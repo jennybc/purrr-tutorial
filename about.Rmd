@@ -2,4 +2,14 @@
 title: "About This Website"
 ---
 
-More about this website.
+Source for this website:
+
+<https://github.com/jennybc/purrr-tutorial>
+
+Its home on the web:
+
+<https://jennybc.github.io/purrr-tutorial>
+
+More information about R Markdown websites:
+
+<http://rmarkdown.rstudio.com/rmarkdown_websites.html>
