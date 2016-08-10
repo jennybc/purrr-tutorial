@@ -2,6 +2,10 @@
 title: "About This Website"
 ---
 
+This is an R Markdown website. To learn more:
+
+<http://rmarkdown.rstudio.com/rmarkdown_websites.html>
+
 Source for this website:
 
 <https://github.com/jennybc/purrr-tutorial>
@@ -10,6 +14,3 @@ Its home on the web:
 
 <https://jennybc.github.io/purrr-tutorial>
 
-More information about R Markdown websites:
-
-<http://rmarkdown.rstudio.com/rmarkdown_websites.html>

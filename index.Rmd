@@ -1,5 +1,14 @@
 ---
-title: "My Website"
+title: "purrr tutorial"
 ---
 
-Hello, Website!
+The purrr package:
+
+  * On CRAN: <https://cran.r-project.org/web/packages/purrr/index.html>
+  * Development on GitHub: <https://github.com/hadley/purrr> 
+
+Tutorial initially created for [2016-08-12 meeting](https://github.com/minisciencegirl/studyGroup/issues/131) of the Vancouver R Study Group.  
+Some version will eventually appear as part of:
+
+  * [STAT 545](http://stat545.com) Exploratory Data Analysis
+  * [DSCI 523](http://www.calendar.ubc.ca/vancouver/courses.cfm?page=code&code=DSCI) Data Wrangling, part of the UBC Master of Data Science

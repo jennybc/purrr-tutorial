@@ -1,7 +1,7 @@
-name: "my-website"
+name: "purrr-tutorial"
 output_dir: "."
 navbar:
-  title: "My Website"
+  title: "purrr tutorial"
   left:
     - text: "Home"
       href: index.html
