@@ -1,0 +1,104 @@
+---
+title: "Sample from groups, n varies by group"
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+A challenge [tweeted by Hilary
+Parker](https://twitter.com/hspter/status/739886244692295680), paraphrased:
+
+> How do you sample from groups, with a different sample size for each group?
+
+Illustrated with the iris data.
+
+  * `Species` = groups.
+  * Sample from the 3 `Species` with 3 different sample sizes.
+  
+How fits the template:
+
+DRAW A SAMPLE for each PAIR OF (SPECIES DATA, SPECIES SAMPLE SIZE)
+
+How to prepare the data? I need a data frame with
+
+  * One row per `Species`
+  * A variable of `Species`-specific sample sizes
+  * A variable of "Species data", whatever that means.
+    - Actually we know what that is: a variable of `Species`-specific data frames. A list-column!
+
+We need a *nested data frame*.
+
+```{r}
+suppressMessages(library(dplyr))
+suppressMessages(library(purrr))
+library(tidyr)
+set.seed(4561)
+
+(nested_iris <- iris %>%
+    group_by(Species) %>%   # prep for work by Species
+    nest() %>%              # --> one row per Species
+    mutate(n = c(2, 5, 3))) # add sample sizes
+```
+
+Draw the samples.
+
+  * `purrr::map2()` is good since we want to operate on 2 things `(data = DATA FOR ONE SPECIES, n = SAMPLE SIZE)`.
+  * We've already got `data = DATA FOR ONE SPECIES` and `n = SAMPLE SIZE` as variables in our data frame.
+  * Drop them in as inputs 1 and 2 to `dplyr::sample_n(tbl, size)`.
+  * Accept whatever comes back as a new list-column in the data frame, i.e. use `dplyr::mutate()`. Be brave and deal with it.
+
+```{r}
+(sampled_iris <- nested_iris %>%
+  mutate(samp = map2(data, n, sample_n)))
+```
+
+What came back? More `Species`-specific data frames.
+
+We are in that uncomfortable intermediate state, with two list-columns: the original `data` and the sampled data, `samp`. Let's get back to a normal data frame!
+
+  * Keep only `Species` and `samp` variables.
+  * Unnest, which essentially rowbinds the data frames in `samp` and replicates `Species` as necessary.
+
+```{r}
+sampled_iris %>% 
+  select(Species, samp) %>%
+  unnest()
+```
+
+Again, from the top, with no exposition:
+
+```{r}
+iris %>%
+  group_by(Species) %>% 
+  nest() %>%            
+  mutate(n = c(2, 5, 3)) %>% 
+  mutate(samp = map2(data, n, sample_n)) %>% 
+  select(Species, samp) %>%
+  unnest()
+```
+
+Base R solution, with marginal comments about what bugs me, especially as someone who teaches R:
+
+```{r}
+split_iris <- split(iris, iris$Species) # why can't Species be found in iris?
+                                        # where else would it be found?
+str(split_iris)                         # split_iris ~= nested_iris[["data"]]
+(n <- c(2, 5, 3))                       # Species data and n are only 'in sync'
+                                        # due to my discipline / care
+                                        # not locked safely into a data frame
+(group_sizes <- vapply(split_iris, nrow, integer(1))) # also floating free
+(sampled_obs <- mapply(sample, group_sizes, n)) # I'm floating free too!
+get_rows <- function(df, rows) df[rows, , drop = FALSE] # custom function
+                                        # drop = FALSE required to avoid
+                                        # nasty surprise in case of n = 1
+(sampled_iris <-                        # god help you if forget SIMPLIFY = FALSE
+    mapply(get_rows, split_iris, sampled_obs, SIMPLIFY = FALSE))
+do.call(rbind, sampled_iris)            # :( do.call()
+```
+
+IMO the base R solution requires much greater facility with R programming and data structures to get it right. It feels more like programming than data analysis.
+
