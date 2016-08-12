@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Trump Android words</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="site_libs/highlight/default.css"
+      type="text/css" />
+<script src="site_libs/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">purrr tutorial</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="examples.html">Examples</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Trump Android words</h1>
+
+</div>
+
+
+<p><em>This is the basis for a live coding exercise.</em></p>
+<p>Inspired by David Robinson’s excellent blog post: <a href="http://varianceexplained.org/r/trump-tweets/">Text analysis of Trump’s tweets confirms he writes only the (angrier) Android half</a>.</p>
+<p>Load some tweets from the official Donald Trump account.</p>
+<pre class="r"><code>library(purrr)
+suppressMessages(library(dplyr))
+library(tibble)
+
+#load(url(&quot;http://varianceexplained.org/files/trump_tweets_df.rda&quot;))
+load(&quot;trump_tweets_df.rda&quot;)
+#glimpse(trump_tweets_df)
+
+tweets &lt;- trump_tweets_df$text
+tweets %&gt;% head() %&gt;% strtrim(70)
+#&gt; [1] &quot;My economic policy speech will be carried live at 12:15 P.M. Enjoy!&quot;   
+#&gt; [2] &quot;Join me in Fayetteville, North Carolina tomorrow evening at 6pm. Ticke&quot;
+#&gt; [3] &quot;#ICYMI: \&quot;Will Media Apologize to Trump?\&quot; https://t.co/ia7rKBmioA&quot;    
+#&gt; [4] &quot;Michael Morell, the lightweight former Acting Director of C.I.A., and &quot;
+#&gt; [5] &quot;The media is going crazy. They totally distort so many things on purpo&quot;
+#&gt; [6] &quot;I see where Mayor Stephanie Rawlings-Blake of Baltimore is pushing Cro&quot;</code></pre>
+<div id="trump-android-words" class="section level3">
+<h3>Trump Android words</h3>
+<p>Here are some words that were shown to be associated with Trump tweets from an Android device. Smush them together into a regular expression – we’ll use it soon!</p>
+<pre class="r"><code>regex &lt;- &quot;badly|crazy|weak|spent|strong|dumb|joke|guns|funny|dead&quot;</code></pre>
+<p>Our mission: extract these Trump Android words from the <code>tweets</code> we’ve stored. <strong>While getting lots of <code>purrr</code> practice.</strong></p>
+<p>A small mercy from the future: we will learn just as much (or more) if we scale down this problem. Allow me to preselect rows that have all the complexity we need.</p>
+<pre class="r"><code>tweets &lt;- tweets[c(1, 2, 5, 6, 198, 347, 919)]
+tweets %&gt;% strtrim(70)
+#&gt; [1] &quot;My economic policy speech will be carried live at 12:15 P.M. Enjoy!&quot;   
+#&gt; [2] &quot;Join me in Fayetteville, North Carolina tomorrow evening at 6pm. Ticke&quot;
+#&gt; [3] &quot;The media is going crazy. They totally distort so many things on purpo&quot;
+#&gt; [4] &quot;I see where Mayor Stephanie Rawlings-Blake of Baltimore is pushing Cro&quot;
+#&gt; [5] &quot;Bernie Sanders started off strong, but with the selection of Kaine for&quot;
+#&gt; [6] &quot;Crooked Hillary Clinton is unfit to serve as President of the U.S. Her&quot;
+#&gt; [7] &quot;The Cruz-Kasich pact is under great strain. This joke of a deal is fal&quot;</code></pre>
+<p>FYI I preselected tweets with 0, 1, 2, and 3 occurences of Trump Android words.</p>
+</div>
+<div id="are-you-ready-for-gregexpr" class="section level3">
+<h3>Are you ready for <code>gregexpr()</code>?</h3>
+<p>No, you are not.</p>
+<p>Use the base function <code>gregexpr()</code> to locate all the Trump Android words inside the tweets. I chose <code>gregexpr()</code> for the glorious opportunity to deal with an Awkward List.</p>
+<pre class="r"><code>matches &lt;- gregexpr(regex, tweets)
+str(matches)
+#&gt; List of 7
+#&gt;  $ : atomic [1:1] -1
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int -1
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;  $ : atomic [1:1] -1
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int -1
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;  $ : atomic [1:1] 20
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int 5
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;  $ : atomic [1:1] 134
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int 4
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;  $ : atomic [1:2] 28 95
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int [1:2] 6 4
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;  $ : atomic [1:2] 87 114
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int [1:2] 4 6
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+#&gt;  $ : atomic [1:3] 50 112 123
+#&gt;   ..- attr(*, &quot;match.length&quot;)= int [1:3] 4 4 4
+#&gt;   ..- attr(*, &quot;useBytes&quot;)= logi TRUE
+matches[[7]]
+#&gt; [1]  50 112 123
+#&gt; attr(,&quot;match.length&quot;)
+#&gt; [1] 4 4 4
+#&gt; attr(,&quot;useBytes&quot;)
+#&gt; [1] TRUE</code></pre>
+<p>What is <code>matches</code>?!?</p>
+<ul>
+<li>A list. One element per element of <code>tweets</code>.</li>
+<li>Each element is an integer vector.
+<ul>
+<li>It’s <code>-1</code> if no matches found.</li>
+<li>Holds the position(s) of the first character of each match, otherwise.</li>
+</ul></li>
+<li>Each element has two attributes. Consider <code>match.length</code>. Let us not speak of the other one.
+<ul>
+<li>It’s <code>-1</code> if no matches found.</li>
+<li>Holds the length(s) of each match, otherwise.</li>
+</ul></li>
+</ul>
+<p>We can clearly extract the matched words with this information. But it’s going to hurt.</p>
+</div>
+<div id="preview-of-substring-target-function" class="section level3">
+<h3>Preview of <code>substring()</code> target function</h3>
+<p>Our eventual target function is <code>substring()</code>. Read the help on it now! Here are the highlights:</p>
+<pre><code>USAGE:
+substring(text, first, last)
+
+ARGUMENTS:
+text = character
+first = integer, position where substring to extract start
+last = integer, position where substring to extract stops</code></pre>
+<p>Imagine each tweet playing the role of <code>text</code>.<br />
+The elements of <code>matches</code> are awfully close to what we need for <code>first</code>.<br />
+But we don’t have anything to use for <code>last</code> yet.<br />
+This is going to be Job #1.<br />
+Job #2 is to insert <code>substring()</code> and <code>tweets</code> + <code>matches</code> + result of Job #1 into the <code>purrr::map()</code> machinery.</p>
+</div>
+<div id="get-you-know-your-awkward-list" class="section level3">
+<h3>Get you know your Awkward List</h3>
+<p>How long are the elements of <code>matches</code>?</p>
+<pre class="r"><code>lengths(matches)                      # just happens to exist for length
+#&gt; [1] 1 1 1 1 2 2 3
+sapply(matches, length)               # NSFP = not safe for programming
+#&gt; [1] 1 1 1 1 2 2 3
+vapply(matches, length, integer(1))   # preferred base approach
+#&gt; [1] 1 1 1 1 2 2 3
+map_int(matches, length)              # purrr way
+#&gt; [1] 1 1 1 1 2 2 3</code></pre>
+<div id="exercise-get-a-list-of-the-match-lengths." class="section level4">
+<h4>Exercise: Get a list of the match lengths.</h4>
+<p>Each element of <code>matches</code> carries this information in an attribute named <code>match.length()</code>. Store this info in a list called <code>match_length</code>.</p>
+<ul>
+<li>Pick one nontrivial example, e.g. <code>m &lt;- matches[[7]]</code>.</li>
+<li>Get the attribute named <code>match.length</code>. Hint: <code>attr()</code>.</li>
+<li>Drop that approach into <code>purrr::map()</code> to scale up to the full <code>matches</code> list.</li>
+</ul>
+<p>Here’s how to do for the last element of <code>matches</code>:</p>
+<pre class="r"><code>m &lt;- matches[[7]]
+attr(m, which = &quot;match.length&quot;)
+#&gt; [1] 4 4 4</code></pre>
+<p>Different ways to apply this logic to the entire <code>matches</code> list.</p>
+<p><strong>1 Pre-defined custom function. Conceptually simplest? Most verbose.</strong></p>
+<pre class="r"><code>ml &lt;- function(x) attr(x, which = &quot;match.length&quot;)
+map(matches, ml)
+#&gt; [[1]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 5
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 4
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] 6 4
+#&gt; 
+#&gt; [[6]]
+#&gt; [1] 4 6
+#&gt; 
+#&gt; [[7]]
+#&gt; [1] 4 4 4</code></pre>
+<p><strong>2 Anonymous function. More abstract? Very compact.</strong></p>
+<pre class="r"><code>map(matches, ~ attr(.x, which = &quot;match.length&quot;))
+#&gt; [[1]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 5
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 4
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] 6 4
+#&gt; 
+#&gt; [[6]]
+#&gt; [1] 4 6
+#&gt; 
+#&gt; [[7]]
+#&gt; [1] 4 4 4</code></pre>
+<p><strong>3 Pre-existing function, additional arguments passed via <code>...</code>.</strong></p>
+<pre class="r"><code>(match_length &lt;- map(matches, attr, which = &quot;match.length&quot;))
+#&gt; [[1]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 5
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 4
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] 6 4
+#&gt; 
+#&gt; [[6]]
+#&gt; [1] 4 6
+#&gt; 
+#&gt; [[7]]
+#&gt; [1] 4 4 4</code></pre>
+<p>It’s good to know about all 3 approaches.</p>
+</div>
+<div id="exercise-count-the-number-of-trump-android-words-in-each-tweet." class="section level4">
+<h4>Exercise: Count the number of Trump Android words in each tweet.</h4>
+<p>Let’s compute how many Trump Android words appear in each tweet.</p>
+<p>This isn’t quite <code>lengths(matches)</code>, though, is it? Think about those <code>-1</code>s. Sad.</p>
+<ul>
+<li>Pick two examples at the extremes: a tweet with 0 Trump words and another with 3.</li>
+<li>Write some code that takes the associated element of <code>matches</code> and returns 0 or 3, as appropriate.</li>
+<li>Use one of the approaches above to insert this into <code>purrr::map()</code> and apply to <code>matches</code>.</li>
+</ul>
+<p>Code that works for both extreme examples:</p>
+<pre class="r"><code>m &lt;- matches[[1]]
+sum(m &gt; 0)
+#&gt; [1] 0
+m &lt;- matches[[7]]
+sum(m &gt; 0)
+#&gt; [1] 3</code></pre>
+<p>Insert into the machinery:</p>
+<pre class="r"><code>f &lt;- function(x) sum(x &gt; 0)
+map(matches, f)
+#&gt; [[1]]
+#&gt; [1] 0
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 0
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 1
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 1
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] 2
+#&gt; 
+#&gt; [[6]]
+#&gt; [1] 2
+#&gt; 
+#&gt; [[7]]
+#&gt; [1] 3
+
+map(matches, ~ sum(.x &gt; 0))
+#&gt; [[1]]
+#&gt; [1] 0
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 0
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 1
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 1
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] 2
+#&gt; 
+#&gt; [[6]]
+#&gt; [1] 2
+#&gt; 
+#&gt; [[7]]
+#&gt; [1] 3</code></pre>
+<p>Note that only 2 of the 3 approaches are workable here. That’s why it’s nice to know all of them.</p>
+<p>What is the resulting object?<br />
+What would be a simpler form of the same info?<br />
+Read the help on <code>map_int()</code> and its other type-specific friends.<br />
+Tweak your existing approach to return an integer vector, with length equal to the number of tweets.</p>
+<pre class="r"><code>map_int(matches, ~ sum(.x &gt; 0))
+#&gt; [1] 0 0 1 1 2 2 3</code></pre>
+<p>Confirm that this is, indeed, different from just taking the lengths of the elements of <code>matches</code>:</p>
+<pre class="r"><code>tibble(
+  naive_length = lengths(matches),
+  n_words = map_int(matches, ~ sum(.x &gt; 0))
+)
+#&gt; # A tibble: 7 x 2
+#&gt;   naive_length n_words
+#&gt;          &lt;int&gt;   &lt;int&gt;
+#&gt; 1            1       0
+#&gt; 2            1       0
+#&gt; 3            1       1
+#&gt; 4            1       1
+#&gt; 5            2       2
+#&gt; 6            2       2
+#&gt; 7            3       3</code></pre>
+</div>
+</div>
+<div id="strip-the-attributes-from-matches" class="section level3">
+<h3>Strip the attributes from <code>matches</code></h3>
+<p>Exercise!</p>
+<p>We have safely stored the match lengths in <code>match_length</code>.</p>
+<p>Let’s create an almost-copy of <code>matches</code> and call it <code>match_first</code>. How will it differ? Remove the attributes from the elements of <code>matches</code>, so there’s less clutter when we print.</p>
+<p>Hint: <code>as.vector()</code> will strip attributes.</p>
+<pre class="r"><code>(match_first &lt;- map(matches, as.vector))
+#&gt; [[1]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 20
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 134
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] 28 95
+#&gt; 
+#&gt; [[6]]
+#&gt; [1]  87 114
+#&gt; 
+#&gt; [[7]]
+#&gt; [1]  50 112 123</code></pre>
+</div>
+<div id="assess-progress-in-a-small-example" class="section level3">
+<h3>Assess progress in a small example</h3>
+<p>Use the R objects on hand to achieve our goal in a small example: extract Trump words from single tweet. Work on tweets #1 and #7 because they represent the two extremes, 0 and 3 words respectively. If you can handle them, you’re in good shape.</p>
+<p>Relevant R objects:</p>
+<pre class="r"><code>tweets %&gt;% strtrim(70)
+#&gt; [1] &quot;My economic policy speech will be carried live at 12:15 P.M. Enjoy!&quot;   
+#&gt; [2] &quot;Join me in Fayetteville, North Carolina tomorrow evening at 6pm. Ticke&quot;
+#&gt; [3] &quot;The media is going crazy. They totally distort so many things on purpo&quot;
+#&gt; [4] &quot;I see where Mayor Stephanie Rawlings-Blake of Baltimore is pushing Cro&quot;
+#&gt; [5] &quot;Bernie Sanders started off strong, but with the selection of Kaine for&quot;
+#&gt; [6] &quot;Crooked Hillary Clinton is unfit to serve as President of the U.S. Her&quot;
+#&gt; [7] &quot;The Cruz-Kasich pact is under great strain. This joke of a deal is fal&quot;
+match_first
+#&gt; [[1]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 20
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 134
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] 28 95
+#&gt; 
+#&gt; [[6]]
+#&gt; [1]  87 114
+#&gt; 
+#&gt; [[7]]
+#&gt; [1]  50 112 123
+match_length
+#&gt; [[1]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] -1
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 5
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 4
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] 6 4
+#&gt; 
+#&gt; [[6]]
+#&gt; [1] 4 6
+#&gt; 
+#&gt; [[7]]
+#&gt; [1] 4 4 4</code></pre>
+<p>Start with tweet #7, with 3 Trump words.</p>
+<pre class="r"><code>(tweet &lt;- tweets[7])
+#&gt; [1] &quot;The Cruz-Kasich pact is under great strain. This joke of a deal is falling apart, not being honored and almost dead. Very dumb!&quot;
+(t_first &lt;- match_first[[7]])
+#&gt; [1]  50 112 123
+(t_length &lt;- match_length[[7]])
+#&gt; [1] 4 4 4
+(t_last &lt;- t_first + t_length - 1)
+#&gt; [1]  53 115 126
+substring(tweet, t_first, t_last)
+#&gt; [1] &quot;joke&quot; &quot;dead&quot; &quot;dumb&quot;</code></pre>
+<p>How well does this code work for tweet #1, with 0 Trump words?</p>
+<pre class="r"><code>(tweet &lt;- tweets[1])
+#&gt; [1] &quot;My economic policy speech will be carried live at 12:15 P.M. Enjoy!&quot;
+(t_first &lt;- match_first[[1]])
+#&gt; [1] -1
+(t_length &lt;- match_length[[1]])
+#&gt; [1] -1
+(t_last &lt;- t_first + t_length - 1)
+#&gt; [1] -3
+substring(tweet, t_first, t_last)
+#&gt; [1] &quot;&quot;</code></pre>
+<p>There is some nonsense along the way and we get an empty string. I’d rather get <code>character(0)</code> or <code>NA_character_</code> back, but I can live with this.</p>
+<p>But we’re in good shape. We just need to compute where the matches end for all matches.</p>
+</div>
+<div id="store-where-trump-words-end" class="section level3">
+<h3>Store where Trump words end</h3>
+<p>Make a list that holds where the Trump words end. Call it <code>match_last</code>.</p>
+<p>Pseudo-code for how we did this for a single tweet:</p>
+<pre class="r"><code>first  &lt;- an element of matches
+length &lt;- an element of match_length
+last   &lt;- first + length - 1</code></pre>
+<p>This is another <code>map()</code>-type problem, but instead of mapping over one list, we need to map over 2 lists in parallel.</p>
+<p>Read the help for <code>purrr::map2()</code>!</p>
+<p>Here’s the usage:</p>
+<pre class="r"><code>map2(.x, .y, .f, ...)</code></pre>
+<p>Match this up to our task:</p>
+<ul>
+<li>Input 1 = <code>.x</code> will be <code>first</code></li>
+<li>Input 2 = <code>.y</code> will be <code>length</code></li>
+<li>Function <code>.f</code> will be something that does <code>first + length - 1</code>. Either a custom pre-defined function or an anonymous function. Your call.</li>
+</ul>
+<p>You do it!</p>
+<pre class="r"><code>(match_last &lt;- map2(match_first, match_length, ~ .x + .y - 1))
+#&gt; [[1]]
+#&gt; [1] -3
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] -3
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 24
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 137
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] 33 98
+#&gt; 
+#&gt; [[6]]
+#&gt; [1]  90 119
+#&gt; 
+#&gt; [[7]]
+#&gt; [1]  53 115 126</code></pre>
+</div>
+<div id="extract-the-trump-words" class="section level3">
+<h3>Extract the Trump words</h3>
+<p>We’re ready to put everything together.</p>
+<p>Pseudo-code for how we do this for a single tweet:</p>
+<pre class="r"><code>text   &lt;- an element of tweets
+first  &lt;- an element of match_first
+last   &lt;- an element of match_last
+substring(text, first, last)</code></pre>
+<p>This is another <code>map()</code>-type problem, but instead of mapping over one list, we need to map over 3 lists in parallel.</p>
+<p>There is no <code>map3()</code>. This calls for <code>pmap()</code>. Read the help on it!</p>
+<p>Here’s the usage:</p>
+<pre class="r"><code>pmap(.l, .f, ...)</code></pre>
+<p>How does this relate to our task?</p>
+<ul>
+<li><code>.l</code> is a list of lists = the 3 lists we need to work through in parallel
+<ul>
+<li><code>list(text = tweets, first = match_first, last = match_last)</code></li>
+<li>I deliberately choose the list names to match the argument names of <code>substring()</code>. Why confuse yourself? Why rely on position when you don’t have to?</li>
+</ul></li>
+<li>Function <code>.f</code> will be <code>substring()</code>.</li>
+</ul>
+<p>You do it!</p>
+<pre class="r"><code>pmap(list(text = tweets, first = match_first, last = match_last), substring)
+#&gt; [[1]]
+#&gt; [1] &quot;&quot;
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] &quot;&quot;
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] &quot;crazy&quot;
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] &quot;joke&quot;
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] &quot;strong&quot; &quot;weak&quot;  
+#&gt; 
+#&gt; [[6]]
+#&gt; [1] &quot;weak&quot;   &quot;strong&quot;
+#&gt; 
+#&gt; [[7]]
+#&gt; [1] &quot;joke&quot; &quot;dead&quot; &quot;dumb&quot;</code></pre>
+<p>We did it!</p>
+<div id="march-through-the-rows-in-a-data-frame" class="section level4">
+<h4>March through the rows in a data frame</h4>
+<p>Remember that a data frame is, in fact, a list of equal-length vectors. Just like the <code>.l</code> argument of <code>pmap()</code>. So often it’s nice to work your problems in the context of a data frame, instead of using free-floating vectors or lists. Why?</p>
+<ul>
+<li>It’s safer. This makes it very hard for you to subset or reorder one of the pieces and forget to do the same to the others.</li>
+<li>It’s tidier. Your project is contained in one neat object. You can print it, <code>View()</code> it, <code>str()</code>, etc. to get a sense of how things stand. This is more annoying if stuff is lying around in separate objects, so you’re less likely to catch problems quickly.</li>
+</ul>
+<p>How would we do that <em>post hoc</em> here?</p>
+<pre class="r"><code>mdf &lt;- tibble(
+  text = tweets,
+  first = match_first,
+  last = match_last
+)
+pmap(mdf, substring)
+#&gt; [[1]]
+#&gt; [1] &quot;&quot;
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] &quot;&quot;
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] &quot;crazy&quot;
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] &quot;joke&quot;
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] &quot;strong&quot; &quot;weak&quot;  
+#&gt; 
+#&gt; [[6]]
+#&gt; [1] &quot;weak&quot;   &quot;strong&quot;
+#&gt; 
+#&gt; [[7]]
+#&gt; [1] &quot;joke&quot; &quot;dead&quot; &quot;dumb&quot;</code></pre>
+<p>What if we take it all from the top, using a data frame approach and being as concise as possible?</p>
+<pre class="r"><code>tibble(text = tweets,
+       first = gregexpr(regex, tweets)) %&gt;% 
+  mutate(match_length = map(first, ~ attr(.x, which = &quot;match.length&quot;)),
+         last = map2(first, match_length, ~ .x + .y - 1)) %&gt;%
+  select(-match_length) %&gt;% 
+  pmap(substring)
+#&gt; [[1]]
+#&gt; [1] &quot;&quot;
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] &quot;&quot;
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] &quot;crazy&quot;
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] &quot;joke&quot;
+#&gt; 
+#&gt; [[5]]
+#&gt; [1] &quot;strong&quot; &quot;weak&quot;  
+#&gt; 
+#&gt; [[6]]
+#&gt; [1] &quot;weak&quot;   &quot;strong&quot;
+#&gt; 
+#&gt; [[7]]
+#&gt; [1] &quot;joke&quot; &quot;dead&quot; &quot;dumb&quot;</code></pre>
+<p>Yes, it all boils down to this.</p>
+</div>
+</div>
+<div id="appendix" class="section level3">
+<h3>Appendix</h3>
+<p>If you just wanted to solve this problem, you’d post-process the output of <code>gregexpr()</code> with <code>regmatches()</code>.</p>
+<pre class="r"><code>regmatches(tweets, gregexpr(regex, tweets))</code></pre>
+<p>Or you’d use the <code>stringr</code> or <code>stringi</code> packages to avoid <code>gregexpr()</code> altogether.</p>
+<p>Have a look at <code>regmatches()</code> source and compare to ours. Note that, by necessity, there has to be more error checking and consideration for encoding and locale. So it’s not directly comparable. But you’ll see plenty of calls to the base equivalent of <code>map()</code>, <code>Map()</code>, and the same functions we’re using, i.e., <code>attr()</code> and <code>substring()</code>.</p>
+<pre class="r"><code>regmatches
+#&gt; function (x, m, invert = FALSE) 
+#&gt; {
+#&gt;     if (length(x) != length(m)) 
+#&gt;         stop(gettextf(&quot;%s and %s must have the same length&quot;, 
+#&gt;             sQuote(&quot;x&quot;), sQuote(&quot;m&quot;)), domain = NA)
+#&gt;     ili &lt;- is.list(m)
+#&gt;     useBytes &lt;- if (ili) 
+#&gt;         any(unlist(lapply(m, attr, &quot;useBytes&quot;)))
+#&gt;     else any(attr(m, &quot;useBytes&quot;))
+#&gt;     if (useBytes) {
+#&gt;         asc &lt;- iconv(x, &quot;latin1&quot;, &quot;ASCII&quot;)
+#&gt;         ind &lt;- is.na(asc) | (asc != x)
+#&gt;         if (any(ind)) 
+#&gt;             Encoding(x[ind]) &lt;- &quot;bytes&quot;
+#&gt;     }
+#&gt;     if (!ili &amp;&amp; identical(invert, FALSE)) {
+#&gt;         so &lt;- m[ind &lt;- (!is.na(m) &amp; (m &gt; -1L))]
+#&gt;         eo &lt;- so + attr(m, &quot;match.length&quot;)[ind] - 1L
+#&gt;         return(substring(x[ind], so, eo))
+#&gt;     }
+#&gt;     y &lt;- if (is.na(invert)) {
+#&gt;         Map(function(u, so, ml) {
+#&gt;             if ((n &lt;- length(so)) == 1L) {
+#&gt;                 if (is.na(so)) 
+#&gt;                   return(NA_character_)
+#&gt;                 else if (so == -1L) 
+#&gt;                   return(u)
+#&gt;             }
+#&gt;             eo &lt;- so + ml - 1L
+#&gt;             if (n &gt; 1L) {
+#&gt;                 if (any(eo[-n] &gt;= so[-1L])) 
+#&gt;                   stop(gettextf(&quot;need non-overlapping matches for %s&quot;, 
+#&gt;                     sQuote(&quot;invert = NA&quot;)), domain = NA)
+#&gt;             }
+#&gt;             beg &lt;- c(1L, c(rbind(so, eo + 1L)))
+#&gt;             end &lt;- c(c(rbind(so - 1L, eo)), nchar(u))
+#&gt;             substring(u, beg, end)
+#&gt;         }, x, m, if (ili) 
+#&gt;             lapply(m, attr, &quot;match.length&quot;)
+#&gt;         else attr(m, &quot;match.length&quot;), USE.NAMES = FALSE)
+#&gt;     }
+#&gt;     else if (invert) {
+#&gt;         Map(function(u, so, ml) {
+#&gt;             if ((n &lt;- length(so)) == 1L) {
+#&gt;                 if (is.na(so)) 
+#&gt;                   return(NA_character_)
+#&gt;                 else if (so == -1L) 
+#&gt;                   return(u)
+#&gt;             }
+#&gt;             beg &lt;- if (n &gt; 1L) {
+#&gt;                 eo &lt;- so + ml - 1L
+#&gt;                 if (any(eo[-n] &gt;= so[-1L])) 
+#&gt;                   stop(gettextf(&quot;need non-overlapping matches for %s&quot;, 
+#&gt;                     sQuote(&quot;invert = TRUE&quot;)), domain = NA)
+#&gt;                 c(1L, eo + 1L)
+#&gt;             }
+#&gt;             else {
+#&gt;                 c(1L, so + ml)
+#&gt;             }
+#&gt;             end &lt;- c(so - 1L, nchar(u))
+#&gt;             substring(u, beg, end)
+#&gt;         }, x, m, if (ili) 
+#&gt;             lapply(m, attr, &quot;match.length&quot;)
+#&gt;         else attr(m, &quot;match.length&quot;), USE.NAMES = FALSE)
+#&gt;     }
+#&gt;     else {
+#&gt;         Map(function(u, so, ml) {
+#&gt;             if (length(so) == 1L) {
+#&gt;                 if (is.na(so) || (so == -1L)) 
+#&gt;                   return(character())
+#&gt;             }
+#&gt;             substring(u, so, so + ml - 1L)
+#&gt;         }, x, m, lapply(m, attr, &quot;match.length&quot;), USE.NAMES = FALSE)
+#&gt;     }
+#&gt;     names(y) &lt;- names(x)
+#&gt;     y
+#&gt; }
+#&gt; &lt;bytecode: 0x7f871304c228&gt;
+#&gt; &lt;environment: namespace:base&gt;</code></pre>
+</div>
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

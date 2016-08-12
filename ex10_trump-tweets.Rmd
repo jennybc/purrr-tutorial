@@ -1,0 +1,420 @@
+---
+title: "Trump Android words"
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+*This is the basis for a live coding exercise.*
+
+Inspired by David Robinson's excellent blog post: [Text analysis of Trump's tweets confirms he writes only the (angrier) Android half](http://varianceexplained.org/r/trump-tweets/).
+
+```{r include = FALSE}
+if (!file.exists("trump_tweets_df.rda")) {
+  download.file("http://varianceexplained.org/files/trump_tweets_df.rda",
+                "trump_tweets_df.rda")
+}
+```
+
+Load some tweets from the official Donald Trump account.
+
+```{r}
+library(purrr)
+suppressMessages(library(dplyr))
+library(tibble)
+
+#load(url("http://varianceexplained.org/files/trump_tweets_df.rda"))
+load("trump_tweets_df.rda")
+#glimpse(trump_tweets_df)
+
+tweets <- trump_tweets_df$text
+tweets %>% head() %>% strtrim(70)
+```
+
+### Trump Android words
+
+Here are some words that were shown to be associated with Trump tweets from an Android device. Smush them together into a regular expression -- we'll use it soon!
+
+```{r}
+regex <- "badly|crazy|weak|spent|strong|dumb|joke|guns|funny|dead"
+```
+
+Our mission: extract these Trump Android words from the `tweets` we've stored. **While getting lots of `purrr` practice.**
+
+A small mercy from the future: we will learn just as much (or more) if we scale down this problem. Allow me to preselect rows that have all the complexity we need.
+
+```{r include = FALSE, eval = FALSE}
+tdf <- tibble(
+  tweets = trump_tweets_df$text,
+  created = trump_tweets_df$created,
+  matches = gregexpr(regex, tweets),
+  n_matches = map_int(matches, ~ sum(.x > 0)) 
+)
+tdf %>% 
+  count(n_matches)
+## # A tibble: 4 x 2
+##   n_matches     n
+##       <int> <int>
+## 1         0  1429
+## 2         1    72
+## 3         2    10
+## 4         3     1
+tdf %>% 
+  mutate(row_num = seq_len(nrow(.))) %>%
+  group_by(n_matches) %>% 
+  top_n(2, created) %>%
+  .$row_num
+## [1]   1   2   5   6 198 347 919
+```
+
+```{r}
+tweets <- tweets[c(1, 2, 5, 6, 198, 347, 919)]
+tweets %>% strtrim(70)
+```
+
+FYI I preselected tweets with 0, 1, 2, and 3 occurences of Trump Android words.
+
+### Are you ready for `gregexpr()`?
+
+No, you are not.
+
+Use the base function `gregexpr()` to locate all the Trump Android words inside the tweets. I chose `gregexpr()` for the glorious opportunity to deal with an Awkward List.
+
+```{r}
+matches <- gregexpr(regex, tweets)
+str(matches)
+matches[[7]]
+```
+
+What is `matches`?!?
+
+  * A list. One element per element of `tweets`.
+  * Each element is an integer vector.
+    - It's `-1` if no matches found.
+    - Holds the position(s) of the first character of each match, otherwise.
+  * Each element has two attributes. Consider `match.length`. Let us not speak of the other one.
+    - It's `-1` if no matches found.
+    - Holds the length(s) of each match, otherwise.
+    
+We can clearly extract the matched words with this information. But it's going to  hurt.
+
+### Preview of `substring()` target function
+
+Our eventual target function is `substring()`. Read the help on it now! Here are the highlights:
+
+```
+USAGE:
+substring(text, first, last)
+
+ARGUMENTS:
+text = character
+first = integer, position where substring to extract start
+last = integer, position where substring to extract stops
+```
+
+Imagine each tweet playing the role of `text`.  
+The elements of `matches` are awfully close to what we need for `first`.  
+But we don't have anything to use for `last` yet.  
+This is going to be Job #1.  
+Job #2 is to insert `substring()` and `tweets` + `matches` + result of Job #1 into the `purrr::map()` machinery.
+
+### Get you know your Awkward List
+
+How long are the elements of `matches`?
+
+```{r}
+lengths(matches)                      # just happens to exist for length
+sapply(matches, length)               # NSFP = not safe for programming
+vapply(matches, length, integer(1))   # preferred base approach
+map_int(matches, length)              # purrr way
+```
+
+#### Exercise: Get a list of the match lengths.
+
+Each element of `matches` carries this information in an attribute named `match.length()`. Store this info in a list called `match_length`.
+
+  * Pick one nontrivial example, e.g. `m <- matches[[7]]`.
+  * Get the attribute named `match.length`. Hint: `attr()`.
+  * Drop that approach into `purrr::map()` to scale up to the full `matches` list.
+
+Here's how to do for the last element of `matches`:
+
+```{r}
+m <- matches[[7]]
+attr(m, which = "match.length")
+```
+
+Different ways to apply this logic to the entire `matches` list.
+
+**1 Pre-defined custom function. Conceptually simplest? Most verbose.**
+
+```{r}
+ml <- function(x) attr(x, which = "match.length")
+map(matches, ml)
+```
+
+**2 Anonymous function. More abstract? Very compact.**
+
+```{r}
+map(matches, ~ attr(.x, which = "match.length"))
+```
+
+**3 Pre-existing function, additional arguments passed via `...`.**
+
+```{r}
+(match_length <- map(matches, attr, which = "match.length"))
+```
+
+It's good to know about all 3 approaches.
+
+#### Exercise: Count the number of Trump Android words in each tweet.
+
+Let's compute how many Trump Android words appear in each tweet.
+
+This isn't quite `lengths(matches)`, though, is it? Think about those `-1`s. Sad.
+
+  * Pick two examples at the extremes: a tweet with 0 Trump words and another with 3.
+  * Write some code that takes the associated element of `matches` and returns 0 or 3, as appropriate.
+  * Use one of the approaches above to insert this into `purrr::map()` and apply to `matches`.
+
+Code that works for both extreme examples:
+
+```{r}
+m <- matches[[1]]
+sum(m > 0)
+m <- matches[[7]]
+sum(m > 0)
+```
+
+Insert into the machinery:
+
+```{r}
+f <- function(x) sum(x > 0)
+map(matches, f)
+
+map(matches, ~ sum(.x > 0))
+```
+
+Note that only 2 of the 3 approaches are workable here. That's why it's nice to know all of them.
+
+What is the resulting object?  
+What would be a simpler form of the same info?  
+Read the help on `map_int()` and its other type-specific friends.  
+Tweak your existing approach to return an integer vector, with length equal to the number of tweets.
+
+```{r}
+map_int(matches, ~ sum(.x > 0))
+```
+
+Confirm that this is, indeed, different from just taking the lengths of the elements of `matches`:
+
+```{r}
+tibble(
+  naive_length = lengths(matches),
+  n_words = map_int(matches, ~ sum(.x > 0))
+)
+```
+
+### Strip the attributes from `matches`
+
+Exercise!
+
+We have safely stored the match lengths in `match_length`.
+
+Let's create an almost-copy of `matches` and call it `match_first`. How will it differ? Remove the attributes from the elements of `matches`, so there's less clutter when we print.
+
+Hint: `as.vector()` will strip attributes.
+
+```{r}
+(match_first <- map(matches, as.vector))
+```
+
+### Assess progress in a small example
+
+Use the R objects on hand to achieve our goal in a small example: extract Trump words from single tweet. Work on tweets #1 and #7 because they represent the two extremes, 0 and 3 words respectively. If you can handle them, you're in good shape.
+
+Relevant R objects:
+
+```{r}
+tweets %>% strtrim(70)
+match_first
+match_length
+```
+
+Start with tweet #7, with 3 Trump words.
+
+```{r}
+(tweet <- tweets[7])
+(t_first <- match_first[[7]])
+(t_length <- match_length[[7]])
+(t_last <- t_first + t_length - 1)
+substring(tweet, t_first, t_last)
+```
+
+How well does this code work for tweet #1, with 0 Trump words?
+
+```{r}
+(tweet <- tweets[1])
+(t_first <- match_first[[1]])
+(t_length <- match_length[[1]])
+(t_last <- t_first + t_length - 1)
+substring(tweet, t_first, t_last)
+```
+
+There is some nonsense along the way and we get an empty string. I'd rather get `character(0)` or `NA_character_` back, but I can live with this.
+
+But we're in good shape. We just need to compute where the matches end for all matches.
+
+### Store where Trump words end
+
+Make a list that holds where the Trump words end. Call it `match_last`.
+
+Pseudo-code for how we did this for a single tweet:
+
+```{r eval = FALSE}
+first  <- an element of matches
+length <- an element of match_length
+last   <- first + length - 1
+```
+
+This is another `map()`-type problem, but instead of mapping over one list, we need to map over 2 lists in parallel.
+
+Read the help for `purrr::map2()`!
+
+Here's the usage:
+
+```{r eval = FALSE}
+map2(.x, .y, .f, ...)
+```
+
+Match this up to our task:
+
+  * Input 1 = `.x` will be `first`
+  * Input 2 = `.y` will be `length`
+  * Function `.f` will be something that does `first + length - 1`. Either a custom pre-defined function or an anonymous function. Your call.
+  
+You do it!
+
+```{r}
+(match_last <- map2(match_first, match_length, ~ .x + .y - 1))
+```
+
+### Extract the Trump words
+
+We're ready to put everything together.
+
+Pseudo-code for how we do this for a single tweet:
+
+```{r eval = FALSE}
+text   <- an element of tweets
+first  <- an element of match_first
+last   <- an element of match_last
+substring(text, first, last)
+```
+
+This is another `map()`-type problem, but instead of mapping over one list, we need to map over 3 lists in parallel.
+
+There is no `map3()`. This calls for `pmap()`. Read the help on it!
+
+Here's the usage:
+
+```{r eval = FALSE}
+pmap(.l, .f, ...)
+```
+
+How does this relate to our task?
+
+  * `.l` is a list of lists = the 3 lists we need to work through in parallel
+    - `list(text = tweets, first = match_first, last = match_last)`
+    - I deliberately choose the list names to match the argument names of `substring()`. Why confuse yourself? Why rely on position when you don't have to?
+  * Function `.f` will be `substring()`.
+  
+You do it!
+
+```{r}
+pmap(list(text = tweets, first = match_first, last = match_last), substring)
+```
+
+We did it!
+
+#### March through the rows in a data frame
+
+Remember that a data frame is, in fact, a list of equal-length vectors. Just like the `.l` argument of `pmap()`. So often it's nice to work your problems in the context of a data frame, instead of using free-floating vectors or lists. Why?
+
+  * It's safer. This makes it very hard for you to subset or reorder one of the pieces and forget to do the same to the others.
+  * It's tidier. Your project is contained in one neat object. You can print it, `View()` it, `str()`, etc. to get a sense of how things stand. This is more annoying if stuff is lying around in separate objects, so you're less likely to catch problems quickly.
+
+How would we do that *post hoc* here?
+
+```{r}
+mdf <- tibble(
+  text = tweets,
+  first = match_first,
+  last = match_last
+)
+pmap(mdf, substring)
+```
+
+What if we take it all from the top, using a data frame approach and being as concise as possible?
+
+```{r}
+tibble(text = tweets,
+       first = gregexpr(regex, tweets)) %>% 
+  mutate(match_length = map(first, ~ attr(.x, which = "match.length")),
+         last = map2(first, match_length, ~ .x + .y - 1)) %>%
+  select(-match_length) %>% 
+  pmap(substring)
+```
+
+Yes, it all boils down to this.
+
+### Appendix
+
+If you just wanted to solve this problem, you'd post-process the output of `gregexpr()` with  `regmatches()`.
+
+```{r eval = FALSE}
+regmatches(tweets, gregexpr(regex, tweets))
+```
+
+Or you'd use the `stringr` or `stringi` packages to avoid `gregexpr()` altogether.
+
+Have a look at `regmatches()` source and compare to ours. Note that, by necessity, there has to be more error checking and consideration for encoding and locale. So it's not directly comparable. But you'll see plenty of calls to the base equivalent of `map()`, `Map()`, and the same functions we're using, i.e., `attr()` and `substring()`.
+
+```{r}
+regmatches
+```
+
+
+```{r include = FALSE, eval = FALSE}
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(tibble)
+#load(url("http://varianceexplained.org/files/trump_tweets_df.rda"))
+load("trump_tweets_df.rda")
+#glimpse(trump_tweets_df)
+df <- trump_tweets_df %>% 
+  select(created, id, text, statusSource) %>% 
+  extract(statusSource, "source", "Twitter for (.*?)<") %>%
+  filter(source %in% c("iPhone", "Android"))
+glimpse(df)
+
+
+# a plot I felt like making, totally unrelated
+library(ggplot2)
+df <- trump_tweets_df %>% 
+  select(favoriteCount, text, statusSource) %>% 
+  extract(statusSource, "source", "Twitter for (.*?)<") %>%
+  filter(source %in% c("iPhone", "Android"))
+
+ggplot(df, aes(x = source, y = favoriteCount, colour = source)) +
+  scale_y_log10() + guides(colour = FALSE) +
+  geom_boxplot(width = 1/2) +
+  geom_jitter(alpha = 1/5, width = 3/4)
+t.test(favoriteCount ~ source, data = df)
+ggsave("favorites-boxplot.png")
+```

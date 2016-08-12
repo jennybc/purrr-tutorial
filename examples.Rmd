@@ -1,0 +1,32 @@
+---
+title: "Examples"
+---
+
+Worked examples and live coding activities
+
+```{r results='asis', echo = FALSE, warning = FALSE}
+suppressPackageStartupMessages(library(dplyr))
+library(tidyr)
+library(stringr)
+suppressPackageStartupMessages(library(purrr))
+library(htmltools)
+
+#library(knitr)
+
+fls <- list.files()
+x <- tibble(fls) %>%
+ separate(col = fls, into = c("type", "slug", "ext"),
+          sep = "[_\\.]", remove = FALSE, extra = "drop", fill = "left")
+x <- x %>% 
+  filter(type %>% str_detect("^ex[0-9]+"),
+         ext %>% str_detect("html$"))
+x$title <- x$fls %>% 
+  str_replace("\\.html$", ".Rmd") %>% 
+  map(readLines, n = 15) %>% # totally arbitrary!
+  map(~ grep("^title:", .x, value = TRUE)) %>% 
+  map_chr(~ gsub("title: \"(.*)\"", "\\1", .x))
+map2(x$fls, x$title, ~ a(href = .x, .y)) %>% 
+  map_chr(as.character) %>% 
+  paste0("* ", . ,"\n") %>% 
+  cat()
+```

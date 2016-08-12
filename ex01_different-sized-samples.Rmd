@@ -81,7 +81,7 @@ iris %>%
   unnest()
 ```
 
-Base R solution, with marginal comments about what bugs me, especially as someone who teaches R:
+A base R solution, with some marginal comments:
 
 ```{r}
 split_iris <- split(iris, iris$Species) # why can't Species be found in iris?
