@@ -11,7 +11,7 @@
 
 
 
-<title>Examples</title>
+<title>Analyze GitHub issues and pull requests</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -197,18 +197,42 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Examples</h1>
+<h1 class="title toc-ignore">Analyze GitHub issues and pull requests</h1>
 
 </div>
 
 
-<p>Worked examples and live coding activities</p>
+<p>Will be based on:</p>
+<p><a href="https://github.com/jennybc/analyze-github-stuff-with-r#readme" class="uri">https://github.com/jennybc/analyze-github-stuff-with-r#readme</a></p>
+<p>Overview:</p>
 <ul>
-<li><a href="ex01_different-sized-samples.html">Sample from groups, n varies by group</a></li>
-<li><a href="ex10_trump-tweets.html">Trump Android words</a></li>
-<li><a href="ex20_bulk-gmail.html">Send a bunch of emails</a></li>
-<li><a href="ex22_github-issues-pull-requests.html">Analyze GitHub issues and pull requests</a></li>
+<li>Three examples of working with data from the GitHub API
+<ul>
+<li>API sends JSON but gets converted to R list by the <a href="https://github.com/gaborcsardi/gh"><code>gh</code> package</a></li>
+</ul></li>
+<li>Issues for one user
+<ul>
+<li>tabulate open issue by repository</li>
+<li><code>map()</code> is used to iterate over repo</li>
+</ul></li>
+<li>Pull requests on a repository
+<ul>
+<li>analyze pull requests against the books <a href="http://r-pkgs.had.co.nz/">R Packages</a> and <a href="http://adv-r.had.co.nz/">Advanced R</a></li>
+<li>Are there more PRs for earlier chapters? Do people lose their enthusiasm for reading/correcting later in the book?</li>
+<li><code>map_*()</code> functions used to create data frame from nested list</li>
+<li><code>map()</code> to iterate over PRs and get affected files from the diff</li>
+<li><code>unnest()</code> to go from one row per PR to one row per file modified in a PR</li>
+</ul></li>
+<li>Issues threads on a repository
+<ul>
+<li>analyze class participation in the STAT 545 Discussion board</li>
+<li><code>map_*()</code> functions used to create data frame from nested list</li>
+<li><code>map()</code> to iterate over issues and retrieve follow up comments</li>
+<li><code>walk()</code></li>
+<li><code>unnest()</code> to go from one row per issue to one row per comment on an issue</li>
+</ul></li>
 </ul>
+<p>Several clean scripts are there, as well as expository README.</p>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
 

@@ -1,0 +1,36 @@
+---
+title: "Analyze GitHub issues and pull requests"
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Will be based on:
+
+<https://github.com/jennybc/analyze-github-stuff-with-r#readme>
+
+Overview:
+
+  * Three examples of working with data from the GitHub API
+    - API sends JSON but gets converted to R list by the [`gh` package](https://github.com/gaborcsardi/gh)
+  * Issues for one user
+    - tabulate open issue by repository
+    - `map()` is used to iterate over repo
+  * Pull requests on a repository
+    - analyze pull requests against the books [R Packages](http://r-pkgs.had.co.nz/) and [Advanced R](http://adv-r.had.co.nz/)
+    - Are there more PRs for earlier chapters? Do people lose their enthusiasm for reading/correcting later in the book?
+    - `map_*()` functions used to create data frame from nested list
+    - `map()` to iterate over PRs and get affected files from the diff
+    - `unnest()` to go from one row per PR to one row per file modified in a PR
+  * Issues threads on a repository
+    - analyze class participation in the STAT 545 Discussion board
+    - `map_*()` functions used to create data frame from nested list
+    - `map()` to iterate over issues and retrieve follow up comments
+    - `walk()`
+    - `unnest()` to go from one row per issue to one row per comment on an issue
+
+Several clean scripts are there, as well as expository README.
