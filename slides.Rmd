@@ -1,0 +1,11 @@
+---
+title: "Slides"
+---
+
+Here are some INCREDIBLY ROUGH slides that give high-level intro, before live-coding.
+
+<script async class="speakerdeck-embed" data-id="f60c9022c5824c0994cd3ec558820daf" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script> <div style="margin-bottom:5px"> <strong> <a href="https://speakerdeck.com/jennybc/purrr-tutorial-intro-very-rough-draft" title="purrr tutorial intro VERY ROUGH DRAFT" target="_blank">purrr tutorial intro VERY ROUGH DRAFT</a> </strong> from <strong><a href="https://speakerdeck.com/jennybc" target="_blank">Jennifer Bryan</a></strong> </div>
+
+If the embed above doesn't work, here's a link:
+
+<https://speakerdeck.com/jennybc/purrr-tutorial-intro-very-rough-draft>
