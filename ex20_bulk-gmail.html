@@ -11,7 +11,7 @@
 
 
 
-<title>Examples</title>
+<title>Send a bunch of emails</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -197,17 +197,84 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Examples</h1>
+<h1 class="title toc-ignore">Send a bunch of emails</h1>
 
 </div>
 
 
-<p>Worked examples and live coding activities</p>
+<p>Will be based on:</p>
+<p><a href="https://github.com/jennybc/send-email-with-r#readme" class="uri">https://github.com/jennybc/send-email-with-r#readme</a></p>
+<p>Overview:</p>
 <ul>
-<li><a href="ex01_different-sized-samples.html">Sample from groups, n varies by group</a></li>
-<li><a href="ex10_trump-tweets.html">Trump Android words</a></li>
-<li><a href="ex20_bulk-gmail.html">Send a bunch of emails</a></li>
+<li>Data frame #1: email recipients
+<ul>
+<li>one row per email recipient</li>
+<li>email addresses</li>
+<li>names</li>
+</ul></li>
+<li>Data frame #2: emails (one per piece of student homework, in example)
+<ul>
+<li>one per email to be sent</li>
+<li>variables for MIME parts</li>
+</ul></li>
+<li>Join these two data frames</li>
+<li>Where does <code>purrr</code> come in?
+<ul>
+<li><code>pmap(edat, mime)</code> to create one MIME-formatted email object per row/email</li>
+<li><code>safely(gmailr::send_message)</code> to create a “safe” version of the function that send messages … so one failure doesn’t derail things</li>
+<li><code>map(email, safe_send_message)</code> to send the email</li>
+<li><code>transpose()</code> and <code>map_lgl()</code> to inspect message success vs failure</li>
+</ul></li>
 </ul>
+<p>In the meantime, here’s the clean script that is developed there:</p>
+<pre class="r"><code>suppressPackageStartupMessages(library(gmailr))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(purrr))
+library(readr)
+
+addresses &lt;- read_csv(&quot;addresses.csv&quot;)
+marks &lt;- read_csv(&quot;marks.csv&quot;)
+my_dat &lt;- left_join(marks, addresses)
+
+this_hw &lt;- &quot;The Fellowship Of The Ring&quot;
+email_sender &lt;- &#39;Peter Jackson &lt;peter@tolkien.example.org&gt;&#39; # your Gmail address
+optional_bcc &lt;- &#39;Anonymous &lt;anon@palantir.example.org&gt;&#39;     # for me, TA address
+body &lt;- &quot;Hi, %s.
+
+Your mark for %s is %s.
+
+Thanks for participating in this film!
+&quot;
+
+edat &lt;- my_dat %&gt;%
+  mutate(
+    To = sprintf(&#39;%s &lt;%s&gt;&#39;, name, email),
+    Bcc = optional_bcc,
+    From = email_sender,
+    Subject = sprintf(&#39;Mark for %s&#39;, this_hw),
+    body = sprintf(body, name, this_hw, mark)) %&gt;%
+  select(To, Bcc, From, Subject, body)
+edat
+write_csv(edat, &quot;composed-emails.csv&quot;)
+
+emails &lt;- edat %&gt;%
+  map_n(mime)
+
+## optional: use if you&#39;ve created your own client id
+use_secret_file(&quot;gmailr-tutorial.json&quot;)
+
+safe_send_message &lt;- safely(send_message)
+sent_mail &lt;- emails %&gt;%
+  map(safe_send_message)
+
+saveRDS(sent_mail,
+        paste(gsub(&quot;\\s+&quot;, &quot;_&quot;, this_hw), &quot;sent-emails.rds&quot;, sep = &quot;_&quot;))
+
+errors &lt;- sent_mail %&gt;%
+  transpose() %&gt;%
+  .$error %&gt;%
+  map_lgl(Negate(is.null))
+sent_mail[errors]</code></pre>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
 
