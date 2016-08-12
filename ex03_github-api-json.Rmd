@@ -1,0 +1,149 @@
+---
+title: "Making a data frame from a list from GitHub API"
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+One of the best uses for `purrr`'s `map()` functions is for digging information out of a nested list and creating a neat data frame. Where do these lists come from? Often as JSON or XML from an API.
+
+Here we'll explore some lists that come from calling the [GitHub API](https://developer.github.com/v3/).
+
+### The `gh` package and getting a GitHub user
+
+```{r}
+library(purrr)
+## devtools::install_github("gaborcsardi/gh")
+library(gh)
+library(listviewer)
+suppressMessages(library(dplyr))
+```
+
+Use `gh::gh()` (not explained here) to get info on a specific GitHub user.
+
+*come back with code to grab this rds from github*
+
+```{r include = FALSE, eval = FALSE}
+gabor <- gh("/users/:username", username = "gaborcsardi")
+saveRDS(gabor, "gabor.rds")
+
+unames <-
+  c("gaborcsardi", "jennybc", "masalmon", "juliasilge", "leeper", "jtleek")
+users <- map(unames, ~ gh("/users/:username", username = .x))
+
+## why is there more info for me than anyone else?
+nms <- users %>%
+  map(names)
+setdiff(nms[[2]], nms[-2] %>% reduce(union))
+# [1] "private_gists"       "total_private_repos" "owned_private_repos"
+# [4] "disk_usage"          "collaborators"       "plan"               
+# I guess this doesn't matter
+saveRDS(users, "github_users.rds")
+```
+
+```{r}
+# gabor <- gh("/users/:username", username = "gaborcsardi")
+gabor <- readRDS("gabor.rds")
+str(gabor, give.attr = FALSE)
+```
+
+### Getting several GitHub users
+
+What if we want information on several GitHub users? The `gh::gh()` function is not vectorized but we can use `map()` to iteratively make `gh::gh()` calls. This will yield a list with info just like that above, but for several users.
+
+*come back with code to grab this rds from github*
+
+```{r}
+unames <-
+  c("gaborcsardi", "jennybc", "masalmon", "juliasilge", "leeper", "jtleek")
+# users <- map(unames, ~ gh("/users/:username", username = .x))
+users <- readRDS("github_users.rds")
+jsonedit(setNames(users, unames))
+```
+
+<!--
+To have the interactive list viewing experience, visit <http://rpubs.com/jennybc/github-users>.
+-->
+
+### Character and integer vector shortcut
+
+Now we want to reach into each user's list and starting pulling info out to make variables in a data frame. This showcases a specific shortcut for making the `.f` function that `map()` will apply.
+
+Provide character or integer input as the `.f` function and it's as if you provided a function like `function(x) x[["y"]]` or `function(i) x[[i]]`. You can index at deeper levels with a character or integer vector, but our current example doesn't support this.
+
+```{r}
+users %>% 
+  map_chr("name")
+
+## the first element of each user's list is their username
+users %>% 
+  map_chr(1)
+```
+
+### Multiple values at same level of hierarchy
+
+A trick for retrieving multiple values at the same level of the hierarchy is to map the function `[` and provide a character or integer vector as an additional argument.
+
+```{r}
+x <- users %>%
+  map(`[`, c("login", "name", "id", "location"))
+str(x[[1]])
+
+y <- users %>% 
+  map(`[`, 1:2)
+str(y[[2]])
+```
+
+What's really awesome is to stack up these per-users lists row-wise and make a data frame. We use the special mapping function `map_df()` to signal that we want a data frame back.
+
+```{r}
+users %>%
+  map_df(`[`, c("login", "name", "id", "location"))
+```
+
+Another, more cumbersome but safer way to get this same data frame is to form variables explicitly like so:
+
+```{r}
+users %>% {
+  data_frame(
+    login = map_chr(., "login"),
+    name = map_chr(., "name"),
+    id = map_int(., "id"),
+    location = map_chr(., "location")
+  )
+}
+```
+
+### Get repos by user
+
+*under development*
+
+```{r}
+library(tibble)
+# repos <- unames %>% 
+#   map(~ gh("/users/:user/repos", user = .x, .limit = Inf))
+# saveRDS(repos, "github_repos.rds")
+repos <- readRDS("github_repos.rds")
+(rdf <- repos %>%
+    set_names(unames) %>% 
+    enframe(value = "gh_repos"))
+jsonedit(set_names(repos, unames))
+```
+
+Make user-specific data frames, one row per repo. Then `unnest()` the enclosing data frame to get one row per repo.
+
+```{r}
+rdf %>% 
+  mutate(
+    #n_repos = map_int(gh_repos, length),
+    repo_info = gh_repos %>%
+      map(. %>% map_df(`[`, c("name", "fork", "open_issues")))
+  ) %>% 
+  select(-gh_repos) %>% 
+  tidyr::unnest()
+```
+
