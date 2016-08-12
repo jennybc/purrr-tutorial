@@ -25,7 +25,7 @@ suppressMessages(library(dplyr))
 
 Use `gh::gh()` (not explained here) to get info on a specific GitHub user.
 
-*come back with code to grab this rds from github*
+*If you don't want to use `gh()` and call the GitHub API, I've made the rds objects available!*
 
 ```{r include = FALSE, eval = FALSE}
 gabor <- gh("/users/:username", username = "gaborcsardi")
@@ -45,9 +45,13 @@ setdiff(nms[[2]], nms[-2] %>% reduce(union))
 saveRDS(users, "github_users.rds")
 ```
 
+Download this if you prefer:  
+<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/gabor.rds>
+
 ```{r}
 # gabor <- gh("/users/:username", username = "gaborcsardi")
-gabor <- readRDS("gabor.rds")
+ gabor <- readRDS("gabor.rds")
+
 str(gabor, give.attr = FALSE)
 ```
 
@@ -55,7 +59,8 @@ str(gabor, give.attr = FALSE)
 
 What if we want information on several GitHub users? The `gh::gh()` function is not vectorized but we can use `map()` to iteratively make `gh::gh()` calls. This will yield a list with info just like that above, but for several users.
 
-*come back with code to grab this rds from github*
+Download this if you prefer:  
+<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.rds>
 
 ```{r}
 unames <-
@@ -133,6 +138,9 @@ repos <- readRDS("github_repos.rds")
     enframe(value = "gh_repos"))
 jsonedit(set_names(repos, unames))
 ```
+
+Download this:  
+<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_repos.rds>
 
 Make user-specific data frames, one row per repo. Then `unnest()` the enclosing data frame to get one row per repo.
 
