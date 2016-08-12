@@ -1,5 +1,5 @@
 ---
-title: "Send a bunch of emails"
+title: "Send email via Gmail API"
 ---
 
 ```{r, echo = FALSE}

@@ -1,0 +1,26 @@
+---
+title: "Tame XML from Google Sheets API"
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Will be based on:
+
+<https://github.com/jennybc/manipulate-xml-with-purrr-dplyr-tidyr#readme>
+
+Overview:
+
+  * Wrangle XML from the Google Sheets API
+  * XPath to isolate XML nodesets as elements of a list
+    - each element contains data for one row of a Google Sheet
+    - wrapped in great gobs of thoroughly namespaced XML
+  * Use `map()` on that list with more XPath to retain only nodes from `gsx` namespace
+    - these nodes contain actual cell data
+  * Use `map()` at depth 2 to extract sub-node names and text
+  * `unnest()` to go from one row per Sheet row to one row per Sheet cell
+  
