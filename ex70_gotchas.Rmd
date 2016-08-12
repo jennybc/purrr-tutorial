@@ -1,0 +1,132 @@
+---
+title: "Gotchas"
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  error = TRUE
+)
+```
+
+Mistakes I have made. And made. And made again. *Expect this page to grow as I (re)discover more gotchas.*
+
+```{r}
+library(purrr)
+```
+
+### The `magrittr` dot tension
+
+The tidyverse takes its dot `.` pronoun from the [`magrittr` package](https://github.com/smbache/magrittr#readme). It means "the thing we are operating on" and is also known as the "argument placeholder".
+
+You don't need the dot when you're using pipe-friendly functions and the planets align for you:
+
+```{r}
+8 %>% log2()
+## is same as
+log2(8)
+```
+
+But sometimes the thing you're passing into the right-hand side (RHS) is not the first argument:
+
+```{r}
+2 %>% log(8)
+## is not what I want and is not the same as
+2 %>% log(8, .)
+## or 
+2 %>% log(8, base = .)
+```
+
+And sometimes you want to prevent the left-hand side from being used as the (invisible) first argument on the RHS. So you have to enclose RHS in curly braces:
+
+```{r}
+iris %>% {
+  c(rows = nrow(.), cols = ncol(.))
+}
+```
+
+One last thing ... and this leads to the gotcha. The `.` can also be used to create a *unary function*:
+
+```{r}
+att <- . %>% toupper() %>% paste("ALL THE THINGS!")
+"open source" %>% att()
+"butter" %>% att()
+"teach" %>% att()
+```
+
+What is `att` anyway?
+
+```{r}
+att
+```
+
+It is a "functional sequence".
+
+It's fairly easy to write code where you think `.` is a placeholder, but it generates a functional sequence.
+
+Watch me.
+
+```{r}
+library(purrr)
+library(tibble)
+
+x <- list(list(int = 1L, chr = 'a'), list(int = 2L, chr = 'b'))
+  
+## YES GOOD WORKS
+x %>% {
+  tibble(id = map_int(., "int"),
+         chr = map_chr(., "chr"))
+}
+
+## NO BAD DOES NOT WORK
+x %>% {
+  tibble(id = . %>% map_int("int"),
+         chr = . %>% map_chr("chr"))
+}
+```
+
+What went wrong? 
+
+`. %>% map_int("int")` built a unary function, instead of passing `x` into `map_int()`. Do not start a pipeline with `.` unless you want a unary function.
+
+What does this have to do with `purrr`?
+
+If you've got a complicated object `x` (e.g., a deeply nested list from JSON), you might build a data frame with repeated calls to `map_*()` functions. Be careful where you put your dot `.`!
+
+### `purrr` is strict about types
+
+`purrr`'s type checking is very strict, which is overhwhelmingly positive. But it will force you to be more aware of integer vs. double.
+
+```{r error = TRUE}
+set.seed(4561)
+(x <- sample(1:5))
+
+times_two <- function(x) x * 2
+times_two(x)
+
+x_list <- as.list(x)
+
+## WTF?
+x_list %>% 
+  map_int(times_two)
+```
+
+Why can I suddenly not multiply these numbers by 2?
+
+Because we've said to expect integers back and, though the elements of `x` are integer, the result of multiplying by the *double* 2 is *double*.
+
+What can you do? Buckle down and make sure that integer stays integer, if that's appropriate. Or loosen up and use `map_dbl()` instead.
+
+```{r}
+## GOOD, in the buckle down sense
+times_two <- function(x) x * 2L
+x_list %>% 
+  map_int(times_two)
+
+## GOOD, in the loosen up sense
+times_two <- function(x) x * 2
+x_list %>% 
+  map_dbl(times_two)
+```
+
