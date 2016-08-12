@@ -10,6 +10,10 @@ The purrr package:
 
   * On CRAN: <https://cran.r-project.org/web/packages/purrr/index.html>
   * Development on GitHub: <https://github.com/hadley/purrr> 
+  * Coverage in [R for Data Science](http://r4ds.had.co.nz)
+    - [Iteration](http://r4ds.had.co.nz/iteration.html)
+    - [Handling hierarchy](http://r4ds.had.co.nz/hierarchy.html)
+    - [Many models](http://r4ds.had.co.nz/many-models.html)
 
 Tutorial development started for [2016-08-12 meeting](https://github.com/minisciencegirl/studyGroup/issues/131) of the Vancouver R Study Group.  
 
