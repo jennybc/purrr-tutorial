@@ -13,60 +13,60 @@ One of the best uses for `purrr`'s `map()` functions is for digging information 
 
 Here we'll explore some lists that come from calling the [GitHub API](https://developer.github.com/v3/).
 
-### The `gh` package and getting a GitHub user
-
 ```{r}
 library(purrr)
-## devtools::install_github("gaborcsardi/gh")
-library(gh)
+suppressMessages(library(jsonlite))
 library(listviewer)
+library(tibble)
 suppressMessages(library(dplyr))
 ```
 
-Use `gh::gh()` (not explained here) to get info on a specific GitHub user.
+### Get a GitHub user
 
-*If you don't want to use `gh()` and call the GitHub API, I've made the rds objects available!*
+Retrieve information on a single GitHub user. Feel free to substitute your own username.
+
+*If you don't want to call the GitHub API, the raw JSON is available.*
 
 ```{r include = FALSE, eval = FALSE}
-gabor <- gh("/users/:username", username = "gaborcsardi")
-saveRDS(gabor, "gabor.rds")
+gabor_response <- httr::GET("https://api.github.com/users/gaborcsardi")
+gabor_json <- httr::content(gabor_response, as = "text")
+writeLines(gabor_json, "gabor.json")
 
 unames <-
   c("gaborcsardi", "jennybc", "masalmon", "juliasilge", "leeper", "jtleek")
-users <- map(unames, ~ gh("/users/:username", username = .x))
-
-## why is there more info for me than anyone else?
-nms <- users %>%
-  map(names)
-setdiff(nms[[2]], nms[-2] %>% reduce(union))
-# [1] "private_gists"       "total_private_repos" "owned_private_repos"
-# [4] "disk_usage"          "collaborators"       "plan"               
-# I guess this doesn't matter
-saveRDS(users, "github_users.rds")
+urls <- paste0("https://api.github.com/users/", unames)
+users <- urls %>% map(fromJSON)
+writeLines(toJSON(users), "github_users.json")
 ```
 
 Download this if you prefer:  
-<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/gabor.rds>
+<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/gabor.json>
 
 ```{r}
-# gabor <- gh("/users/:username", username = "gaborcsardi")
- gabor <- readRDS("gabor.rds")
-
+## pick one:
+#gabor <- fromJSON("gabor.json")
+gabor <- fromJSON("https://api.github.com/users/gaborcsardi")
 str(gabor, give.attr = FALSE)
 ```
 
-### Getting several GitHub users
+Info for one user = a list.
 
-What if we want information on several GitHub users? The `gh::gh()` function is not vectorized but we can use `map()` to iteratively make `gh::gh()` calls. This will yield a list with info just like that above, but for several users.
+### Get several GitHub users
+
+What if we want information on several GitHub users? The `jsonlite::fromJSON()` function is not vectorized but we can use `map()` to iteratively make calls for several users. This will yield a list of lists, *a nested list*.
 
 Download this if you prefer:  
-<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.rds>
+<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.json>
 
 ```{r}
 unames <-
   c("gaborcsardi", "jennybc", "masalmon", "juliasilge", "leeper", "jtleek")
-# users <- map(unames, ~ gh("/users/:username", username = .x))
-users <- readRDS("github_users.rds")
+
+## pick one
+# urls <- paste0("https://api.github.com/users/", unames)
+# users <- map(urls, fromJSON)
+users <- fromJSON("github_users.json", simplifyDataFrame = FALSE)
+
 jsonedit(setNames(users, unames))
 ```
 
@@ -74,19 +74,36 @@ jsonedit(setNames(users, unames))
 To have the interactive list viewing experience, visit <http://rpubs.com/jennybc/github-users>.
 -->
 
-### Character and integer vector shortcut
+### Shortcuts to extract elements by name or position
 
-Now we want to reach into each user's list and starting pulling info out to make variables in a data frame. This showcases a specific shortcut for making the `.f` function that `map()` will apply.
+Reach into each user's list and pull elements out.
 
-Provide character or integer input as the `.f` function and it's as if you provided a function like `function(x) x[["y"]]` or `function(i) x[[i]]`. You can index at deeper levels with a character or integer vector, but our current example doesn't support this.
+Shortcut for making the `.f` function that `map()` will apply:
+
+  * provide "TEXT" to extract the element named "TEXT"
+  * equivalent to `function(x) x[["TEXT"]]`
 
 ```{r}
 users %>% 
   map_chr("name")
 
-## the first element of each user's list is their username
+## equivalent to the more verbose
+users %>%
+  map_chr(function(x) x[["name"]])
+```
+
+Or extract by position:
+
+  * provide `i` to extract the `i`-th element
+  * equivalent to `function(x) x[[i]]`
+
+```{r}
 users %>% 
   map_chr(1)
+
+## equivalent to the more verbose
+users %>%
+  map_chr(function(x) x[[1]])
 ```
 
 ### Multiple values at same level of hierarchy
@@ -97,6 +114,10 @@ A trick for retrieving multiple values at the same level of the hierarchy is to 
 x <- users %>%
   map(`[`, c("login", "name", "id", "location"))
 str(x[[1]])
+
+## if you find this ugly, try magrittr::extract()
+x <- users %>%
+  map(magrittr::extract, c("login", "name", "id", "location"))
 
 y <- users %>% 
   map(`[`, 1:2)
@@ -114,7 +135,7 @@ Another, more cumbersome but safer way to get this same data frame is to form va
 
 ```{r}
 users %>% {
-  data_frame(
+  tibble(
     login = map_chr(., "login"),
     name = map_chr(., "name"),
     id = map_int(., "id"),
@@ -125,6 +146,8 @@ users %>% {
 
 ### Get repos by user
 
+You can index at deeper levels with a character or integer vector, but our current example doesn't support this.
+ 
 *under development*
 
 ```{r}
