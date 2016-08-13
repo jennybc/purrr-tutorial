@@ -1,5 +1,5 @@
 ---
-title: "Making a data frame from a list from GitHub API"
+title: "Simplifying data from a list from GitHub API"
 ---
 
 ```{r, echo = FALSE}
@@ -9,9 +9,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-One of the best uses for `purrr`'s `map()` functions is for digging information out of a nested list and creating a neat data frame. Where do these lists come from? Often as JSON or XML from an API.
+One of the best uses for `purrr`'s `map()` functions is for digging information out of a non-rectangular data structures and creating a neat data frame. Where do these awkward objects come from? Often as JSON or XML from an API, which has frequently been pre-converted to an R list.
 
-Here we'll explore some lists that come from calling the [GitHub API](https://developer.github.com/v3/).
+Here we explore some lists that come from calling the [GitHub API](https://developer.github.com/v3/). Interactive exploration of these lists is made possible by the [`listviewer` package](https://github.com/timelyportfolio/listviewer).
+
+This example also shows how character and integer vectors can be provided as the function `.f` for the `map()` family functions. An extractor function is created behind the scenes, providing a concise way to extract by name or position.
 
 ```{r}
 library(purrr)
@@ -21,17 +23,9 @@ library(tibble)
 suppressMessages(library(dplyr))
 ```
 
-### Get a GitHub user
-
-Retrieve information on a single GitHub user. Feel free to substitute your own username.
-
-*If you don't want to call the GitHub API, the raw JSON is available.*
+### Get several GitHub users
 
 ```{r include = FALSE, eval = FALSE}
-gabor_response <- httr::GET("https://api.github.com/users/gaborcsardi")
-gabor_json <- httr::content(gabor_response, as = "text")
-writeLines(gabor_json, "gabor.json")
-
 unames <-
   c("gaborcsardi", "jennybc", "masalmon", "juliasilge", "leeper", "jtleek")
 urls <- paste0("https://api.github.com/users/", unames)
@@ -39,35 +33,24 @@ users <- urls %>% map(fromJSON)
 writeLines(toJSON(users), "github_users.json")
 ```
 
-Download this if you prefer:  
-<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/gabor.json>
-
-```{r}
-## pick one:
-#gabor <- fromJSON("gabor.json")
-gabor <- fromJSON("https://api.github.com/users/gaborcsardi")
-str(gabor, give.attr = FALSE)
-```
-
-Info for one user = a list.
-
-### Get several GitHub users
-
-What if we want information on several GitHub users? The `jsonlite::fromJSON()` function is not vectorized but we can use `map()` to iteratively make calls for several users. This will yield a list of lists, *a nested list*.
-
-Download this if you prefer:  
+Here is information on six GitHub users, pre-stored as JSON:  
 <https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.json>
 
 ```{r}
-unames <-
-  c("gaborcsardi", "jennybc", "masalmon", "juliasilge", "leeper", "jtleek")
-
-## pick one
-# urls <- paste0("https://api.github.com/users/", unames)
-# users <- map(urls, fromJSON)
 users <- fromJSON("github_users.json", simplifyDataFrame = FALSE)
+str(users, max.level = 1)
+str(users[[1]], list.len = 6)
+```
 
-jsonedit(setNames(users, unames))
+`users` is *a nested list*:
+
+  * one element per GitHub user
+  * each element is, in turn, a list with info on the user
+
+Explore it interactively:
+
+```{r echo = FALSE}
+jsonedit(users)
 ```
 
 <!--
@@ -76,7 +59,9 @@ To have the interactive list viewing experience, visit <http://rpubs.com/jennybc
 
 ### Shortcuts to extract elements by name or position
 
-Reach into each user's list and pull elements out.
+Who are these people?
+
+Reach into each user's list and pull elements out, such as "name".
 
 Shortcut for making the `.f` function that `map()` will apply:
 
@@ -88,8 +73,11 @@ users %>%
   map_chr("name")
 
 ## equivalent to the more verbose
-users %>%
-  map_chr(function(x) x[["name"]])
+# users %>%
+#   map_chr(function(x) x[["name"]])
+
+(unames <- users %>%
+    map_chr("login"))
 ```
 
 Or extract by position:
@@ -102,8 +90,8 @@ users %>%
   map_chr(1)
 
 ## equivalent to the more verbose
-users %>%
-  map_chr(function(x) x[[1]])
+# users %>%
+#   map_chr(function(x) x[[1]])
 ```
 
 ### Multiple values at same level of hierarchy
@@ -124,7 +112,7 @@ y <- users %>%
 str(y[[2]])
 ```
 
-What's really awesome is to stack up these per-users lists row-wise and make a data frame. We use the special mapping function `map_df()` to signal that we want a data frame back.
+What's really awesome is to stack up these per-user lists row-wise and make a data frame. We use the special mapping function `map_df()` to signal that we want a data frame back.
 
 ```{r}
 users %>%
@@ -144,31 +132,68 @@ users %>% {
 }
 ```
 
-### Get repos by user
+### Repositiories for each user
 
-You can index at deeper levels with a character or integer vector, but our current example doesn't support this.
- 
-*under development*
-
-```{r}
-library(tibble)
-# repos <- unames %>% 
-#   map(~ gh("/users/:user/repos", user = .x, .limit = Inf))
-# saveRDS(repos, "github_repos.rds")
-repos <- readRDS("github_repos.rds")
-(rdf <- repos %>%
-    set_names(unames) %>% 
-    enframe(value = "gh_repos"))
-jsonedit(set_names(repos, unames))
+```{r include = FALSE, eval = FALSE}
+urls <- paste0("https://api.github.com/users/", unames, "/repos")
+repos <- urls %>% map(fromJSON)
+writeLines(toJSON(repos), "github_repos.json")
 ```
 
-Download this:  
-<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_repos.rds>
+The list above has one level of nesting, but it's common to have even more.
 
-Make user-specific data frames, one row per repo. Then `unnest()` the enclosing data frame to get one row per repo.
+`repos` is a list with:
+
+  * one element per GitHub user
+  * each element is another list of that user's repositories (actually, just the first 30)
+  * several of those list elements are, again, a list
+
+Download this:  
+<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_repos.json>
 
 ```{r}
-rdf %>% 
+repos <- fromJSON("github_repos.json", simplifyDataFrame = FALSE)
+str(repos, max.level = 1)
+```
+
+Explore it interactively:
+
+```{r echo = FALSE}
+jsonedit(repos)
+```
+
+### Revisit shortcuts to extract elements by name or position
+
+Now we can use the indexing shortcuts in a more complicated setting. Instead of providing a single name or position, we use a vector:
+
+  * the `j`-th element addresses the `j`-th level of the hierarchy
+  
+It's easiest to see in a concrete example. We get the full name (element 3) of the first repository listed for each user.
+
+```{r}
+repos %>%
+  map_chr(c(1, 3))
+## TO DO: I would really prefer a character example :(
+```
+
+### Organizing an analysis in a data frame
+
+*under development*
+
+Mission: get a data frame with one row per repository, with varibles identifying which GitHub user owns it and the repository name, etc.
+
+Step 1: Put the repository list into a data frame, along with identifying GitHub usernames.
+
+```{r}
+(udf <- repos %>%
+    set_names(unames) %>% 
+    enframe("username", "gh_repos"))
+```
+
+*go out in blaze of glory ... or rather: develop this in steps*
+
+```{r}
+rdf <- udf %>% 
   mutate(
     #n_repos = map_int(gh_repos, length),
     repo_info = gh_repos %>%
@@ -176,5 +201,14 @@ rdf %>%
   ) %>% 
   select(-gh_repos) %>% 
   tidyr::unnest()
+rdf %>% 
+  filter(!fork) %>% 
+  select(-fork) %>% 
+  group_by(username) %>%
+  arrange(username, desc(open_issues)) %>%
+  top_n(3)
 ```
 
+### Appendix
+
+If you just wanted to solve this problem, you could let [`jsonlite`](https://github.com/jeroenooms/jsonlite) simplify the JSON for you. Other packages for list handling include [`listless`](https://bitbucket.org/graumannlabtools/listless), [`rlist`](https://renkun.me/rlist/).
