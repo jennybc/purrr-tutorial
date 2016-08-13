@@ -123,6 +123,10 @@ But we don't have anything to use for `last` yet.
 This is going to be Job #1.  
 Job #2 is to insert `substring()` and `tweets` + `matches` + result of Job #1 into the `purrr::map()` machinery.
 
+Here's where we are heading:
+
+![](purrr-slides-trump-tweets.png)
+
 ### Get you know your Awkward List
 
 How long are the elements of `matches`?

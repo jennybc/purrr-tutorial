@@ -306,6 +306,11 @@ The elements of <code>matches</code> are awfully close to what we need for <code
 But we don’t have anything to use for <code>last</code> yet.<br />
 This is going to be Job #1.<br />
 Job #2 is to insert <code>substring()</code> and <code>tweets</code> + <code>matches</code> + result of Job #1 into the <code>purrr::map()</code> machinery.</p>
+<p>Here’s where we are heading:</p>
+<div class="figure">
+<img src="purrr-slides-trump-tweets.png" />
+
+</div>
 </div>
 <div id="get-you-know-your-awkward-list" class="section level3">
 <h3>Get you know your Awkward List</h3>
@@ -824,7 +829,7 @@ pmap(mdf, substring)
 #&gt;     names(y) &lt;- names(x)
 #&gt;     y
 #&gt; }
-#&gt; &lt;bytecode: 0x7f871304c228&gt;
+#&gt; &lt;bytecode: 0x7ff512ef3298&gt;
 #&gt; &lt;environment: namespace:base&gt;</code></pre>
 </div>
 
