@@ -9,6 +9,7 @@ suppressPackageStartupMessages(library(dplyr))
 library(tidyr)
 library(stringr)
 suppressPackageStartupMessages(library(purrr))
+library(yaml)
 library(htmltools)
 
 #library(knitr)
@@ -20,13 +21,16 @@ x <- tibble(fls) %>%
 x <- x %>% 
   filter(type %>% str_detect("^ex[0-9]+"),
          ext %>% str_detect("html$"))
-x$title <- x$fls %>% 
+x$t_or_c <- x$fls %>% 
   str_replace("\\.html$", ".Rmd") %>% 
   map(readLines, n = 15) %>% # totally arbitrary!
-  map(~ grep("^title:", .x, value = TRUE)) %>% 
-  map_chr(~ gsub("title: \"(.*)\"", "\\1", .x))
-map2(x$fls, x$title, ~ a(href = .x, .y)) %>% 
-  map_chr(as.character) %>% 
-  paste0("* ", . ,"\n") %>% 
-  cat()
+  map(~ grep("^title|^comment", .x, value = TRUE)) %>% 
+  map(paste, collapse = "\n") %>% 
+  map(yaml.load)
+x <- x %>% 
+  mutate(title = t_or_c %>% map_chr("title"),
+         comment = t_or_c %>% map_chr("comment", .null = ""),
+         href = map2(fls, title, ~ a(href = .x, .y)) %>% map_chr(as.character),
+         bullet = map2_chr(href, comment, ~ paste("*", .x, .y, "\n")))
+cat(x$bullet)
 ```

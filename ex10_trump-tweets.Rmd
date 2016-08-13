@@ -1,5 +1,6 @@
 ---
 title: "Trump Android words"
+comment: "*suitable for a hands-on activity*"
 ---
 
 ```{r, echo = FALSE}
