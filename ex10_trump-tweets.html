@@ -478,7 +478,7 @@ Tweak your existing approach to return an integer vector, with length equal to t
   naive_length = lengths(matches),
   n_words = map_int(matches, ~ sum(.x &gt; 0))
 )
-#&gt; # A tibble: 7 x 2
+#&gt; # A tibble: 7 × 2
 #&gt;   naive_length n_words
 #&gt;          &lt;int&gt;   &lt;int&gt;
 #&gt; 1            1       0
@@ -829,7 +829,7 @@ pmap(mdf, substring)
 #&gt;     names(y) &lt;- names(x)
 #&gt;     y
 #&gt; }
-#&gt; &lt;bytecode: 0x7ff512ef3298&gt;
+#&gt; &lt;bytecode: 0x7ff84a663bf8&gt;
 #&gt; &lt;environment: namespace:base&gt;</code></pre>
 </div>
 

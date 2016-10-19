@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Introduction to lists</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="site_libs/highlight/default.css"
+      type="text/css" />
+<script src="site_libs/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">purrr tutorial</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="examples.html">Worked Examples</a>
+</li>
+<li>
+  <a href="slides.html">Slides</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Introduction to lists</h1>
+
+</div>
+
+
+<div id="atomic-vectors" class="section level3">
+<h3>Atomic vectors</h3>
+<p>It is useful to understand lists as a data structure that is more general than atomic vectors. So let’s start there.</p>
+<p>The garden variety R object is an <em>atomic vector</em> like these:</p>
+<pre class="r"><code>(v_log &lt;- c(TRUE, FALSE, FALSE, TRUE))
+#&gt; [1]  TRUE FALSE FALSE  TRUE
+(v_int &lt;- 1:4)
+#&gt; [1] 1 2 3 4
+(v_doub &lt;- 1:4 * 1.2)
+#&gt; [1] 1.2 2.4 3.6 4.8
+(v_char &lt;- letters[1:4])
+#&gt; [1] &quot;a&quot; &quot;b&quot; &quot;c&quot; &quot;d&quot;</code></pre>
+<p>Atomic vectors are homogeneous. Each “atom” has the same flavor, by which I roughly mean type or storage mode, and is a scalar, by which I mean “has length one”. The above examples show the most prevalent flavors of R vectors, though you will eventually encounter more exotic ones.</p>
+<p>Exercises</p>
+<ol style="list-style-type: decimal">
+<li>Define the vectors above or similar. Use the family of <code>is.*()</code> functions to confirm vector type, e.g. <code>is.logical()</code>. You might need to guess or look some of them up.</li>
+<li>What do <code>is.numeric()</code>, <code>is.integer()</code>, and <code>is.double()</code> return for the vectors that hold floating point number versus integers?</li>
+</ol>
+<p>The <code>c()</code> function is used to construct a vector by hand. We used it above to construct the logical vector. All the other vectors came about through other means and this is indicative of real life: most vectors aren’t made explicitly with <code>c()</code>. They tend to be created with some generator, like the <code>1:n</code> shortcut, or via transformation of an existing object.</p>
+<p>To index a vector is to address specific elements or atoms, either for reading or writing. We index a vector using square brackets, like so: <code>x[something]</code>. There are several ways to express which elements you want, i.e. there are several valid forms for <code>something</code>:</p>
+<ul>
+<li>logical vector: keep elements of <code>x</code> for which <code>something</code> is <code>TRUE</code> and drop those for which it’s <code>FALSE</code></li>
+<li>integer vector, all positive: the elements specified in <code>something</code> are kept</li>
+<li>negative integers, all negative: the elements specified in <code>something</code> are dropped</li>
+<li>character vector: presumes that <code>x</code> is a named vector and the elements whose names are specified in <code>something</code> are kept</li>
+</ul>
+<pre class="r"><code>v_char[v_log]
+#&gt; [1] &quot;a&quot; &quot;d&quot;
+v_doub[2:3]
+#&gt; [1] 2.4 3.6
+v_char[-4]
+#&gt; [1] &quot;a&quot; &quot;b&quot; &quot;c&quot;</code></pre>
+<p>Exercises</p>
+<ol style="list-style-type: decimal">
+<li>What happens when you request the zero-th element of one of our vectors?</li>
+<li>What happens when you ask for an element that is past the end of the vector, i.e. request <code>x[k]</code> when the length of <code>x</code> is less than <code>k</code>?</li>
+<li>What happen when you index <code>x</code> with a vector of positive integers that is shorter than <code>x</code>? How about when it’s longer? What about indexing with a logical vector that’s shorter? Logical vector that’s longer?</li>
+</ol>
+<p>If you’ve worked the exercises, you’ve seen that it’s possible to get an atomic vector of length zero and to get elements that are <code>NA</code>. Notice that, in both of these scenarios, the underlying variable type is retained.</p>
+<pre class="r"><code>v_int[0]
+#&gt; integer(0)
+typeof(v_int[0])
+#&gt; [1] &quot;integer&quot;
+v_doub[100]
+#&gt; [1] NA
+typeof(v_doub[100])
+#&gt; [1] &quot;double&quot;</code></pre>
+<p>Yes, there are different flavors of <code>NA</code>!</p>
+<p>Even though R’s vectors have a specific type, it’s quite easy to convert them to another type. This is called coercion. As a language for data analysis, this flexibility is generally a positive. It’s why, for example, we don’t stress out over integer versus double much in R. But unexpected coercion is a rich source of programming puzzles, so always consider this possibility when debugging. When you’re operating as an R programmer (versus interactive data analyst), you need to be much more intentional about types.</p>
+<p>There’s a hierarchy of types: the more primitive ones cheerfully and silently convert to those higher up the food chain. Here’s the order: logical &lt; integer &lt; double &lt; character.</p>
+<pre class="r"><code>v_log
+#&gt; [1]  TRUE FALSE FALSE  TRUE
+as.integer(v_log)
+#&gt; [1] 1 0 0 1
+v_int
+#&gt; [1] 1 2 3 4
+as.numeric(v_int)
+#&gt; [1] 1 2 3 4
+v_doub
+#&gt; [1] 1.2 2.4 3.6 4.8
+as.character(v_doub)
+#&gt; [1] &quot;1.2&quot; &quot;2.4&quot; &quot;3.6&quot; &quot;4.8&quot;
+as.character(as.numeric(as.integer(v_log)))
+#&gt; [1] &quot;1&quot; &quot;0&quot; &quot;0&quot; &quot;1&quot;</code></pre>
+<p>Here I’ve used <code>as.*()</code> functions to explicitly coerce vectors from one type to another. But coercion can also be triggered by other actions, such as assigning a scalar of the wrong type into an existing vector. Watch how easily I turn a numeric vector into character.</p>
+<pre class="r"><code>v_doub_copy &lt;- v_doub
+str(v_doub_copy)
+#&gt;  num [1:4] 1.2 2.4 3.6 4.8
+v_doub_copy[3] &lt;- &quot;uhoh&quot;
+str(v_doub_copy)
+#&gt;  chr [1:4] &quot;1.2&quot; &quot;2.4&quot; &quot;uhoh&quot; &quot;4.8&quot;</code></pre>
+<p>Notice that R did this coercion quietly, with no fanfare. Again, when debugging, always give serious thought to this question: Is this object of the type I think it is? How sure am I about that?</p>
+<p>I end the discussion of atomic vectors with two specific examples of “being intentional about type”.</p>
+<ul>
+<li>Use type-specific <code>NA</code>s when doing setup.</li>
+<li>Use <code>L</code> to explicitly request integer. This looks weird but is a nod to short versus long integers. Just accept that this method of requesting a “long” is how we force a number to be an integer in R.</li>
+</ul>
+<pre class="r"><code>(big_plans &lt;- rep(NA_integer_, 4))
+#&gt; [1] NA NA NA NA
+str(big_plans)
+#&gt;  int [1:4] NA NA NA NA
+big_plans[3] &lt;- 5L
+str(big_plans)
+#&gt;  int [1:4] NA NA 5 NA
+## note that omitting L results in coercion of big_plans to double
+big_plans[1] &lt;- 10
+str(big_plans)
+#&gt;  num [1:4] 10 NA 5 NA</code></pre>
+</div>
+<div id="lists" class="section level3">
+<h3>Lists</h3>
+<p>What if you need to hold something that violates the constraints imposed by an atomic vector? I.e. one or both of these is true:</p>
+<ul>
+<li>Individual atoms might have length greater than 1.</li>
+<li>Individual atoms might not be of the same flavor.</li>
+</ul>
+<p>You need a list!</p>
+<p>A list is actually still a vector in R, but it’s not an atomic vector. We construct a list explicit with <code>list()</code> but, like atomic vectors, most lists are created some other way in real life.</p>
+<pre class="r"><code>(x &lt;- list(one = 1:3, two = 4:6))
+#&gt; $one
+#&gt; [1] 1 2 3
+#&gt; 
+#&gt; $two
+#&gt; [1] 4 5 6
+(y &lt;- list(logical = TRUE, integer = 4L, double = 4 * 1.2, character = &quot;character&quot;))
+#&gt; $logical
+#&gt; [1] TRUE
+#&gt; 
+#&gt; $integer
+#&gt; [1] 4
+#&gt; 
+#&gt; $double
+#&gt; [1] 4.8
+#&gt; 
+#&gt; $character
+#&gt; [1] &quot;character&quot;</code></pre>
+<p>Exercises</p>
+<ol style="list-style-type: decimal">
+<li>Make the lists <code>x</code> and <code>y</code> shown above. Use <code>is.*()</code> functions to get to know these objects. Try to get some positive and negative results, i.e. establish a few things that <code>x</code> is and is NOT. Make sure to try <code>is.vector()</code> and <code>is.atomic()</code>.</li>
+</ol>
+<p><strong>starting to just sketch now</strong></p>
+<p>Indexing. Single square vs double square vs <code>$</code>. The <a href="http://r4ds.had.co.nz/vectors.html#lists-of-condiments">“pepper shaker photos” in R for Data Science</a>.</p>
+</div>
+<div id="vectorized-operations" class="section level3">
+<h3>Vectorized operations</h3>
+<p>Lots of operations are naturally vectorized in R. But almost always for atomic vectors. Not for lists.</p>
+<pre class="r"><code>exp(v_doub)
+#&gt; [1]   3.320117  11.023176  36.598234 121.510418
+(l_doub &lt;- as.list(v_doub))
+#&gt; [[1]]
+#&gt; [1] 1.2
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 2.4
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 3.6
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 4.8
+exp(l_doub)
+#&gt; Error in exp(l_doub): non-numeric argument to mathematical function</code></pre>
+<p>How do you apply a function elementwise to a list, like we’re doing with an atomic vector with <code>v_doub ^ 2</code>?</p>
+<p>First, vocabulary.</p>
+<p>We talk about this as “mapping the function f over the list l”, which means visiting each element of the list and applying f to it.</p>
+<p>Conceptually, we loop over the elements of the list and apply the function f.</p>
+<pre class="r"><code>my_list &lt;- list(...)
+my_output &lt;- ## something of an appropriate size and flavor
+for(i in seq_along(my_list)) {
+  my_output[[i]] &lt;- f(my_list([[i]]))
+}</code></pre>
+<p>Note the whole point of this tutorial is to show higher-level abstractions for this. You won’t be writing these for loops yourself!</p>
+<p><code>lapply()</code> is the basic mapper in base. We’ll use <code>map()</code> from purrr, which at this point is interchangeable with <code>lapply()</code>. Subsequent lessons and examples will demonstrate why we use <code>map()</code> and purrr more generally.</p>
+<pre class="r"><code>lapply(l_doub, exp)
+#&gt; [[1]]
+#&gt; [1] 3.320117
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 11.02318
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 36.59823
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 121.5104
+library(purrr)
+map(l_doub, exp)
+#&gt; [[1]]
+#&gt; [1] 3.320117
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 11.02318
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 36.59823
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] 121.5104</code></pre>
+</div>
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

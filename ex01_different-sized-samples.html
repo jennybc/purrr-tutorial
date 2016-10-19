@@ -235,12 +235,12 @@ set.seed(4561)
     group_by(Species) %&gt;%   # prep for work by Species
     nest() %&gt;%              # --&gt; one row per Species
     mutate(n = c(2, 5, 3))) # add sample sizes
-#&gt; # A tibble: 3 x 3
+#&gt; # A tibble: 3 × 3
 #&gt;      Species              data     n
 #&gt;       &lt;fctr&gt;            &lt;list&gt; &lt;dbl&gt;
-#&gt; 1     setosa &lt;tibble [50 x 4]&gt;     2
-#&gt; 2 versicolor &lt;tibble [50 x 4]&gt;     5
-#&gt; 3  virginica &lt;tibble [50 x 4]&gt;     3</code></pre>
+#&gt; 1     setosa &lt;tibble [50 × 4]&gt;     2
+#&gt; 2 versicolor &lt;tibble [50 × 4]&gt;     5
+#&gt; 3  virginica &lt;tibble [50 × 4]&gt;     3</code></pre>
 <p>Draw the samples.</p>
 <ul>
 <li><code>purrr::map2()</code> is good since we want to operate on 2 things <code>(data = DATA FOR ONE SPECIES, n = SAMPLE SIZE)</code>.</li>
@@ -250,12 +250,12 @@ set.seed(4561)
 </ul>
 <pre class="r"><code>(sampled_iris &lt;- nested_iris %&gt;%
   mutate(samp = map2(data, n, sample_n)))
-#&gt; # A tibble: 3 x 4
+#&gt; # A tibble: 3 × 4
 #&gt;      Species              data     n             samp
 #&gt;       &lt;fctr&gt;            &lt;list&gt; &lt;dbl&gt;           &lt;list&gt;
-#&gt; 1     setosa &lt;tibble [50 x 4]&gt;     2 &lt;tibble [2 x 4]&gt;
-#&gt; 2 versicolor &lt;tibble [50 x 4]&gt;     5 &lt;tibble [5 x 4]&gt;
-#&gt; 3  virginica &lt;tibble [50 x 4]&gt;     3 &lt;tibble [3 x 4]&gt;</code></pre>
+#&gt; 1     setosa &lt;tibble [50 × 4]&gt;     2 &lt;tibble [2 × 4]&gt;
+#&gt; 2 versicolor &lt;tibble [50 × 4]&gt;     5 &lt;tibble [5 × 4]&gt;
+#&gt; 3  virginica &lt;tibble [50 × 4]&gt;     3 &lt;tibble [3 × 4]&gt;</code></pre>
 <p>What came back? More <code>Species</code>-specific data frames.</p>
 <p>We are in that uncomfortable intermediate state, with two list-columns: the original <code>data</code> and the sampled data, <code>samp</code>. Let’s get back to a normal data frame!</p>
 <ul>
@@ -265,7 +265,7 @@ set.seed(4561)
 <pre class="r"><code>sampled_iris %&gt;% 
   select(Species, samp) %&gt;%
   unnest()
-#&gt; # A tibble: 10 x 5
+#&gt; # A tibble: 10 × 5
 #&gt;       Species Sepal.Length Sepal.Width Petal.Length Petal.Width
 #&gt;        &lt;fctr&gt;        &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
 #&gt; 1      setosa          4.6         3.1          1.5         0.2
@@ -286,7 +286,7 @@ set.seed(4561)
   mutate(samp = map2(data, n, sample_n)) %&gt;% 
   select(Species, samp) %&gt;%
   unnest()
-#&gt; # A tibble: 10 x 5
+#&gt; # A tibble: 10 × 5
 #&gt;       Species Sepal.Length Sepal.Width Petal.Length Petal.Width
 #&gt;        &lt;fctr&gt;        &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
 #&gt; 1      setosa          5.4         3.4          1.7         0.2
