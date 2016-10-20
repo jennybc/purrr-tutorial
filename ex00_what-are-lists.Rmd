@@ -22,16 +22,18 @@ The garden variety R object is an *atomic vector* like these:
 (v_char <- letters[1:4])
 ```
 
-Atomic vectors are homogeneous. Each "atom" has the same flavor, by which I roughly mean type or storage mode, and is a scalar, by which I mean "has length one". The above examples show the most prevalent flavors of R vectors, though you will eventually encounter more exotic ones.
+Atomic vectors are homogeneous. Each "atom" has the same flavor, by which I roughly mean type or storage mode, and is a scalar, by which I mean "has length one". The above examples show the most common flavors of R vectors, though you will eventually encounter more exotic ones.
+
+
 
 Exercises
 
-1. Define the vectors above or similar. Use the family of `is.*()` functions to confirm vector type, e.g. `is.logical()`. You might need to guess or look some of them up.
+1. Define the vectors above or similar. Use the family of `is.*()` functions to confirm vector type, e.g. `is.logical()`. You might need to guess or look some of them up. *TO CONSIDER: prompt use of the equivalent functions from purrr, i.e. the `is_*()` family?*
 1. What do `is.numeric()`, `is.integer()`, and `is.double()` return for the vectors that hold floating point number versus integers? 
 
 The `c()` function is used to construct a vector by hand. We used it above to construct the logical vector. All the other vectors came about through other means and this is indicative of real life: most vectors aren't made explicitly with `c()`. They tend to be created with some generator, like the `1:n` shortcut, or via transformation of an existing object.
 
-To index a vector is to address specific elements or atoms, either for reading or writing. We index a vector using square brackets, like so: `x[something]`. There are several ways to express which elements you want, i.e. there are several valid forms for `something`:
+To "index a vector" means to address specific elements or atoms, either for reading or writing. We index a vector using square brackets, like so: `x[something]`. There are several ways to express which elements you want, i.e. there are several valid forms for `something`:
 
   * logical vector: keep elements of `x` for which `something` is `TRUE` and drop those for which it's `FALSE`
   * integer vector, all positive: the elements specified in `something` are kept
@@ -50,6 +52,8 @@ Exercises
 1. What happens when you ask for an element that is past the end of the vector, i.e. request `x[k]` when the length of `x` is less than `k`?
 1. What happen when you index `x` with a vector of positive integers that is shorter than `x`? How about when it's longer? What about indexing with a logical vector that's shorter? Logical vector that's longer?
 
+*Student Q: what's a real world scenario in which you'd want the 0th element? My tentative lame answer: you never really want it. This just comes up in programming and therefore needs to be well-defined. Can I do any better?*
+
 If you've worked the exercises, you've seen that it's possible to get an atomic vector of length zero and to get elements that are `NA`. Notice that, in both of these scenarios, the underlying variable type is retained.
 
 ```{r}
@@ -61,9 +65,9 @@ typeof(v_doub[100])
 
 Yes, there are different flavors of `NA`!
 
-Even though R's vectors have a specific type, it's quite easy to convert them to another type. This is called coercion. As a language for data analysis, this flexibility is generally a positive. It's why, for example, we don't stress out over integer versus double much in R. But unexpected coercion is a rich source of programming puzzles, so always consider this possibility when debugging. When you're operating as an R programmer (versus interactive data analyst), you need to be much more intentional about types.
+Even though R's vectors have a specific type, it's quite easy to convert them to another type. This is called **coercion**. As a language for data analysis, this flexibility is generally a positive. It's why we generally don't stress out over integer versus double in R. It's why we can compute a proportion as the mean of a logical vector (we exploit automatic coercion to integer in this case). But unexpected coercion is a rich source of programming puzzles, so always consider this possibility when debugging. When you're operating as an R programmer (versus interactive data analyst), you need to be much more intentional about types.
 
-There's a hierarchy of types: the more primitive ones cheerfully and silently convert to those higher up the food chain. Here's the order: logical < integer < double < character.
+There's a hierarchy of types: the more primitive ones cheerfully and silently convert to those higher up in the food chain. Here's the order: logical < integer < double < character.
 
 ```{r}
 v_log
@@ -89,7 +93,7 @@ Notice that R did this coercion quietly, with no fanfare. Again, when debugging,
 I end the discussion of atomic vectors with two specific examples of "being intentional about type".
 
   * Use type-specific `NA`s when doing setup.
-  * Use `L` to explicitly request integer. This looks weird but is a nod to short versus long integers. Just accept that this method of requesting a "long" is how we force a number to be an integer in R.
+  * Use `L` to explicitly request integer. This looks weird but is a nod to short versus long integers. Just accept that this is how we force a literal number to be interpreted as an integer in R.
   
 ```{r}
 (big_plans <- rep(NA_integer_, 4))
@@ -110,16 +114,18 @@ What if you need to hold something that violates the constraints imposed by an a
   
 You need a list!
 
-A list is actually still a vector in R, but it's not an atomic vector. We construct a list explicit with `list()` but, like atomic vectors, most lists are created some other way in real life.
+A list is actually still a vector in R, but it's not an atomic vector. We construct a list explicitly with `list()` but, like atomic vectors, most lists are created some other way in real life.
 
 ```{r}
-(x <- list(one = 1:3, two = 4:6))
+(x <- list(one = 1:3, two = c("four", "five", "six")))
 (y <- list(logical = TRUE, integer = 4L, double = 4 * 1.2, character = "character"))
 ```
 
 Exercises
 
-1. Make the lists `x` and `y` shown above. Use `is.*()` functions to get to know these objects. Try to get some positive and negative results, i.e. establish a few things that `x` is and is NOT. Make sure to try `is.vector()` and `is.atomic()`.
+1. Make the lists `x` and `y` shown above. Use `is.*()` functions to get to know these objects. Try to get some positive and negative results, i.e. establish a few things that `x` is and is NOT. Make sure to try `is.vector()`, `is.atomic()`, and `is.recursive()`.
+
+*Student Q: are all lists vectors? are all vectors lists? if not ... can you please make a venn diagram of this stuff?*
 
 **starting to just sketch now**
 
@@ -127,10 +133,11 @@ Indexing. Single square vs double square vs `$`. The ["pepper shaker photos" in 
 
 ### Vectorized operations
 
-Lots of operations are naturally vectorized in R. But almost always for atomic vectors. Not for lists.
+Lots of operations are naturally vectorized in R. But for atomic vectors. Not for lists.
 
 ```{r error = TRUE}
 exp(v_doub)
+## put the same info in a list and ... this no longer works
 (l_doub <- as.list(v_doub))
 exp(l_doub)
 ```
@@ -151,9 +158,11 @@ for(i in seq_along(my_list)) {
 }
 ```
 
-Note the whole point of this tutorial is to show higher-level abstractions for this. You won't be writing these for loops yourself!
+The whole point of this tutorial is to show higher-level abstractions for this. So you won't be writing these for loops yourself!
 
 `lapply()` is the basic mapper in base. We'll use `map()` from purrr, which at this point is interchangeable with `lapply()`. Subsequent lessons and examples will demonstrate why we use `map()` and purrr more generally.
+
+We use `lapply()` or `purrr::map()` to visit each component of the list `l_doub` and exponentiate:
 
 ```{r}
 lapply(l_doub, exp)
