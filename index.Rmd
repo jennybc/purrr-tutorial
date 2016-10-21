@@ -4,7 +4,7 @@ title: "purrr tutorial"
 
 <img src="https://www.stickermule.com/marketplace/embed_img/13594" style="max-width:100%;">
 
-*DISCLAIMER: ROUGH AND INCOMPLETE!*
+*DISCLAIMER: Under development*
 
 The purrr package:
 
@@ -15,9 +15,8 @@ The purrr package:
     - [Handling hierarchy](http://r4ds.had.co.nz/hierarchy.html)
     - [Many models](http://r4ds.had.co.nz/many-models.html)
 
-Tutorial development started for [2016-08-12 meeting](https://github.com/minisciencegirl/studyGroup/issues/131) of the Vancouver R Study Group.  
+Materials created to support:
 
-Some version will eventually appear as part of:
-
+  * [2016-08-12 meeting](https://github.com/minisciencegirl/studyGroup/issues/131) of the Vancouver R Study Group.  
   * [STAT 545](http://stat545.com) Exploratory Data Analysis
   * [DSCI 523](http://www.calendar.ubc.ca/vancouver/courses.cfm?page=code&code=DSCI) Data Wrangling, part of the UBC Master of Data Science
