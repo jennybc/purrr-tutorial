@@ -389,7 +389,7 @@ Or you'd use the `stringr` or `stringi` packages to avoid `gregexpr()` altogethe
 
 Have a look at `regmatches()` source and compare to ours. Note that, by necessity, there has to be more error checking and consideration for encoding and locale. So it's not directly comparable. But you'll see plenty of calls to the base equivalent of `map()`, `Map()`, and the same functions we're using, i.e., `attr()` and `substring()`.
 
-```{r}
+```{r cache = TRUE}
 regmatches
 ```
 

@@ -1,36 +1,61 @@
 ---
-title: "Worked Examples"
+title: "Lessons and Examples"
 ---
 
-Worked examples and live coding activities
-
-```{r results='asis', echo = FALSE, warning = FALSE}
-suppressPackageStartupMessages(library(dplyr))
-library(tidyr)
+```{r setup, include = FALSE, warning = FALSE}
+library(tidyverse)
 library(stringr)
-suppressPackageStartupMessages(library(purrr))
-library(yaml)
 library(htmltools)
-
-#library(knitr)
-
-fls <- list.files()
-x <- tibble(fls) %>%
- separate(col = fls, into = c("type", "slug", "ext"),
-          sep = "[_\\.]", remove = FALSE, extra = "drop", fill = "left")
-x <- x %>% 
-  filter(type %>% str_detect("^ex[0-9]+"),
-         ext %>% str_detect("html$"))
-x$t_or_c <- x$fls %>% 
-  str_replace("\\.html$", ".Rmd") %>% 
-  map(readLines, n = 15) %>% # totally arbitrary!
-  map(~ grep("^title|^comment", .x, value = TRUE)) %>% 
-  map(paste, collapse = "\n") %>% 
-  map(yaml.load)
-x <- x %>% 
-  mutate(title = t_or_c %>% map_chr("title"),
-         comment = t_or_c %>% map_chr("comment", .null = ""),
-         href = map2(fls, title, ~ a(href = .x, .y)) %>% map_chr(as.character),
-         bullet = map2_chr(href, comment, ~ paste("*", .x, .y, "\n")))
-cat(x$bullet)
 ```
+
+```{r file-list, include = FALSE, warning = FALSE}
+has_all_things <- function(y, things) {
+  all(match(tolower(things), tolower(y), nomatch = 0) > 0)
+}
+parse_yaml <- function(file, n = 15) {
+  rmarkdown:::parse_yaml_front_matter(read_lines(file, n_max = n))
+}
+ext_file <- function(file, ext) paste(file, ext, sep = ".")
+cat_bullet <- function(x, pattern) {
+  x <- x %>% 
+    filter(str_detect(basename, pattern))
+  cat(x$bullet)
+}
+
+x <- tibble(fls = list.files()) %>%
+  mutate(basename = tools::file_path_sans_ext(fls),
+         ext = tools::file_ext(fls)) %>% 
+  group_by(basename) %>% 
+  summarize_all(list) %>% 
+  filter(map_lgl(ext, has_all_things, things = c("Rmd", "html")))
+
+x <- x %>% 
+  mutate(
+    yaml = basename %>% ext_file("Rmd") %>% map(parse_yaml),
+    title = yaml %>% map_chr("title"),
+    comment = yaml %>% map_chr("comment", .null = ""),
+    href = map2(ext_file(basename, "Rmd"), title, ~ a(href = .x, .y)) %>%
+      map_chr(as.character),
+    bullet = map2_chr(href, comment, ~ paste("*", .x, .y, "\n"))
+  )
+```
+
+### Background basics
+
+```{r results = 'asis', echo = FALSE}
+cat_bullet(x, "^back")
+```
+
+### Core purrr lessons
+
+*coming soon*
+
+### Worked examples
+
+```{r results = 'asis', echo = FALSE}
+cat_bullet(x, "^ex")
+```
+
+### Patterns and anti-patterns
+
+*coming soon*

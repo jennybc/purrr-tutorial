@@ -1,5 +1,5 @@
 ---
-title: "Introduction to lists"
+title: "Vectors and lists"
 ---
 
 ```{r, echo = FALSE}
