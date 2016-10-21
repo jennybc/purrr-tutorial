@@ -40,15 +40,19 @@ x <- x %>%
   )
 ```
 
+*more coming in the subsections below*
+
 ### Background basics
 
 ```{r results = 'asis', echo = FALSE}
-cat_bullet(x, "^back")
+cat_bullet(x, "^bk")
 ```
 
 ### Core purrr lessons
 
-*coming soon*
+```{r results = 'asis', echo = FALSE}
+cat_bullet(x, "^ls")
+```
 
 ### Worked examples
 
@@ -58,4 +62,7 @@ cat_bullet(x, "^ex")
 
 ### Patterns and anti-patterns
 
-*coming soon*
+```{r results = 'asis', echo = FALSE}
+cat_bullet(x, "^pt")
+```
+
