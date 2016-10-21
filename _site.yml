@@ -5,8 +5,8 @@ navbar:
   left:
     - text: "Home"
       href: index.html
-    - text: "Worked Examples"
-      href: examples.html
+    - text: "Lessons and examples"
+      href: topic-index.html
     - text: "Slides"
       href: slides.html
   right:
