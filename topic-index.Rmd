@@ -34,7 +34,7 @@ x <- x %>%
     yaml = basename %>% ext_file("Rmd") %>% map(parse_yaml),
     title = yaml %>% map_chr("title"),
     comment = yaml %>% map_chr("comment", .null = ""),
-    href = map2(ext_file(basename, "Rmd"), title, ~ a(href = .x, .y)) %>%
+    href = map2(ext_file(basename, "html"), title, ~ a(href = .x, .y)) %>%
       map_chr(as.character),
     bullet = map2_chr(href, comment, ~ paste("*", .x, .y, "\n"))
   )

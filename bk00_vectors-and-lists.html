@@ -207,8 +207,8 @@ $(document).ready(function () {
 
 <div id="atomic-vectors" class="section level3">
 <h3>Atomic vectors</h3>
-<p>It is useful to understand lists as a data structure that is more general than atomic vectors. So let’s start there.</p>
-<p>The garden variety R object is an <em>atomic vector</em> like these:</p>
+<p>It is useful to understand lists as a data structure that generalizes atomic vectors. So we really need to start there.</p>
+<p>The garden variety R object is an <strong>atomic vector</strong> like these:</p>
 <pre class="r"><code>(v_log &lt;- c(TRUE, FALSE, FALSE, TRUE))
 #&gt; [1]  TRUE FALSE FALSE  TRUE
 (v_int &lt;- 1:4)
@@ -217,34 +217,39 @@ $(document).ready(function () {
 #&gt; [1] 1.2 2.4 3.6 4.8
 (v_char &lt;- letters[1:4])
 #&gt; [1] &quot;a&quot; &quot;b&quot; &quot;c&quot; &quot;d&quot;</code></pre>
-<p>Atomic vectors are homogeneous. Each “atom” has the same flavor, by which I roughly mean type or storage mode, and is a scalar, by which I mean “has length one”. The above examples show the most common flavors of R vectors, though you will eventually encounter more exotic ones.</p>
-<p>Exercises</p>
+<p>Atomic vectors are homogeneous. Each <strong>atom</strong> has the same flavor, by which I roughly mean type or storage mode, and is a scalar, by which I mean “has length one”. The above examples cover the most common flavors of R vectors (logical, integer, double, character), though you will eventually encounter more exotic ones.</p>
+<div id="exercises" class="section level4">
+<h4>Exercises</h4>
 <ol style="list-style-type: decimal">
-<li>Define the vectors above or similar. Use the family of <code>is.*()</code> functions to confirm vector type, e.g. <code>is.logical()</code>. You might need to guess or look some of them up. <em>TO CONSIDER: prompt use of the equivalent functions from purrr, i.e. the <code>is_*()</code> family?</em></li>
+<li>Define the vectors above or similar. Use the family of <code>is.*()</code> functions to confirm vector type, e.g. <code>is.logical()</code>. You will need to guess or look some of them up. <em>Long-term, you may wish to explore the <code>purrr::is_*()</code> family of functions.</em></li>
 <li>What do <code>is.numeric()</code>, <code>is.integer()</code>, and <code>is.double()</code> return for the vectors that hold floating point number versus integers?</li>
 </ol>
-<p>The <code>c()</code> function is used to construct a vector by hand. We used it above to construct the logical vector. All the other vectors came about through other means and this is indicative of real life: most vectors aren’t made explicitly with <code>c()</code>. They tend to be created with some generator, like the <code>1:n</code> shortcut, or via transformation of an existing object.</p>
+<p>Construct a vector by hand with the <code>c()</code> function. We used it above to construct the logical vector. All the other vectors came about through other means and this is indicative of real life: most vectors aren’t made explicitly with <code>c()</code>. They tend to be created with some generator, like the <code>1:n</code> shortcut, or via transformation of an existing object.</p>
 <p>To “index a vector” means to address specific elements or atoms, either for reading or writing. We index a vector using square brackets, like so: <code>x[something]</code>. There are several ways to express which elements you want, i.e. there are several valid forms for <code>something</code>:</p>
 <ul>
-<li>logical vector: keep elements of <code>x</code> for which <code>something</code> is <code>TRUE</code> and drop those for which it’s <code>FALSE</code></li>
+<li><p>logical vector: keep elements of <code>x</code> for which <code>something</code> is <code>TRUE</code> and drop those for which it’s <code>FALSE</code></p>
+<pre class="r"><code>v_char[c(FALSE, FALSE, TRUE, TRUE)]
+#&gt; [1] &quot;c&quot; &quot;d&quot;
+v_char[v_log]
+#&gt; [1] &quot;a&quot; &quot;d&quot;</code></pre></li>
 <li>integer vector, all positive: the elements specified in <code>something</code> are kept</li>
-<li>negative integers, all negative: the elements specified in <code>something</code> are dropped</li>
-<li>character vector: presumes that <code>x</code> is a named vector and the elements whose names are specified in <code>something</code> are kept</li>
-</ul>
-<pre class="r"><code>v_char[v_log]
-#&gt; [1] &quot;a&quot; &quot;d&quot;
-v_doub[2:3]
+<li><p>negative integers, all negative: the elements specified in <code>something</code> are dropped</p>
+<pre class="r"><code>v_doub[2:3]
 #&gt; [1] 2.4 3.6
 v_char[-4]
-#&gt; [1] &quot;a&quot; &quot;b&quot; &quot;c&quot;</code></pre>
-<p>Exercises</p>
+#&gt; [1] &quot;a&quot; &quot;b&quot; &quot;c&quot;</code></pre></li>
+<li><p>character vector: presumes that <code>x</code> is a named vector and the elements whose names are specified in <code>something</code> are kept <em>not shown here, since none of our vectors are named</em></p></li>
+</ul>
+</div>
+<div id="exercises-1" class="section level4">
+<h4>Exercises</h4>
 <ol style="list-style-type: decimal">
 <li>What happens when you request the zero-th element of one of our vectors?</li>
 <li>What happens when you ask for an element that is past the end of the vector, i.e. request <code>x[k]</code> when the length of <code>x</code> is less than <code>k</code>?</li>
-<li>What happen when you index <code>x</code> with a vector of positive integers that is shorter than <code>x</code>? How about when it’s longer? What about indexing with a logical vector that’s shorter? Logical vector that’s longer?</li>
+<li>We indexed a vector <code>x</code> with a vector of positive integers that is shorter than <code>x</code>. What happens if the indexing vector is <strong>longer</strong> than <code>x</code>?</li>
+<li>We indexed <code>x</code> with a logical vector of the same length. What happen if the indexing vector is <strong>shorter</strong> than <code>x</code>?</li>
 </ol>
-<p><em>Student Q: what’s a real world scenario in which you’d want the 0th element? My tentative lame answer: you never really want it. This just comes up in programming and therefore needs to be well-defined. Can I do any better?</em></p>
-<p>If you’ve worked the exercises, you’ve seen that it’s possible to get an atomic vector of length zero and to get elements that are <code>NA</code>. Notice that, in both of these scenarios, the underlying variable type is retained.</p>
+<p>Do the exercises and you’ll see it’s possible to get an atomic vector of length zero and also to get elements that are <code>NA</code>. Notice that, in both of these scenarios, the underlying variable type is retained.</p>
 <pre class="r"><code>v_int[0]
 #&gt; integer(0)
 typeof(v_int[0])
@@ -254,8 +259,19 @@ v_doub[100]
 typeof(v_doub[100])
 #&gt; [1] &quot;double&quot;</code></pre>
 <p>Yes, there are different flavors of <code>NA</code>!</p>
-<p>Even though R’s vectors have a specific type, it’s quite easy to convert them to another type. This is called <strong>coercion</strong>. As a language for data analysis, this flexibility is generally a positive. It’s why we generally don’t stress out over integer versus double in R. It’s why we can compute a proportion as the mean of a logical vector (we exploit automatic coercion to integer in this case). But unexpected coercion is a rich source of programming puzzles, so always consider this possibility when debugging. When you’re operating as an R programmer (versus interactive data analyst), you need to be much more intentional about types.</p>
-<p>There’s a hierarchy of types: the more primitive ones cheerfully and silently convert to those higher up in the food chain. Here’s the order: logical &lt; integer &lt; double &lt; character.</p>
+</div>
+</div>
+<div id="coercion" class="section level3">
+<h3>Coercion</h3>
+<p>Even though R’s vectors have a specific type, it’s quite easy to convert them to another type. This is called <strong>coercion</strong>. As a language for data analysis, this flexibility works mostly to our advantage. It’s why we generally don’t stress out over integer versus double in R. It’s why we can compute a proportion as the mean of a logical vector (we exploit automatic coercion to integer in this case). But unexpected coercion is a rich source of programming puzzles, so always consider this possibility when debugging.</p>
+<p>There’s a hierarchy of types: the more primitive ones cheerfully and silently convert to those higher up in the food chain. Here’s the order:</p>
+<ol style="list-style-type: decimal">
+<li>logical</li>
+<li>integer</li>
+<li>double</li>
+<li>character</li>
+</ol>
+<p>For explicit coercion, use the <code>as.*()</code> functions.</p>
 <pre class="r"><code>v_log
 #&gt; [1]  TRUE FALSE FALSE  TRUE
 as.integer(v_log)
@@ -270,30 +286,38 @@ as.character(v_doub)
 #&gt; [1] &quot;1.2&quot; &quot;2.4&quot; &quot;3.6&quot; &quot;4.8&quot;
 as.character(as.numeric(as.integer(v_log)))
 #&gt; [1] &quot;1&quot; &quot;0&quot; &quot;0&quot; &quot;1&quot;</code></pre>
-<p>Here I’ve used <code>as.*()</code> functions to explicitly coerce vectors from one type to another. But coercion can also be triggered by other actions, such as assigning a scalar of the wrong type into an existing vector. Watch how easily I turn a numeric vector into character.</p>
+<p>But coercion can also be triggered by other actions, such as assigning a scalar of the wrong type into an existing vector. Watch how easily I turn a numeric vector into character.</p>
 <pre class="r"><code>v_doub_copy &lt;- v_doub
 str(v_doub_copy)
 #&gt;  num [1:4] 1.2 2.4 3.6 4.8
 v_doub_copy[3] &lt;- &quot;uhoh&quot;
 str(v_doub_copy)
 #&gt;  chr [1:4] &quot;1.2&quot; &quot;2.4&quot; &quot;uhoh&quot; &quot;4.8&quot;</code></pre>
-<p>Notice that R did this coercion quietly, with no fanfare. Again, when debugging, always give serious thought to this question: Is this object of the type I think it is? How sure am I about that?</p>
+<p>Our numeric vector was silently coerced to character. Notice that R did this quietly, with no fanfare. Again, when debugging, always give serious thought to this question: Is this object of the type I think it is? How sure am I about that?</p>
 <p>I end the discussion of atomic vectors with two specific examples of “being intentional about type”.</p>
 <ul>
-<li>Use type-specific <code>NA</code>s when doing setup.</li>
-<li>Use <code>L</code> to explicitly request integer. This looks weird but is a nod to short versus long integers. Just accept that this is how we force a literal number to be interpreted as an integer in R.</li>
+<li>Use of type-specific <code>NA</code>s when doing setup.</li>
+<li>Use of <code>L</code> to explicitly request integer. This looks weird but is a nod to short versus long integers. Just accept that this is how we force a literal number to be interpreted as an integer in R.</li>
 </ul>
 <pre class="r"><code>(big_plans &lt;- rep(NA_integer_, 4))
 #&gt; [1] NA NA NA NA
 str(big_plans)
 #&gt;  int [1:4] NA NA NA NA
 big_plans[3] &lt;- 5L
+## note that big_plans is still integer!
 str(big_plans)
 #&gt;  int [1:4] NA NA 5 NA
 ## note that omitting L results in coercion of big_plans to double
 big_plans[1] &lt;- 10
 str(big_plans)
 #&gt;  num [1:4] 10 NA 5 NA</code></pre>
+<p>As the tutorial goes on, you’ll see how the purrr package makes it easier for you to be intentional and careful about type in your R programming.</p>
+<div id="exercises-2" class="section level4">
+<h4>Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>Recall the hieararchy of the most common atomic vector types: logical &lt; integer &lt; numeric &lt; character. Try to use the <code>as.*()</code> functions to go the wrong way. Call <code>as.logical()</code>, <code>as.integer()</code>, and <code>as.numeric()</code> on a character vector, such as <code>letters</code>. What happens?</li>
+</ol>
+</div>
 </div>
 <div id="lists" class="section level3">
 <h3>Lists</h3>
@@ -303,13 +327,13 @@ str(big_plans)
 <li>Individual atoms might not be of the same flavor.</li>
 </ul>
 <p>You need a list!</p>
-<p>A list is actually still a vector in R, but it’s not an atomic vector. We construct a list explicitly with <code>list()</code> but, like atomic vectors, most lists are created some other way in real life.</p>
-<pre class="r"><code>(x &lt;- list(one = 1:3, two = c(&quot;four&quot;, &quot;five&quot;, &quot;six&quot;)))
-#&gt; $one
+<p><strong>A list is actually still a vector in R, but it’s not an atomic vector.</strong> We construct a list explicitly with <code>list()</code> but, like atomic vectors, most lists are created some other way in real life.</p>
+<pre class="r"><code>(x &lt;- list(1:3, c(&quot;four&quot;, &quot;five&quot;)))
+#&gt; [[1]]
 #&gt; [1] 1 2 3
 #&gt; 
-#&gt; $two
-#&gt; [1] &quot;four&quot; &quot;five&quot; &quot;six&quot;
+#&gt; [[2]]
+#&gt; [1] &quot;four&quot; &quot;five&quot;
 (y &lt;- list(logical = TRUE, integer = 4L, double = 4 * 1.2, character = &quot;character&quot;))
 #&gt; $logical
 #&gt; [1] TRUE
@@ -321,21 +345,91 @@ str(big_plans)
 #&gt; [1] 4.8
 #&gt; 
 #&gt; $character
-#&gt; [1] &quot;character&quot;</code></pre>
-<p>Exercises</p>
+#&gt; [1] &quot;character&quot;
+(z &lt;- list(letters[26:22], transcendental = c(pi, exp(1)), f = function(x) x^2))
+#&gt; [[1]]
+#&gt; [1] &quot;z&quot; &quot;y&quot; &quot;x&quot; &quot;w&quot; &quot;v&quot;
+#&gt; 
+#&gt; $transcendental
+#&gt; [1] 3.141593 2.718282
+#&gt; 
+#&gt; $f
+#&gt; function (x) 
+#&gt; x^2</code></pre>
+<p>We have explicit proof above that list components can</p>
+<ul>
+<li>Be heterogeneous, i.e. can be of different “flavors”. Heck, they don’t even need to be atomic vectors – you can stick a function in there!</li>
+<li>Have different lengths.</li>
+<li>Have names. Or not. Or some of both.</li>
+</ul>
+<div id="exercises-3" class="section level4">
+<h4>Exercises</h4>
 <ol style="list-style-type: decimal">
-<li>Make the lists <code>x</code> and <code>y</code> shown above. Use <code>is.*()</code> functions to get to know these objects. Try to get some positive and negative results, i.e. establish a few things that <code>x</code> is and is NOT. Make sure to try <code>is.vector()</code>, <code>is.atomic()</code>, and <code>is.recursive()</code>.</li>
+<li>Make the lists <code>x</code>, <code>y</code>, and <code>z</code> as shown above. Use <code>is.*()</code> functions to get to know these objects. Try to get some positive and negative results, i.e. establish a few things that <code>x</code> is and is NOT. Make sure to try <code>is.list()</code>, <code>is.vector()</code>, <code>is.atomic()</code>, and <code>is.recursive()</code>. <em>Long-term, you may wish to explore the <code>purrr::is_*()</code> family of functions.</em></li>
 </ol>
-<p><em>Student Q: are all lists vectors? are all vectors lists? if not … can you please make a venn diagram of this stuff?</em></p>
-<p><strong>starting to just sketch now</strong></p>
-<p>Indexing. Single square vs double square vs <code>$</code>. The <a href="http://r4ds.had.co.nz/vectors.html#lists-of-condiments">“pepper shaker photos” in R for Data Science</a>.</p>
+<p>It should be clear that lists are much more general than atomic vectors. But they also share many properties: for example, they have length and they can be indexed.</p>
+</div>
+</div>
+<div id="list-indexing" class="section level3">
+<h3>List indexing</h3>
+<p>There is a new wrinkle when you index a list vs an atomic vector. There are 3 ways to index a list and the differences are very important:</p>
+<ol style="list-style-type: decimal">
+<li><p>With single square brackets, i.e. just like we indexed atomic vectors. Note this <strong>always returns a list</strong>, even if we request a single component.</p>
+<pre class="r"><code>x[c(FALSE, TRUE)]
+#&gt; [[1]]
+#&gt; [1] &quot;four&quot; &quot;five&quot;
+y[2:3]
+#&gt; $integer
+#&gt; [1] 4
+#&gt; 
+#&gt; $double
+#&gt; [1] 4.8
+z[&quot;transcendental&quot;]
+#&gt; $transcendental
+#&gt; [1] 3.141593 2.718282</code></pre></li>
+<li><p>With double square brackets, which is new to us. This can only be used to access a single component and it returns the “naked” component. You can request a component with a positive integer or by name.</p>
+<pre class="r"><code>x[[2]]
+#&gt; [1] &quot;four&quot; &quot;five&quot;
+y[[&quot;double&quot;]]
+#&gt; [1] 4.8</code></pre></li>
+<li><p>With the <code>$</code>, which you may already use to extract a single variable from a data frame (which is a special kind of list!). Like <code>[[</code>, this can only be used to access a single component, but it is even more limited: You must specify the component by name.</p>
+<pre class="r"><code>z$transcendental
+#&gt; [1] 3.141593 2.718282</code></pre></li>
+</ol>
+<p>My favorite explanation of the difference between the list-preserving indexing provided by <code>[</code> and the object-extracting indexing provided by <code>[[</code> is given by the <a href="http://r4ds.had.co.nz/vectors.html#lists-of-condiments">“pepper shaker photos” in R for Data Science</a>. Highly recommended!</p>
+<div id="exercises-4" class="section level4">
+<h4>Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>Use <code>[</code>, <code>[[</code>, and <code>$</code> to access the second component of the list <code>z</code>, which bears the name “transcendental”. Use the <code>length()</code> and the <code>is.*()</code> functions explored elsewhere to study the result. Which methods of indexing yield the same result vs. different?</li>
+<li><p>Put the same data into an atomic vector and a list:</p>
+<pre class="r"><code>my_vec &lt;- c(a = 1, b = 2, c = 3)
+my_list &lt;- list(a = 1, b = 2, c = 3)</code></pre>
+<p>Use <code>[</code> and <code>[[</code> to attempt to retrieve elements 2 and 3 from <code>my_vec</code> and <code>my_list</code>. What succeeds vs. fails? What if you try to retrieve element 2 alone? Does <code>[[</code> even work on atomic vectors? Compare and contrast the results from the various combinations of indexing method and input object.</p></li>
+</ol>
+</div>
 </div>
 <div id="vectorized-operations" class="section level3">
 <h3>Vectorized operations</h3>
-<p>Lots of operations are naturally vectorized in R. But for atomic vectors. Not for lists.</p>
-<pre class="r"><code>exp(v_doub)
+<p>Many people are shocked to learn that the garden variety R object is a vector. A related fact is that many operations “just work” element-wise on vectors, with no special effort. This often requires an adjustment for people coming from other languages. Your code can be simpler than you think!</p>
+<p>Consider how to square the integers 1 through <code>n</code>. The brute force method might look like:</p>
+<pre class="r"><code>n &lt;- 5
+res &lt;- rep(NA_integer_, n) 
+for (i in seq_len(n)) {
+  res[i] &lt;- i ^ 2
+}
+res
+#&gt; [1]  1  4  9 16 25</code></pre>
+<p>The R way is:</p>
+<pre class="r"><code>n &lt;- 5
+seq_len(n) ^ 2
+#&gt; [1]  1  4  9 16 25</code></pre>
+<p>Element-wise or vectorized operations are “baked in” to a surprising degree in R. Which is great. You get used to it soon enough.</p>
+<p>But then there’s the let down. This happens for atomic vectors, but not, in general, for lists. This makes sense because, in general, there is no reason to believe that the same sorts of operations make sense for each component of a list. Unlike atomic vectors, they are heterogeneous.</p>
+<p>Here’s a demo using <code>as.list()</code> to create the list version of an atomic vector.</p>
+<pre class="r"><code>## elementwise exponentiation of numeric vector works
+exp(v_doub)
 #&gt; [1]   3.320117  11.023176  36.598234 121.510418
-## put the same info in a list and ... this no longer works
+## put the same numbers in a list and ... this no longer works :(
 (l_doub &lt;- as.list(v_doub))
 #&gt; [[1]]
 #&gt; [1] 1.2
@@ -350,31 +444,9 @@ str(big_plans)
 #&gt; [1] 4.8
 exp(l_doub)
 #&gt; Error in exp(l_doub): non-numeric argument to mathematical function</code></pre>
-<p>How do you apply a function elementwise to a list, like we’re doing with an atomic vector with <code>v_doub ^ 2</code>?</p>
-<p>First, vocabulary.</p>
-<p>We talk about this as “mapping the function f over the list l”, which means visiting each element of the list and applying f to it.</p>
-<p>Conceptually, we loop over the elements of the list and apply the function f.</p>
-<pre class="r"><code>my_list &lt;- list(...)
-my_output &lt;- ## something of an appropriate size and flavor
-for(i in seq_along(my_list)) {
-  my_output[[i]] &lt;- f(my_list([[i]]))
-}</code></pre>
-<p>The whole point of this tutorial is to show higher-level abstractions for this. So you won’t be writing these for loops yourself!</p>
-<p><code>lapply()</code> is the basic mapper in base. We’ll use <code>map()</code> from purrr, which at this point is interchangeable with <code>lapply()</code>. Subsequent lessons and examples will demonstrate why we use <code>map()</code> and purrr more generally.</p>
-<p>We use <code>lapply()</code> or <code>purrr::map()</code> to visit each component of the list <code>l_doub</code> and exponentiate:</p>
-<pre class="r"><code>lapply(l_doub, exp)
-#&gt; [[1]]
-#&gt; [1] 3.320117
-#&gt; 
-#&gt; [[2]]
-#&gt; [1] 11.02318
-#&gt; 
-#&gt; [[3]]
-#&gt; [1] 36.59823
-#&gt; 
-#&gt; [[4]]
-#&gt; [1] 121.5104
-library(purrr)
+<p>So, how do you apply a function elementwise to a list?! What is the list analogue of <code>exp(v_doub)</code>?</p>
+<p>Use <code>purrr::map()</code>! The first argument is the list to operate on. The second is the function to apply.</p>
+<pre class="r"><code>library(purrr)
 map(l_doub, exp)
 #&gt; [[1]]
 #&gt; [1] 3.320117
@@ -387,6 +459,13 @@ map(l_doub, exp)
 #&gt; 
 #&gt; [[4]]
 #&gt; [1] 121.5104</code></pre>
+<p>Vocabulary: we talk about this as “mapping the function <code>exp()</code> over the list <code>l_doub</code>”. Conceptually, we loop over the elements of the list and apply a function.</p>
+<pre class="r"><code>my_list &lt;- list(...)
+my_output &lt;- ## something of an appropriate size and flavor
+for(i in seq_along(my_list)) {
+  my_output[[i]] &lt;- f(my_list([[i]]))
+}</code></pre>
+<p>A major objective of this tutorial is to show you how to avoid writing these explicit <code>for()</code> loops yourself.</p>
 </div>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>

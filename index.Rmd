@@ -4,9 +4,9 @@ title: "purrr tutorial"
 
 <img src="https://www.stickermule.com/marketplace/embed_img/13594" style="max-width:100%;">
 
-*DISCLAIMER: Under development*
+*NOTE: Under development*
 
-The purrr package:
+More resources for purrr package:
 
   * On CRAN: <https://cran.r-project.org/web/packages/purrr/index.html>
   * Development on GitHub: <https://github.com/hadley/purrr> 
