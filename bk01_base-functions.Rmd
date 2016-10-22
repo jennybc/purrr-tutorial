@@ -1,0 +1,72 @@
+---
+title: "Relationship to base and plyr functions"
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+```{r}
+library(tidyverse)
+library(gapminder)
+```
+
+
+  * List relevant base and plyr functions. Create a base <--> purrr, base <--> plyr map.
+  * Point out general reasons to consider purrr.
+  * Point out specific gotchas or FAQs that purrr avoids or answers.
+
+### Base functions
+
+`lapply()` <--> `purrr::map()`
+
+`sapply()`, fine for interactive use, but unpredictability hard to program around
+
+`vapply()`, some similarities with `map_chr()`, `map_lgl()`, etc. Touted as the base option for programming, but still unpredictable.
+
+Example gotcha from real life. Using `vapply()` inside a function. `n` can vary depending on input. But `vapply()`'s simplifying behavior means it will return 2D or 1D object, depending on `n`. It has no way to say `drop = FALSE`.
+
+<div class = "row">
+<div class = "col-md-6">
+```{r}
+f <- function(x, n) rep(x, n)
+n <- 3
+vapply(c("a", "b"), f, character(n), n = n)
+n <- 1
+vapply(c("a", "b"), f, character(n), n = n)
+```
+</div>
+<div class = "col-md-6">
+```{r}
+f <- function(x, n) rep(x, n)
+map(c("a", "b"), f, n = 3) %>% lift_dl(cbind)(.)
+map(c("a", "b"), f, n = 1) %>% lift_dl(cbind)(.)
+```
+</div>
+</div>
+
+`mapply()`, similar to `map2()`, `pmap()`
+
+`tapply()`, `aggregate()`
+
+Possible format for some comparisons
+
+<div class = "row">
+<div class = "col-md-6">
+```{r}
+aggregate(breaks ~ wool + tension,
+          data = warpbreaks, mean)
+```
+</div>
+<div class = "col-md-6">
+```{r}
+warpbreaks %>% 
+  group_by(wool, tension) %>% 
+  summarise(mean = mean(breaks), var = var(breaks))
+```
+</div>
+</div>
+
+
+
+
