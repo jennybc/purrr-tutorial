@@ -4,10 +4,7 @@ comment: "*suitable for a hands-on activity*"
 ---
 
 ```{r, echo = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
 One of the best uses for `purrr`'s `map()` functions is for digging information out of a non-rectangular data structures and creating a neat data frame. Where do these awkward objects come from? Often as JSON or XML from an API, which has frequently been pre-converted to an R list.
@@ -30,12 +27,16 @@ suppressMessages(library(dplyr))
 unames <-
   c("gaborcsardi", "jennybc", "masalmon", "juliasilge", "leeper", "jtleek")
 urls <- paste0("https://api.github.com/users/", unames)
-users <- urls %>% map(fromJSON)
-writeLines(toJSON(users), "github_users.json")
+users <- urls %>%
+  map(fromJSON)
+users %>% 
+  toJSON() %>% 
+  prettify() %>%
+  writeLines("github_users.json")
 ```
 
 Here is information on six GitHub users, pre-stored as JSON:  
-<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.json>
+<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.json>. Use the code below
 
 ```{r}
 users <- fromJSON("github_users.json", simplifyDataFrame = FALSE)
