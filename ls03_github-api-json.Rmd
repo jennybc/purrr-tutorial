@@ -1,24 +1,28 @@
 ---
-title: "Simplifying data from a list from GitHub API"
+title: "Simplifying data from a list of GitHub users"
 comment: "*suitable for a hands-on activity*"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-One of the best uses for `purrr`'s `map()` functions is for digging information out of a non-rectangular data structures and creating a neat data frame. Where do these awkward objects come from? Often as JSON or XML from an API, which has frequently been pre-converted to an R list.
+A great use of purrr's `map()` functions is to dig information out of a non-rectangular data structure and create a neat data frame. Where do these awkward objects come from? Often as JSON or XML from an API. JSON and XML are two plain text formats for non-rectangular data, i.e. for scenarios where CSV is not an option. If you are lucky it's JSON, which is less aggravating, and readily converts to a list you can work with in R.
 
-Here we explore some lists that come from calling the [GitHub API](https://developer.github.com/v3/). Interactive exploration of these lists is made possible by the [`listviewer` package](https://github.com/timelyportfolio/listviewer).
+Here we explore some lists obtained from the [GitHub API](https://developer.github.com/v3/). Interactive exploration of these lists is made possible by the [`listviewer` package](https://github.com/timelyportfolio/listviewer).
 
-This example also shows how character and integer vectors can be provided as the function `.f` for the `map()` family functions. An extractor function is created behind the scenes, providing a concise way to extract by name or position.
+Load the packages.
 
-```{r}
-library(purrr)
-suppressMessages(library(jsonlite))
+```{r message = FALSE}
 library(listviewer)
+library(jsonlite)
+library(dplyr)
 library(tibble)
-suppressMessages(library(dplyr))
+library(purrr)
 ```
 
 ### Get several GitHub users
@@ -35,109 +39,192 @@ users %>%
   writeLines("github_users.json")
 ```
 
-Here is information on six GitHub users, pre-stored as JSON:  
-<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.json>. Use the code below to grab the JSON from GitHub (*this will soon be available within  [repurrrsive](https://github.com/jennybc/repurrrsive#readme)*).
+Here is information on 6 GitHub users, pre-stored in a JSON file: [github_users.json](https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.json). Create this file locally or uncomment the code below to read it directly from GitHub (*this will soon be available within  [repurrrsive](https://github.com/jennybc/repurrrsive#readme)*). `fromJSON()` from jsonlite reads this information directly into an R list.
 
 ```{r}
 ## grab the JSON from GitHub
 #json_source <- "https://raw.githubusercontent.com/jennybc/purrr-tutorial/gh-pages/github_users.json"
-## or grab locally if you're working in a local clone of this repo
+## or do this if you have a local copy
 json_source <- "github_users.json"
 
 users <- fromJSON(json_source, simplifyDataFrame = FALSE)
-str(users, max.level = 1)
-str(users[[1]], list.len = 6)
 ```
 
 `users` is *a recursive list*:
 
-  * one element per GitHub user
-  * each element is, in turn, a list with info on the user
+  * one component for each of the 6 GitHub users
+  * each component is, in turn, a list with info on the user
 
-Explore it interactively:
+We have no clue what is in this list. This is normal. That is why it's important to develop list inspection strategies.
+
+Use `str()` with arguments such as `max.level` and `list.len`. It often pays off to do deeper inspection on a single element.
+
+```{r}
+str(users, max.level = 1)
+str(users[[1]], list.len = 6)
+```
+
+You can also use `listviewer::jsonedit()` to explore it interactively:
 
 ```{r echo = FALSE}
-jsonedit(users)
+jsonedit(users, mode = "view")
 ```
 
 <!--
 To have the interactive list viewing experience, visit <http://rpubs.com/jennybc/github-users>.
 -->
 
-### Shortcuts to extract elements by name or position
+#### Exercises
 
-Who are these people?
+1. Read the documentation on `str()`. What does `max.level` control? Do `str(users, max.level = i)` for `i` in 0,1, and 2.
+1. What does the `list.len` argument of `str()` control? What is it's default value? Call `str()` on `users` and then on a single component of `users` with `list.len` set to a value much smaller than the default.
+1. Call `str()` on `users`, specifying both `max.level` and `list.len`.
+1. Recall the [list and vector indexing techniques](bk00_vectors-and-lists.html#list_indexing). Inspect elements 1, 2, 6, 18, 21, and 24 of the list component for the 5th GitHub user. One of these should be the URL for the user's profile on GitHub.com. Go there and compare info you see there with the info you just extracted from `users`.
+1. Consider the interactive view of `users` here. Or, optionally, install the listviewer package via `install.packages("listviewer")` and call `jsonedit(users)` to run this widget locally. Can you find the same info you extracted in the previous exercise? The same info you see in user's GitHub.com profile?
 
-Reach into each user's list and pull elements out, such as "name".
+### Name and position shortcuts
 
-Shortcut for making the `.f` function that `map()` will apply:
+Who are these GitHub users?
+
+We need to reach into each user's list and pull out the element that holds the user's name or, maybe, username. How?
+
+Recall the basic usage of `purrr::map()`:
+
+```{r eval = FALSE}
+map(.x, .f, ...)
+```
+
+The first input `.x` is your list. It will be `users` here.
+
+The second input `.f`, is the function to apply to each component of the list.
+
+We want the element with name "login", so we do this:
+
+```{r}
+map(users, "login")
+```
+
+We are exploiting one of purrr's most useful features: a shortcut to create a function that extracts an element based on its name.
+
+A companion shortcut is used if you provide a positive integer to `map()`. This creates a function that extracts an element based on position.
+
+The 18th element of each user's list is his or her name and we get them like so:
+
+```{r}
+map(users, 18)
+```
+
+To recap, here are two shortcuts for making the `.f` function that `map()` will apply:
 
   * provide "TEXT" to extract the element named "TEXT"
-  * equivalent to `function(x) x[["TEXT"]]`
-
-```{r}
-users %>% 
-  map_chr("name")
-
-## equivalent to the more verbose
-# users %>%
-#   map_chr(function(x) x[["name"]])
-
-(unames <- users %>%
-    map_chr("login"))
-```
-
-Or extract by position:
-
+    - equivalent to `function(x) x[["TEXT"]]`
   * provide `i` to extract the `i`-th element
-  * equivalent to `function(x) x[[i]]`
+    - equivalent to `function(x) x[[i]]`
 
-```{r}
+You will frequently see `map()` used together with [the pipe `%>%`](http://r4ds.had.co.nz/pipes.html). These calls produce the same result as the above.
+
+```{r eval = FALSE}
 users %>% 
-  map_chr(1)
-
-## equivalent to the more verbose
-# users %>%
-#   map_chr(function(x) x[[1]])
+  map("login")
+users %>% 
+  map(18)
 ```
 
-### Multiple values at same level of hierarchy
+#### Exercises
 
-A trick for retrieving multiple values at the same level of the hierarchy is to map the function `[` and provide a character or integer vector as an additional argument.
+1. Use `names()` to inspect the names of the list elements associated with a single user. What is the index or position of the `created_at` element? Use the character and position shortcuts to extract the `created_at` elements for all 6 users.
+1. What happens if you use the character shortcut with a string that does not appear in the lists' names?
+1. What happens if you use the position shortcut with a number greater than the length of the lists?
+1. What if these shortcuts did not exist? Write a function that takes a list and a string as input and returns the list element that bears the name in the string. Apply this to `users` via `map()`. Do you get the same result as with the shortcut? Reflect on code length and readability.
+1. Write another function that takes a list and an integer as input and returns the list element at that position. Apply this to `users` via `map()`. How does this result and process compare with the shortcut?
+
+### Type-specific map
+
+`map()` always returns a list, even if all the elements have the same flavor and are of length one. But in that case, you might prefer a simpler object: **an atomic vector**.
+
+If you expect `map()` to return output that can be turned into an atomic vector, it is best to use a type-specific variant of `map()`. This is more efficient than using `map()` to get a list and then simplifying the result in a second step. Also purrr will also alert you to any problems, i.e. if one or more inputs has the wrong type or length. This is the [increased rigor about type alluded to in the section about coercion](bk00_vectors-and-lists.html#coercion).
+
+Our current examples are suitable for demonstrating `map_chr()`, since the requested elements are always character.
 
 ```{r}
-x <- users %>%
-  map(`[`, c("login", "name", "id", "location"))
-str(x[[1]])
-
-## if you find this ugly, try magrittr::extract()
-x <- users %>%
-  map(magrittr::extract, c("login", "name", "id", "location"))
-
-y <- users %>% 
-  map(`[`, 1:2)
-str(y[[2]])
+map_chr(users, "login")
+map_chr(users, 18)
 ```
 
-What's really awesome is to stack up these per-user lists row-wise and make a data frame. We use the special mapping function `map_df()` to signal that we want a data frame back.
+Besides `map_chr()`, there are other variants of `map()`, with the target type conveyed by the name:
+
+  * `map_lgl()`, `map_int()`, `map_dbl()`
+  
+#### Exercises
+
+1. For each user, the second element is named "id". This is the user's GitHub id number, where it seems like the person with an id of, say, 10 was the 10th person to sign up for GitHub. At least, it's something like that! Use a type-specific form of `map()` and an extraction shortcut to extract the ids of these 6 users.
+1. Use your list inspection strategies to find the list element that is logical. There is one! Use a type-specific form of `map()` and an extraction shortcut to extract this for all 6 users.
+1. Use your list inspection strategies to find elements other than `id` that are numbers. Practice extracting them.
+
+### Extract multiple values
+
+What if you want to retrieve multiple elements? Such as the user's name and GitHub username? First, recall how we do this with the list for a single user:
 
 ```{r}
-users %>%
-  map_df(`[`, c("login", "name", "id", "location"))
+users[[3]][c("name", "login", "id", "location")]
 ```
 
-Another, more cumbersome but safer way to get this same data frame is to form variables explicitly like so:
+We use single square bracket indexing and a character vector to index by name. How will we ram this into the `map()` framework? To paraphrase Chambers, ["everything that happens in R is a function call"](http://adv-r.had.co.nz/Functions.html#all-calls) and indexing with `[` is no exception.
+
+It feels (and maybe looks) weird, but we can map `[` just like any other function. Recall `map()` usage:
+
+```{r eval = FALSE}
+map(.x, .f, ...)
+```
+
+The function `.f` will be `[`. And we finally get to use `...`! This is where we pass the character vector of the names of our desired elements. We inspect the result for the first 2 users.
+
+```{r}
+x <- map(users, `[`, c("login", "name", "id", "location"))
+str(x[1:2])
+```
+
+Some people find this ugly and might prefer the `extract()` function from magrittr.
+
+```{r}
+x <- map(users, magrittr::extract, c("login", "name", "id", "location"))
+str(x[3:4])
+```
+
+#### Exercises
+
+1. Use your list inspection skills to determine the position of the elements named "login", "name", "id", and "location". Map `[` or `magrittr::extract()` over users, requesting these four elements by position instead of name.
+
+### Data frame output
+
+We just learned how to extract multiple elements per user by mapping `[`. But, of course, `map()` returns list. Even if all the elements are character, we can't use `map_chr()`, because the user-level info has length greater than one.
+
+How can we "stack up" these results row-wise, i.e. one row per user and variables for "login", "name", etc.?
+
+This is what `map_df()` is for.
+
+```{r}
+map_df(users, `[`, c("login", "name", "id", "location"))
+```
+
+Finally! A data frame! Hallelujah!
+
+Notice how the variables have been automatically type converted. It's a beautiful thing. Until it's not. When programming, it is safer, but more cumbersome, to explicitly specify type and build your data frame the usual way.
 
 ```{r}
 users %>% {
   tibble(
-    login = map_chr(., "login"),
-    name = map_chr(., "name"),
-    id = map_int(., "id"),
+       login = map_chr(., "login"),
+        name = map_chr(., "name"),
+          id = map_int(., "id"),
     location = map_chr(., "location")
   )
 }
 ```
+
+#### Exercises
+
+1. Use `map_df()` to create a data frame with one row per user and variables for "name", "following", and "created_at".
 
 ### Repositiories for each user
 
@@ -175,7 +262,7 @@ str(repos, max.level = 1)
 Explore it interactively:
 
 ```{r echo = FALSE}
-jsonedit(repos)
+jsonedit(repos, mode = "view")
 ```
 
 ### Revisit shortcuts to extract elements by name or position
@@ -201,6 +288,7 @@ Mission: get a data frame with one row per repository, with varibles identifying
 Step 1: Put the repository list into a data frame, along with identifying GitHub usernames.
 
 ```{r}
+(unames <- map_chr(repos, c(1, 4, 1)))
 (udf <- repos %>%
     set_names(unames) %>% 
     enframe("username", "gh_repos"))
