@@ -36,15 +36,20 @@ users %>%
 ```
 
 Here is information on six GitHub users, pre-stored as JSON:  
-<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.json>. Use the code below
+<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.json>. Use the code below to grab the JSON from GitHub (*this will soon be available within  [repurrrsive](https://github.com/jennybc/repurrrsive#readme)*).
 
 ```{r}
-users <- fromJSON("github_users.json", simplifyDataFrame = FALSE)
+## grab the JSON from GitHub
+#json_source <- "https://raw.githubusercontent.com/jennybc/purrr-tutorial/gh-pages/github_users.json"
+## or grab locally if you're working in a local clone of this repo
+json_source <- "github_users.json"
+
+users <- fromJSON(json_source, simplifyDataFrame = FALSE)
 str(users, max.level = 1)
 str(users[[1]], list.len = 6)
 ```
 
-`users` is *a nested list*:
+`users` is *a recursive list*:
 
   * one element per GitHub user
   * each element is, in turn, a list with info on the user
@@ -138,8 +143,12 @@ users %>% {
 
 ```{r include = FALSE, eval = FALSE}
 urls <- paste0("https://api.github.com/users/", unames, "/repos")
-repos <- urls %>% map(fromJSON)
-writeLines(toJSON(repos), "github_repos.json")
+repos <- urls %>%
+  map(fromJSON)
+repos %>% 
+  toJSON() %>% 
+  prettify() %>%
+  writeLines("github_repos.json")
 ```
 
 The list above has one level of nesting, but it's common to have even more.
@@ -151,10 +160,15 @@ The list above has one level of nesting, but it's common to have even more.
   * several of those list elements are, again, a list
 
 Download this:  
-<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_repos.json>
+<https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_repos.json>. Use the code below to grab the JSON from GitHub (*this will soon be available within  [repurrrsive](https://github.com/jennybc/repurrrsive#readme)*).
 
 ```{r}
-repos <- fromJSON("github_repos.json", simplifyDataFrame = FALSE)
+## grab the JSON from GitHub
+#json_source <- "https://raw.githubusercontent.com/jennybc/purrr-tutorial/gh-pages/github_repos.json"
+## or grab locally if you're working in a local clone of this repo
+json_source <- "github_repos.json"
+
+repos <- fromJSON(json_source, simplifyDataFrame = FALSE)
 str(repos, max.level = 1)
 ```
 
