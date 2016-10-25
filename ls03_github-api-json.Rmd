@@ -18,6 +18,9 @@ Here we explore some lists obtained from the [GitHub API](https://developer.gith
 Load the packages.
 
 ```{r message = FALSE}
+# install.packages("devtools")
+# devtools::install_github("jennybc/repurrrsive")
+library(repurrrsive)
 library(listviewer)
 library(jsonlite)
 library(dplyr)
@@ -27,30 +30,9 @@ library(purrr)
 
 ### Get several GitHub users
 
-```{r include = FALSE, eval = FALSE}
-unames <-
-  c("gaborcsardi", "jennybc", "masalmon", "juliasilge", "leeper", "jtleek")
-urls <- paste0("https://api.github.com/users/", unames)
-users <- urls %>%
-  map(fromJSON)
-users %>% 
-  toJSON() %>% 
-  prettify() %>%
-  writeLines("github_users.json")
-```
+The [repurrrsive package](https://github.com/jennybc/repurrrsive#readme) provides information on 6 GitHub users in an R list named `gh_users`.
 
-Here is information on 6 GitHub users, pre-stored in a JSON file: [github_users.json](https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_users.json). Create this file locally or uncomment the code below to read it directly from GitHub (*this will soon be available within  [repurrrsive](https://github.com/jennybc/repurrrsive#readme)*). `fromJSON()` from jsonlite reads this information directly into an R list.
-
-```{r}
-## grab the JSON from GitHub
-#json_source <- "https://raw.githubusercontent.com/jennybc/purrr-tutorial/gh-pages/github_users.json"
-## or do this if you have a local copy
-json_source <- "github_users.json"
-
-users <- fromJSON(json_source, simplifyDataFrame = FALSE)
-```
-
-`users` is *a recursive list*:
+`gh_users` is *a recursive list*:
 
   * one component for each of the 6 GitHub users
   * each component is, in turn, a list with info on the user
@@ -60,14 +42,14 @@ We have no clue what is in this list. This is normal. That is why it's important
 Use `str()` with arguments such as `max.level` and `list.len`. It often pays off to do deeper inspection on a single element.
 
 ```{r}
-str(users, max.level = 1)
-str(users[[1]], list.len = 6)
+str(gh_users, max.level = 1)
+str(gh_users[[1]], list.len = 6)
 ```
 
 You can also use `listviewer::jsonedit()` to explore it interactively:
 
 ```{r echo = FALSE}
-jsonedit(users, mode = "view")
+jsonedit(gh_users, mode = "view")
 ```
 
 <!--
@@ -76,11 +58,11 @@ To have the interactive list viewing experience, visit <http://rpubs.com/jennybc
 
 #### Exercises
 
-1. Read the documentation on `str()`. What does `max.level` control? Do `str(users, max.level = i)` for `i` in 0,1, and 2.
-1. What does the `list.len` argument of `str()` control? What is it's default value? Call `str()` on `users` and then on a single component of `users` with `list.len` set to a value much smaller than the default.
-1. Call `str()` on `users`, specifying both `max.level` and `list.len`.
-1. Recall the [list and vector indexing techniques](bk00_vectors-and-lists.html#list_indexing). Inspect elements 1, 2, 6, 18, 21, and 24 of the list component for the 5th GitHub user. One of these should be the URL for the user's profile on GitHub.com. Go there and compare info you see there with the info you just extracted from `users`.
-1. Consider the interactive view of `users` here. Or, optionally, install the listviewer package via `install.packages("listviewer")` and call `jsonedit(users)` to run this widget locally. Can you find the same info you extracted in the previous exercise? The same info you see in user's GitHub.com profile?
+1. Read the documentation on `str()`. What does `max.level` control? Do `str(gh_users, max.level = i)` for `i` in 0,1, and 2.
+1. What does the `list.len` argument of `str()` control? What is it's default value? Call `str()` on `gh_users` and then on a single component of `gh_users` with `list.len` set to a value much smaller than the default.
+1. Call `str()` on `gh_users`, specifying both `max.level` and `list.len`.
+1. Recall the [list and vector indexing techniques](bk00_vectors-and-lists.html#list_indexing). Inspect elements 1, 2, 6, 18, 21, and 24 of the list component for the 5th GitHub user. One of these should be the URL for the user's profile on GitHub.com. Go there and compare info you see there with the info you just extracted from `gh_users`.
+1. Consider the interactive view of `gh_users` here. Or, optionally, install the listviewer package via `install.packages("listviewer")` and call `jsonedit(gh_users)` to run this widget locally. Can you find the same info you extracted in the previous exercise? The same info you see in user's GitHub.com profile?
 
 ### Name and position shortcuts
 
@@ -94,14 +76,14 @@ Recall the basic usage of `purrr::map()`:
 map(.x, .f, ...)
 ```
 
-The first input `.x` is your list. It will be `users` here.
+The first input `.x` is your list. It will be `gh_users` here.
 
 The second input `.f`, is the function to apply to each component of the list.
 
 We want the element with name "login", so we do this:
 
 ```{r}
-map(users, "login")
+map(gh_users, "login")
 ```
 
 We are exploiting one of purrr's most useful features: a shortcut to create a function that extracts an element based on its name.
@@ -111,7 +93,7 @@ A companion shortcut is used if you provide a positive integer to `map()`. This 
 The 18th element of each user's list is his or her name and we get them like so:
 
 ```{r}
-map(users, 18)
+map(gh_users, 18)
 ```
 
 To recap, here are two shortcuts for making the `.f` function that `map()` will apply:
@@ -124,9 +106,9 @@ To recap, here are two shortcuts for making the `.f` function that `map()` will 
 You will frequently see `map()` used together with [the pipe `%>%`](http://r4ds.had.co.nz/pipes.html). These calls produce the same result as the above.
 
 ```{r eval = FALSE}
-users %>% 
+gh_users %>% 
   map("login")
-users %>% 
+gh_users %>% 
   map(18)
 ```
 
@@ -135,8 +117,8 @@ users %>%
 1. Use `names()` to inspect the names of the list elements associated with a single user. What is the index or position of the `created_at` element? Use the character and position shortcuts to extract the `created_at` elements for all 6 users.
 1. What happens if you use the character shortcut with a string that does not appear in the lists' names?
 1. What happens if you use the position shortcut with a number greater than the length of the lists?
-1. What if these shortcuts did not exist? Write a function that takes a list and a string as input and returns the list element that bears the name in the string. Apply this to `users` via `map()`. Do you get the same result as with the shortcut? Reflect on code length and readability.
-1. Write another function that takes a list and an integer as input and returns the list element at that position. Apply this to `users` via `map()`. How does this result and process compare with the shortcut?
+1. What if these shortcuts did not exist? Write a function that takes a list and a string as input and returns the list element that bears the name in the string. Apply this to `gh_users` via `map()`. Do you get the same result as with the shortcut? Reflect on code length and readability.
+1. Write another function that takes a list and an integer as input and returns the list element at that position. Apply this to `gh_users` via `map()`. How does this result and process compare with the shortcut?
 
 ### Type-specific map
 
@@ -147,8 +129,8 @@ If you expect `map()` to return output that can be turned into an atomic vector,
 Our current examples are suitable for demonstrating `map_chr()`, since the requested elements are always character.
 
 ```{r}
-map_chr(users, "login")
-map_chr(users, 18)
+map_chr(gh_users, "login")
+map_chr(gh_users, 18)
 ```
 
 Besides `map_chr()`, there are other variants of `map()`, with the target type conveyed by the name:
@@ -166,7 +148,7 @@ Besides `map_chr()`, there are other variants of `map()`, with the target type c
 What if you want to retrieve multiple elements? Such as the user's name and GitHub username? First, recall how we do this with the list for a single user:
 
 ```{r}
-users[[3]][c("name", "login", "id", "location")]
+gh_users[[3]][c("name", "login", "id", "location")]
 ```
 
 We use single square bracket indexing and a character vector to index by name. How will we ram this into the `map()` framework? To paraphrase Chambers, ["everything that happens in R is a function call"](http://adv-r.had.co.nz/Functions.html#all-calls) and indexing with `[` is no exception.
@@ -180,14 +162,14 @@ map(.x, .f, ...)
 The function `.f` will be `[`. And we finally get to use `...`! This is where we pass the character vector of the names of our desired elements. We inspect the result for the first 2 users.
 
 ```{r}
-x <- map(users, `[`, c("login", "name", "id", "location"))
+x <- map(gh_users, `[`, c("login", "name", "id", "location"))
 str(x[1:2])
 ```
 
 Some people find this ugly and might prefer the `extract()` function from magrittr.
 
 ```{r}
-x <- map(users, magrittr::extract, c("login", "name", "id", "location"))
+x <- map(gh_users, magrittr::extract, c("login", "name", "id", "location"))
 str(x[3:4])
 ```
 
@@ -204,7 +186,7 @@ How can we "stack up" these results row-wise, i.e. one row per user and variable
 This is what `map_df()` is for.
 
 ```{r}
-map_df(users, `[`, c("login", "name", "id", "location"))
+map_df(gh_users, `[`, c("login", "name", "id", "location"))
 ```
 
 Finally! A data frame! Hallelujah!
@@ -212,7 +194,7 @@ Finally! A data frame! Hallelujah!
 Notice how the variables have been automatically type converted. It's a beautiful thing. Until it's not. When programming, it is safer, but more cumbersome, to explicitly specify type and build your data frame the usual way.
 
 ```{r}
-users %>% {
+gh_users %>% {
   tibble(
        login = map_chr(., "login"),
         name = map_chr(., "name"),
@@ -226,36 +208,21 @@ users %>% {
 
 1. Use `map_df()` to create a data frame with one row per user and variables for "name", "following", and "created_at". What type are the variables?
 
-### Repositiories for each user
+### Repositories for each user
 
-```{r include = FALSE, eval = FALSE}
-urls <- paste0("https://api.github.com/users/", unames, "/repos")
-repos <- urls %>%
-  map(fromJSON)
-repos %>% 
-  toJSON() %>% 
-  prettify() %>%
-  writeLines("github_repos.json")
-```
+The `gh_users` list from above has one primary level of nesting, but it's common to have even more.
 
-The `users` list from above has one primary level of nesting, but it's common to have even more.
-
-Meet `repos`. It is a list with:
+Meet `gh_repos`. It is a list with:
 
   * one component for each of our 6 GitHub users
   * each component is another list of that user's repositories (or just the first 30, if user has more than 30)
   * several of those list components are, again, a list
 
-This information is stored in a JSON file: [github_repos.json](https://github.com/jennybc/purrr-tutorial/raw/gh-pages/github_repos.json). Create this file locally or uncomment the code below to read it directly from GitHub (*this will soon be available within  [repurrrsive](https://github.com/jennybc/repurrrsive#readme)*). `fromJSON()` from jsonlite reads this information directly into an R list.
+The [repurrrsive package](https://github.com/jennybc/repurrrsive#readme) provides this in an R list named `gh_repos`.
+
 
 ```{r}
-## grab the JSON from GitHub
-#json_source <- "https://raw.githubusercontent.com/jennybc/purrr-tutorial/gh-pages/github_repos.json"
-## or grab locally if you're working in a local clone of this repo
-json_source <- "github_repos.json"
-
-repos <- fromJSON(json_source, simplifyDataFrame = FALSE)
-str(repos, max.level = 1)
+str(gh_repos, max.level = 1)
 ```
 
 As usual, we have no idea what's in here and, again, this is normal. To work with lists, you have to develop list inspection strategies.
@@ -263,14 +230,14 @@ As usual, we have no idea what's in here and, again, this is normal. To work wit
 Explore it interactively:
 
 ```{r echo = FALSE}
-jsonedit(repos, mode = "view")
+jsonedit(gh_repos, mode = "view")
 ```
 
 #### Exercises
 
 Use `str()`, `[`, and `[[` to explore this list, possibly in addition to the interactive list viewer.
 
-1. How many elements does `repos` have? How many elements does each of those elements have?
+1. How many elements does `gh_repos` have? How many elements does each of those elements have?
 2. Extract a list with all the info for one repo for one user. Use `str()` on it. Maybe print the whole thing to screen. How many elements does this list have and what are their names? Do the same for at least one other repo from a different user and get an rough sense for whether these repo-specific lists tend to look similar.
 3. What are three pieces of repo information that strike you as the most useful? I.e. if you were going to make a data frame of repositories, what might the variables be?
 
@@ -283,12 +250,12 @@ Now we use the indexing shortcuts in a more complicated setting. Instead of prov
 It's easiest to see in a concrete example. We get the full name (element 3) of the first repository listed for each user.
 
 ```{r}
-repos %>%
+gh_repos %>%
   map_chr(c(1, 3))
-## TO DO? I would prefer a character example :( but repos is unnamed atm
+## TO DO? I would prefer a character example :( but gh_repos is unnamed atm
 ```
 
-Note that this does NOT give elements 1 and 3 of `repos`. It extracts the first repo for each user and, within that, the 3rd piece of information for the repo.
+Note that this does NOT give elements 1 and 3 of `gh_repos`. It extracts the first repo for each user and, within that, the 3rd piece of information for the repo.
 
 #### Exercises
 
@@ -302,13 +269,13 @@ We go out in a blaze of glory now, using all of the techniques from above plus a
 
 **Mission: get a data frame with one row per repository, with variables identifying which GitHub user owns it, the repository name, etc.**
 
-Step 1: Put the `repos` list into a data frame, along with identifying GitHub usernames. The care and feeding of lists inside a data frame -- "list-columns" -- is the subject of its own lesson (*yet to be written / linked*), so I ask you to simply accept that this can be done.
+Step 1: Put the `gh_repos` list into a data frame, along with identifying GitHub usernames. The care and feeding of lists inside a data frame -- "list-columns" -- is the subject of its own lesson (*yet to be written / linked*), so I ask you to simply accept that this can be done.
 
-We use the answer to the previous exercise to grab the 6 usernames and set them as the names on the `repos` list. Then we use `tibble::enframe()` to convert this named vector into a tibble with the names as one variable and the vector as the other. This is a generally useful setup technique.
+We use the answer to the previous exercise to grab the 6 usernames and set them as the names on the `gh_repos` list. Then we use `tibble::enframe()` to convert this named vector into a tibble with the names as one variable and the vector as the other. This is a generally useful setup technique.
 
 ```{r}
-(unames <- map_chr(repos, c(1, 4, 1)))
-(udf <- repos %>%
+(unames <- map_chr(gh_repos, c(1, 4, 1)))
+(udf <- gh_repos %>%
     set_names(unames) %>% 
     enframe("username", "gh_repos"))
 ```
@@ -367,9 +334,7 @@ rdf %>%
   select(-fork) %>% 
   group_by(username) %>%
   arrange(username, desc(open_issues)) %>%
-  top_n(3) %>% 
-  print(n = Inf)
-## TO DO: do this another way that is better about ties
+  slice(1:3)
 ```
 
 
