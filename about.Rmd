@@ -14,3 +14,7 @@ Its home on the web:
 
 <https://jennybc.github.io/purrr-tutorial>
 
+```{r}
+devtools::session_info(c("purrr", "repurrrsive"))
+```
+
