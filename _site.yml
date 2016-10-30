@@ -3,10 +3,10 @@ output_dir: "."
 navbar:
   title: "purrr tutorial"
   left:
-    - text: "Home"
-      href: index.html
     - text: "Lessons and examples"
-      href: topic-index.html
+      href: index.html
+    - text: "More resources"
+      href: more-resources.html
     - text: "Slides"
       href: slides.html
   right:

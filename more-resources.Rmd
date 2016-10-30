@@ -1,0 +1,12 @@
+---
+title: "More resources"
+---
+
+<img src="https://www.stickermule.com/marketplace/embed_img/13594" style="max-width:100%;">
+
+  * On CRAN: <https://CRAN.R-project.org/package=purrr>
+  * Development on GitHub: <https://github.com/hadley/purrr> 
+  * Coverage in [R for Data Science](http://r4ds.had.co.nz)
+    - [Iteration](http://r4ds.had.co.nz/iteration.html)
+    - [Handling hierarchy](http://r4ds.had.co.nz/hierarchy.html)
+    - [Many models](http://r4ds.had.co.nz/many-models.html)

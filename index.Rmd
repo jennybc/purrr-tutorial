@@ -1,22 +1,68 @@
 ---
-title: "purrr tutorial"
+title: "Lessons and Examples"
 ---
 
-<img src="https://www.stickermule.com/marketplace/embed_img/13594" style="max-width:100%;">
+```{r setup, include = FALSE, warning = FALSE}
+library(tidyverse)
+library(stringr)
+library(htmltools)
+```
 
-*NOTE: Under development*
+```{r file-list, include = FALSE, warning = FALSE}
+has_all_things <- function(y, things) {
+  all(match(tolower(things), tolower(y), nomatch = 0) > 0)
+}
+parse_yaml <- function(file, n = 15) {
+  rmarkdown:::parse_yaml_front_matter(read_lines(file, n_max = n))
+}
+ext_file <- function(file, ext) paste(file, ext, sep = ".")
+cat_bullet <- function(x, pattern) {
+  x <- x %>% 
+    filter(str_detect(basename, pattern))
+  cat(x$bullet)
+}
 
-More resources for purrr package:
+x <- tibble(fls = list.files()) %>%
+  mutate(basename = tools::file_path_sans_ext(fls),
+         ext = tools::file_ext(fls)) %>% 
+  group_by(basename) %>% 
+  summarize_all(list) %>% 
+  filter(map_lgl(ext, has_all_things, things = c("Rmd", "html")))
 
-  * On CRAN: <https://cran.r-project.org/web/packages/purrr/index.html>
-  * Development on GitHub: <https://github.com/hadley/purrr> 
-  * Coverage in [R for Data Science](http://r4ds.had.co.nz)
-    - [Iteration](http://r4ds.had.co.nz/iteration.html)
-    - [Handling hierarchy](http://r4ds.had.co.nz/hierarchy.html)
-    - [Many models](http://r4ds.had.co.nz/many-models.html)
+x <- x %>% 
+  mutate(
+    yaml = basename %>% ext_file("Rmd") %>% map(parse_yaml),
+    title = yaml %>% map_chr("title"),
+    comment = yaml %>% map_chr("comment", .null = ""),
+    href = map2(ext_file(basename, "html"), title, ~ a(href = .x, .y)) %>%
+      map_chr(as.character),
+    bullet = map2_chr(href, comment, ~ paste("*", .x, .y, "\n"))
+  )
+```
 
-Materials created to support:
+*more coming in the subsections below*
 
-  * [2016-08-12 meeting](https://github.com/minisciencegirl/studyGroup/issues/131) of the Vancouver R Study Group.  
-  * [STAT 545](http://stat545.com) Exploratory Data Analysis
-  * [DSCI 523](http://www.calendar.ubc.ca/vancouver/courses.cfm?page=code&code=DSCI) Data Wrangling, part of the UBC Master of Data Science
+### Background basics
+
+```{r results = 'asis', echo = FALSE}
+cat_bullet(x, "^bk")
+```
+
+### Core purrr lessons
+
+```{r results = 'asis', echo = FALSE}
+cat_bullet(x, "^ls")
+```
+
+### Worked examples
+
+```{r results = 'asis', echo = FALSE}
+cat_bullet(x, "^ex")
+```
+
+### Patterns and anti-patterns
+
+```{r results = 'asis', echo = FALSE}
+cat_bullet(x, "^pt")
+```
+
