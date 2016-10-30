@@ -1,5 +1,9 @@
 ---
 title: "Relationship to base and plyr functions"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r, echo = FALSE}
@@ -8,20 +12,67 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 ```{r}
 library(tidyverse)
-library(gapminder)
+library(repurrrsive)
 ```
 
   * List relevant base and plyr functions. Create a base <--> purrr, base <--> plyr map.
   * Point out general reasons to consider purrr.
   * Point out specific gotchas or FAQs that purrr avoids or answers.
 
-### Base functions
+## `lapply()` and `purrr::map()`
 
-`lapply()` <--> `purrr::map()`
+The main (only?) difference is access to purrr's shortcuts for anonymous functions.
 
-`sapply()`, fine for interactive use, but unpredictability hard to program around
+<div class = "row">
+<div class = "col-md-6">
+```{r}
+lapply(got_chars[1:3],
+       function(x) x[["name"]])
+```
+</div>
+<div class = "col-md-6">
+```{r}
+map(got_chars[1:3], "name")
+```
+</div>
+</div>
+
+This is also `plyr::llply()`, although it offers some other arguments, such as `.progress` and `.parallel`.
+
+```{r eval = FALSE}
+plyr::llply(got_chars[1:3], function(x) x[["name"]])
+```
+
+## `sapply()` and ???
+
+`sapply()` is a base function that attempts to apply a reasonable simplification to the output of `lapply()`. It's fine for interactive use, but due to the unpredictability of it return value, it's unwise to use it in programming. There is no equivalent in purrr or plyr.
+
+Problem demonstration: The characters in Game of Thrones can have aliases. Some have several, some have one, some have none. Depending on which characters I work with, the same code can return an object of entirely different class, i.e. a list or a character vector:
+
+```{r}
+(aliases1 <- sapply(got_chars[2:4], function(x) x[["aliases"]]))
+str(aliases1)
+(aliases2 <- sapply(got_chars[c(14, 22, 25)], function(x) x[["aliases"]]))
+str(aliases2)
+```
+
+## `vapply()` and `map_*()`
 
 `vapply()`, some similarities with `map_chr()`, `map_lgl()`, etc. Touted as the base option for programming, but still unpredictable.
+
+<div class = "row">
+<div class = "col-md-6">
+```{r}
+vapply(got_chars[1:3],
+       function(x) x[["name"]], character(1))
+```
+</div>
+<div class = "col-md-6">
+```{r}
+map_chr(got_chars[1:3], "name")
+```
+</div>
+</div>
 
 Example gotcha from real life. Using `vapply()` inside a function. `n` can vary depending on input. But `vapply()`'s simplifying behavior means it will return 2D or 1D object, depending on `n`. It has no way to say `drop = FALSE`.
 
@@ -44,28 +95,6 @@ map(c("a", "b"), f, n = 1) %>% lift_dl(cbind)(.)
 </div>
 </div>
 
-`mapply()`, similar to `map2()`, `pmap()`
+## `mapply()` and `map2()`, `pmap()`
 
-`tapply()`, `aggregate()`
-
-Possible format for some comparisons
-
-<div class = "row">
-<div class = "col-md-6">
-```{r}
-aggregate(breaks ~ wool + tension,
-          data = warpbreaks, mean)
-```
-</div>
-<div class = "col-md-6">
-```{r}
-warpbreaks %>% 
-  group_by(wool, tension) %>% 
-  summarise(mean = mean(breaks), var = var(breaks))
-```
-</div>
-</div>
-
-
-
-
+## `tapply()`, `aggregate()`
