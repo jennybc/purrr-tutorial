@@ -1,0 +1,128 @@
+---
+title: "Basic mapping with Wes Anderson and Game of Thrones"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", error = TRUE)
+```
+
+*Not many words yet. Taking repurrrsive out for a spin.*
+
+## Load packages
+
+Load purrr and repurrrsive, which contains recursive list examples.
+
+```{r}
+library(purrr)
+## install_github("jennybc/repurrrsive")
+library(repurrrsive)
+```
+
+List inspection is very important and also fairly miserable. Below I offer interactive widgets for our examples. If you wish to do the same locally, I suggest you install the [listviewer](https://CRAN.R-project.org/package=listviewer) package.
+
+```{r}
+library(listviewer)
+```
+
+## Vectorized and "list-ized" operations
+
+This lesson picks up where [the primer on vectors and lists](https://jennybc.github.io/purrr-tutorial/bk00_vectors-and-lists.html#vectorized_operations) left off. Recall that many operations "just work" in a vectorized fashion in R:
+
+```{r}
+(3:5) ^ 2
+sqrt(c(9, 16, 25))
+```
+
+Through the magic of R, the operations "raise to the power of 2" and "take the square root" were applied to each individual element of the numeric vector input. Someone -- but not you! -- has written a `for()` loop:
+
+```
+for (i in 1:n) {
+  output[[i]] <- f(input[[i]])
+}
+```
+
+Automatic vectorization is possible because our input is an atomic vector: always of length one, always of uniform type.
+
+What if the input is a list? You have to be more intentional to apply a function `f()` to each element of a list, i.e. to "list-ize" computation. This makes sense because the data structure itself does not guarantee that it makes any sense at all to apply a common function `f()` to each element of the list. It is your responsibility to do something sensible.
+
+`purrr::map()` is a function for applying a function to each element of a list. The [closest base R function](bk01_base-functions.html) is `lapply()`. Here's how the square root example of the above would look if the input was in a list.
+
+```{r}
+map(c(9, 16, 25), sqrt)
+```
+
+A template for basic `map()` usage:
+
+```{r eval = FALSE}
+map(YOUR_LIST, YOUR_FUNCTION)
+```
+
+Below we explore these cool features of `purrr::map()` and friends:
+
+  * Shortcuts for `YOUR_FUNCTION` when you want to extract list elements by name or position
+  * Simplify and specify the type of output via `map_chr()`, `map_lgl()`, etc.
+  * Flexible and concise syntax for specifying `YOUR_FUNCTION`
+
+## Wes Anderson and Game of Thrones
+
+Let's introduce two example lists found in repurrrsive:
+
+* `wesanderson` is a simple list, containing color palettes, from the [wesanderson package](https://cran.r-project.org/package=wesanderson).
+* `got_chars` is a more complicated list with information on the `r length(got_chars)` point-of-view characters from the first five books in the Song of Ice and Fire series by George R. R. Martin.
+
+`str()` can help with basic list inspection, although it's still rather frustrating. Learn to love the `max.level` and `list.len` arguments.
+
+```{r}
+str(wesanderson, list.len = 3)
+str(got_chars, max.level = 1, list.len = 3)
+str(got_chars[[1]], list.len = 8)
+```
+
+It's often more helpful to explore such lists with an interactive widget. If you installed listviewer, replicate this experience locally via `listviewer::jsonedit(got_chars, mode = "view")`.
+
+### Explore `wesanderson`
+
+```{r echo = FALSE}
+jsonedit(wesanderson, mode = "view")
+```
+
+### Explore `got_chars`
+
+```{r echo = FALSE}
+jsonedit(got_chars, mode = "view")
+```
+
+#### Exercises
+
+1. Read the documentation on `str()`. What does `max.level` control? Apply `str()` to `wesanderson` and/or `got_chars` and experiment with `max.level = 0`, `max.level = 1`, and `max.level = 2`. Which will you use in practice with deeply nested lists?
+1. What does the `list.len` argument of `str()` control? What is it's default value? Call `str()` on `got_chars` and then on a single component of `got_chars` with `list.len` set to a value much smaller than the default. How can you use this to keep printed output down to a manageable level?
+1. Call `str()` on `got_chars`, specifying both `max.level` and `list.len`.
+1. Call `str()` on the first element of `got_chars`, i.e. the first Game of Thrones character. Use what you've learned to pick an appropriate combination of `max.level` and `list.len`.
+
+### Name and position shortcuts
+
+Shortcuts for `YOUR_FUNCTION` when you want to extract list elements by name or position
+
+### Type-specific map
+
+Simplify and specify the type of output via `map_chr()`, `map_lgl()`, etc.
+
+### Function specification
+
+Flexible and concise syntax for specifying `YOUR_FUNCTION`
+
+```{r}
+nms <- map(got_chars, "name")
+aliases <- map(got_chars, "aliases")
+aliases <- set_names(aliases, nms)
+map(aliases, function(x) paste(x, collapse = "|"))
+map(aliases, paste, collapse = "|")
+map(aliases, ~ paste(.x, collapse = " | "))
+
+map2(aliases, nms, set_names)
+```
+
