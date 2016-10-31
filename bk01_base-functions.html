@@ -312,11 +312,43 @@ div.tocify {
 #&gt; filter(): dplyr, stats
 #&gt; lag():    dplyr, stats
 library(repurrrsive)</code></pre>
+<div id="why-not-base" class="section level2">
+<h2>Why not base?</h2>
+<p>You need a way to iterate in R in a data-structure-informed way. What does that mean?</p>
 <ul>
-<li>List relevant base and plyr functions. Create a base &lt;–&gt; purrr, base &lt;–&gt; plyr map.</li>
-<li>Point out general reasons to consider purrr.</li>
-<li>Point out specific gotchas or FAQs that purrr avoids or answers.</li>
+<li>Iterate over elements of a list</li>
+<li>Iterate over sub data frames induced by one or more factors</li>
+<li>Iterate over rows or columns of a 2-dimensional object</li>
+<li>Iterate over tuples formed from the i-th element of several vectors of equal-length</li>
 </ul>
+<p>All of this is absolutely possible with base R, using <code>for()</code> loops or the “apply” functions, such as <code>apply()</code>, <code>[slvmt]apply()</code>, <code>split()</code>, and <code>by()</code>. I know, because I did so religiously for over 15 years.</p>
+<p>What’s the problem? As an instructor, I encounter lots of useRs who sheepishly say they know they should be using the apply functions, but they don’t. Because they’ve never quite figured them out or been able to form the habit.</p>
+<p>I have a theory about why. The apply functions are not particularly easy or convenient to use. The user interface is not as consistent as it could be, which slows down learning. The return objects frequently require further checking and massage to use downstream, which diminishes the payoff.</p>
+</div>
+<div id="why-purrr" class="section level2">
+<h2>Why purrr?</h2>
+<p>purrr addresses some of the friction identified in the base functions for “split-apply-combine”:</p>
+<ul>
+<li>The <code>map()</code> family of functions is highly internally consistent, making it easier to transfer expertise from one function to another.</li>
+<li>Greater encouragement for type-safe simplification, i.e. conversion from list to atomic vector or data frame.</li>
+<li>Concise syntax for defining anonymous functions.</li>
+</ul>
+</div>
+<div id="why-not-plyr" class="section level2">
+<h2>Why not plyr?</h2>
+<p>If you have never heard of the <a href="https://CRAN.R-project.org/package=plyr">plyr package</a>, you can skip this section! Personally, I’m a bit sad that it’s time to move on from plyr. But it probably is.</p>
+<p>Why? It’s no longer under active development. The innovation is happening elsewhere, in purrr and the other packages in the tidyverse. Also, even I must admit that plyr can be rather slow. I wouldn’t recommend writing new code that requires plyr.</p>
+<p>In terms of understanding or translating plyr code, here’s the minimum you need to know: The key feature of the main 3 * 4 = 12 functions in plyr is their explicit, memorable form.</p>
+<pre class="r"><code>XYply()</code></pre>
+<p>where <code>X</code> and <code>Y</code> specify the type of input and output respectively. <code>X</code> and <code>Y</code> take values from here:</p>
+<ul>
+<li><code>a</code> = “array”</li>
+<li><code>d</code> = “data frame”</li>
+<li><code>l</code> = “list”</li>
+<li><code>_</code> = “nothing” (not eligible as <code>X</code> re: input, for obvious reasons)</li>
+</ul>
+<p>The most useful function proved to be <code>ddply()</code>: data frame in, data frame out. This is now handled by dplyr and tidyr. Most tasks suitable for <code>a*ply()</code> and, especially <code>l*ply()</code> are now handled by purrr’s <code>map()</code> family. The functions called for their side effects, as opposed to return value, are those named <code>*_ply()</code>; this is handled by purrr’s <code>walk()</code> functions. Marching through a data frame row by row is now a job for purrr’s <code>pmap()</code>.</p>
+</div>
 <div id="lapply-and-purrrmap" class="section level2">
 <h2><code>lapply()</code> and <code>purrr::map()</code></h2>
 <p>The main (only?) difference is access to purrr’s shortcuts for anonymous functions.</p>

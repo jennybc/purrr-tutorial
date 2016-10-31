@@ -15,9 +15,49 @@ library(tidyverse)
 library(repurrrsive)
 ```
 
-  * List relevant base and plyr functions. Create a base <--> purrr, base <--> plyr map.
-  * Point out general reasons to consider purrr.
-  * Point out specific gotchas or FAQs that purrr avoids or answers.
+## Why not base?
+
+You need a way to iterate in R in a data-structure-informed way. What does that mean?
+
+  * Iterate over elements of a list
+  * Iterate over sub data frames induced by one or more factors
+  * Iterate over rows or columns of a 2-dimensional object
+  * Iterate over tuples formed from the i-th element of several vectors of equal-length
+
+All of this is absolutely possible with base R, using `for()` loops or the "apply" functions, such as `apply()`, `[slvmt]apply()`, `split()`, and `by()`. I know, because I did so religiously for over 15 years.
+
+What's the problem? As an instructor, I encounter lots of useRs who sheepishly say they know they should be using the apply functions, but they don't. Because they've never quite figured them out or been able to form the habit.
+
+I have a theory about why. The apply functions are not particularly easy or convenient to use. The user interface is not as consistent as it could be, which slows down learning. The return objects frequently require further checking and massage to use downstream, which diminishes the payoff.
+
+## Why purrr?
+
+purrr addresses some of the friction identified in the base functions for "split-apply-combine":
+
+  * The `map()` family of functions is highly internally consistent, making it easier to transfer expertise from one function to another.
+  * Greater encouragement for type-safe simplification, i.e. conversion from list to atomic vector or data frame.
+  * Concise syntax for defining anonymous functions.
+  
+## Why not plyr?
+
+If you have never heard of the [plyr package](https://CRAN.R-project.org/package=plyr), you can skip this section! Personally, I'm a bit sad that it's time to move on from plyr. But it probably is.
+
+Why? It's no longer under active development. The innovation is happening elsewhere, in purrr and the other packages in the tidyverse. Also, even I must admit that plyr can be rather slow. I wouldn't recommend writing new code that requires plyr.
+
+In terms of understanding or translating plyr code, here's the minimum you need to know: The key feature of the main 3 * 4 = 12 functions in plyr is their explicit, memorable form.
+
+```{r eval = FALSE}
+XYply()
+```
+
+where `X` and `Y` specify the type of input and output respectively. `X` and `Y` take values from here:
+
+  * `a` = "array"
+  * `d` = "data frame"
+  * `l` = "list"
+  * `_` = "nothing" (not eligible as `X` re: input, for obvious reasons)
+  
+The most useful function proved to be `ddply()`: data frame in, data frame out. This is now handled by dplyr and tidyr. Most tasks suitable for `a*ply()` and, especially `l*ply()` are now handled by purrr's `map()` family. The functions called for their side effects, as opposed to return value, are those named `*_ply()`; this is handled by purrr's `walk()` functions. Marching through a data frame row by row is now a job for purrr's `pmap()`.
 
 ## `lapply()` and `purrr::map()`
 
