@@ -37,6 +37,7 @@ We load purrr now. Below we also use example lists from [repurrrsive](https://gi
 
 ```{r}
 library(purrr)
+## install_github("jennybc/repurrrsive")
 library(repurrrsive)
 ```
 
@@ -164,4 +165,3 @@ tapply(mini_gap$lifeExp, mini_gap$country, mean)
 tapply(mini_gap$lifeExp, mini_gap$country, mean, simplify = FALSE)
 ```
 
-sapply()_vs_%AF\_(%C4)_%AF
