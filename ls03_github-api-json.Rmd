@@ -230,7 +230,7 @@ As usual, we have no idea what's in here and, again, this is normal. To work wit
 Explore it interactively:
 
 ```{r echo = FALSE}
-jsonedit(gh_repos, mode = "view")
+jsonedit(gh_repos, mode = "view", elementId = "gh_repos")
 ```
 
 #### Exercises

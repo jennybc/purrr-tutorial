@@ -87,13 +87,13 @@ It's often more helpful to explore such lists with an interactive widget. If you
 ### Explore `wesanderson`
 
 ```{r echo = FALSE}
-jsonedit(wesanderson, mode = "view")
+jsonedit(wesanderson, mode = "view", elementId = "wesanderson")
 ```
 
 ### Explore `got_chars`
 
 ```{r echo = FALSE}
-jsonedit(got_chars, mode = "view")
+jsonedit(got_chars, mode = "view", elementId = "got_chars")
 ```
 
 #### Exercises
