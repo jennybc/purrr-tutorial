@@ -302,16 +302,6 @@ div.tocify {
 </div>
 
 
-<pre class="r"><code>library(tidyverse)
-#&gt; Loading tidyverse: ggplot2
-#&gt; Loading tidyverse: tibble
-#&gt; Loading tidyverse: tidyr
-#&gt; Loading tidyverse: readr
-#&gt; Loading tidyverse: dplyr
-#&gt; Conflicts with tidy packages ----------------------------------------------
-#&gt; filter(): dplyr, stats
-#&gt; lag():    dplyr, stats
-library(repurrrsive)</code></pre>
 <div id="why-not-base" class="section level2">
 <h2>Why not base?</h2>
 <p>You need a way to iterate in R in a data-structure-informed way. What does that mean?</p>
@@ -333,6 +323,9 @@ library(repurrrsive)</code></pre>
 <li>Greater encouragement for type-safe simplification, i.e. conversion from list to atomic vector or data frame.</li>
 <li>Concise syntax for defining anonymous functions.</li>
 </ul>
+<p>We load purrr now. Below we also use example lists from <a href="https://github.com/jennybc/repurrrsive">repurrrsive</a> which are <a href="index.html">introduced and explored elsewhere</a>.</p>
+<pre class="r"><code>library(purrr)
+library(repurrrsive)</code></pre>
 </div>
 <div id="why-not-plyr" class="section level2">
 <h2>Why not plyr?</h2>
@@ -340,7 +333,7 @@ library(repurrrsive)</code></pre>
 <p>Why? It’s no longer under active development. The innovation is happening elsewhere, in purrr and the other packages in the tidyverse. Also, even I must admit that plyr can be rather slow. I wouldn’t recommend writing new code that requires plyr.</p>
 <p>In terms of understanding or translating plyr code, here’s the minimum you need to know: The key feature of the main 3 * 4 = 12 functions in plyr is their explicit, memorable form.</p>
 <pre class="r"><code>XYply()</code></pre>
-<p>where <code>X</code> and <code>Y</code> specify the type of input and output respectively. <code>X</code> and <code>Y</code> take values from here:</p>
+<p>where <code>X</code> and <code>Y</code> specify the type of input and output, respectively. <code>X</code> and <code>Y</code> take values from here:</p>
 <ul>
 <li><code>a</code> = “array”</li>
 <li><code>d</code> = “data frame”</li>
@@ -349,9 +342,9 @@ library(repurrrsive)</code></pre>
 </ul>
 <p>The most useful function proved to be <code>ddply()</code>: data frame in, data frame out. This is now handled by dplyr and tidyr. Most tasks suitable for <code>a*ply()</code> and, especially <code>l*ply()</code> are now handled by purrr’s <code>map()</code> family. The functions called for their side effects, as opposed to return value, are those named <code>*_ply()</code>; this is handled by purrr’s <code>walk()</code> functions. Marching through a data frame row by row is now a job for purrr’s <code>pmap()</code>.</p>
 </div>
-<div id="lapply-and-purrrmap" class="section level2">
-<h2><code>lapply()</code> and <code>purrr::map()</code></h2>
-<p>The main (only?) difference is access to purrr’s shortcuts for anonymous functions.</p>
+<div id="lapply-vs.-purrrmap" class="section level2">
+<h2><code>lapply()</code> vs. <code>purrr::map()</code></h2>
+<p>These are the core mapping functions of base and purrr, respectively. They are “list in, list out”. The main (only?) difference is access to purrr’s shortcuts for anonymous functions.</p>
 <div class="row">
 <div class="col-md-6">
 <pre class="r"><code>lapply(got_chars[1:3],
@@ -380,34 +373,26 @@ library(repurrrsive)</code></pre>
 <p>This is also <code>plyr::llply()</code>, although it offers some other arguments, such as <code>.progress</code> and <code>.parallel</code>.</p>
 <pre class="r"><code>plyr::llply(got_chars[1:3], function(x) x[[&quot;name&quot;]])</code></pre>
 </div>
-<div id="sapply-and" class="section level2">
-<h2><code>sapply()</code> and ???</h2>
+<div id="sapply-vs.-__" class="section level2">
+<h2><code>sapply()</code> vs. ¯\_(ツ)_/¯</h2>
 <p><code>sapply()</code> is a base function that attempts to apply a reasonable simplification to the output of <code>lapply()</code>. It’s fine for interactive use, but due to the unpredictability of it return value, it’s unwise to use it in programming. There is no equivalent in purrr or plyr.</p>
-<p>Problem demonstration: The characters in Game of Thrones can have aliases. Some have several, some have one, some have none. Depending on which characters I work with, the same code can return an object of entirely different class, i.e. a list or a character vector:</p>
-<pre class="r"><code>(aliases1 &lt;- sapply(got_chars[2:4], function(x) x[[&quot;aliases&quot;]]))
-#&gt; [[1]]
-#&gt; [1] &quot;Bran&quot;            &quot;Bran the Broken&quot; &quot;The Winged Wolf&quot;
-#&gt; 
-#&gt; [[2]]
-#&gt; [1] &quot;Catelyn Tully&quot;     &quot;Lady Stoneheart&quot;   &quot;The Silent Sistet&quot;
-#&gt; [4] &quot;Mother Mercilesr&quot;  &quot;The Hangwomans&quot;   
-#&gt; 
-#&gt; [[3]]
-#&gt; [1] &quot;Ned&quot;            &quot;The Ned&quot;        &quot;The Quiet Wolf&quot;
+<p>Problem demonstration: The characters in Game of Thrones can have aliases. Some have several, some have one, some have none. Depending on which characters I work with, the same <code>sapply()</code> call can return an object of entirely different class, i.e. a list or a character vector. This can be a source of mysterious bugs in code meant to run non-interactively.</p>
+<pre class="r"><code>aliases1 &lt;- sapply(got_chars[2:4], function(x) x[[&quot;aliases&quot;]])
 str(aliases1)
 #&gt; List of 3
 #&gt;  $ : chr [1:3] &quot;Bran&quot; &quot;Bran the Broken&quot; &quot;The Winged Wolf&quot;
 #&gt;  $ : chr [1:5] &quot;Catelyn Tully&quot; &quot;Lady Stoneheart&quot; &quot;The Silent Sistet&quot; &quot;Mother Mercilesr&quot; ...
 #&gt;  $ : chr [1:3] &quot;Ned&quot; &quot;The Ned&quot; &quot;The Quiet Wolf&quot;
-(aliases2 &lt;- sapply(got_chars[c(14, 22, 25)], function(x) x[[&quot;aliases&quot;]]))
-#&gt; [1] &quot;Merrett Muttonhead&quot;       &quot;The Iron Captain&quot;        
-#&gt; [3] &quot;Griffthe Mad King&#39;s Hand&quot;
+aliases2 &lt;- sapply(got_chars[c(14, 22, 25)], function(x) x[[&quot;aliases&quot;]])
 str(aliases2)
 #&gt;  chr [1:3] &quot;Merrett Muttonhead&quot; &quot;The Iron Captain&quot; ...</code></pre>
+<p>With purrr, you would use <code>map()</code> to get a list back or <code>map_chr()</code> to get atomic character vector. If you use <code>map_chr()</code> when you should not, you’ll get an error and can adjust your approach accordingly.</p>
+<pre class="r"><code>map_chr(got_chars[2:4], &quot;aliases&quot;)
+#&gt; Error: Result 1 is not a length 1 atomic vector</code></pre>
 </div>
-<div id="vapply-and-map_" class="section level2">
-<h2><code>vapply()</code> and <code>map_*()</code></h2>
-<p><code>vapply()</code>, some similarities with <code>map_chr()</code>, <code>map_lgl()</code>, etc. Touted as the base option for programming, but still unpredictable.</p>
+<div id="vapply-vs.-map_" class="section level2">
+<h2><code>vapply()</code> vs. <code>map_*()</code></h2>
+<p>Base <code>vapply()</code> requires you to specify a template for the return value and is described as a safer alternative to <code>sapply()</code>. The closest purrr functions are the type-specific mapping functions: <code>map_lgl()</code>, <code>map_int()</code>, <code>map_dbl()</code>, and <code>map_chr()</code>. Here’s comparable use of <code>vapply()</code> and <code>map_chr()</code> to get some of the Game of Thrones characters’ names.</p>
 <div class="row">
 <div class="col-md-6">
 <pre class="r"><code>vapply(got_chars[1:3],
@@ -419,9 +404,8 @@ str(aliases2)
 #&gt; [1] &quot;Arya Stark&quot;    &quot;Brandon Stark&quot; &quot;Catelyn Stark&quot;</code></pre>
 </div>
 </div>
-<p>Example gotcha from real life. Using <code>vapply()</code> inside a function. <code>n</code> can vary depending on input. But <code>vapply()</code>’s simplifying behavior means it will return 2D or 1D object, depending on <code>n</code>. It has no way to say <code>drop = FALSE</code>.</p>
-<div class="row">
-<div class="col-md-6">
+<p>What’s not to love with <code>vapply()</code> then? It suffers from the <code>drop = FALSE</code> problem we can have when requesting columns of 2-dimensional objects. Except <code>vapply()</code> has no <code>drop</code> argument to control this behavior! It’s another example of the base functions being more difficult to program around.</p>
+<p>I adapt this example from my real life, where I have <code>vapply()</code> inside a function and <code>n</code> is an argument to that function, i.e. it varies. Here I just define <code>n</code> prior to the <code>vapply()</code> call. Note how <code>vapply()</code> returns a 2 dimensional object in the first case and atomic vector in the second. As it says in the docs: “Simplification is always done in <code>vapply</code>.” Believe it.</p>
 <pre class="r"><code>f &lt;- function(x, n) rep(x, n)
 n &lt;- 3
 vapply(c(&quot;a&quot;, &quot;b&quot;), f, character(n), n = n)
@@ -434,24 +418,44 @@ vapply(c(&quot;a&quot;, &quot;b&quot;), f, character(n), n = n)
 #&gt;   a   b 
 #&gt; &quot;a&quot; &quot;b&quot;</code></pre>
 </div>
-<div class="col-md-6">
-<pre class="r"><code>f &lt;- function(x, n) rep(x, n)
-map(c(&quot;a&quot;, &quot;b&quot;), f, n = 3) %&gt;% lift_dl(cbind)(.)
-#&gt;      [,1] [,2]
-#&gt; [1,] &quot;a&quot;  &quot;b&quot; 
-#&gt; [2,] &quot;a&quot;  &quot;b&quot; 
-#&gt; [3,] &quot;a&quot;  &quot;b&quot;
-map(c(&quot;a&quot;, &quot;b&quot;), f, n = 1) %&gt;% lift_dl(cbind)(.)
-#&gt;      [,1] [,2]
-#&gt; [1,] &quot;a&quot;  &quot;b&quot;</code></pre>
-</div>
-</div>
-</div>
-<div id="mapply-and-map2-pmap" class="section level2">
-<h2><code>mapply()</code> and <code>map2()</code>, <code>pmap()</code></h2>
+<div id="mapply-vs.-map2-pmap" class="section level2">
+<h2><code>mapply()</code> vs. <code>map2()</code>, <code>pmap()</code></h2>
+<p><em>for when you want to iterate over the i-th elements of multiple vectors/lists</em></p>
 </div>
 <div id="tapply-aggregate" class="section level2">
 <h2><code>tapply()</code>, <code>aggregate()</code></h2>
+<p><em>for when you want to chop a vector or data frame into pieces based on one or more factors and compute on the pieces … tidyverse way would be <code>group_by() + summarize()</code> or <code>map()</code> inside <code>mutate()</code> with a nested data frame or <code>map()</code> over a list of split data frames … this gets a bit off topic, i.e. more into dplyr/tidyr territory??? … issue w/ <code>tapply()</code> and data.frame method of <code>aggregate()</code> is there’s no concept of common data frame for the splitter and splittee, return values quite variable</em></p>
+<pre class="r"><code>library(gapminder)
+mini_gap &lt;- gapminder %&gt;%
+  dplyr::filter(country %in% c(&quot;Canada&quot;, &quot;Germany&quot;), year &gt; 2000) %&gt;% 
+  droplevels()
+
+## in this specific case, output is quite nice
+aggregate(lifeExp ~ country, mini_gap, mean) 
+#&gt;   country lifeExp
+#&gt; 1  Canada 80.2115
+#&gt; 2 Germany 79.0380
+
+## frustrating that mini_gap can&#39;t be specified as the data frame in which to
+## find everything ... Group.1?
+aggregate(mini_gap[c(&quot;lifeExp&quot;, &quot;gdpPercap&quot;)], list(mini_gap$country), mean)
+#&gt;   Group.1 lifeExp gdpPercap
+#&gt; 1  Canada 80.2115  34824.10
+#&gt; 2 Germany 79.0380  31103.09
+
+## named vector comes back
+tapply(mini_gap$lifeExp, mini_gap$country, mean)
+#&gt;  Canada Germany 
+#&gt; 80.2115 79.0380
+
+## or a list ... but what you really want is a data frame
+tapply(mini_gap$lifeExp, mini_gap$country, mean, simplify = FALSE)
+#&gt; $Canada
+#&gt; [1] 80.2115
+#&gt; 
+#&gt; $Germany
+#&gt; [1] 79.038</code></pre>
+<p>sapply()<em>vs</em>%AF_(%C4)_%AF</p>
 </div>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>

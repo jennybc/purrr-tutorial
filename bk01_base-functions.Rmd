@@ -7,12 +7,7 @@ output:
 ---
 
 ```{r, echo = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-```
-
-```{r}
-library(tidyverse)
-library(repurrrsive)
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", error = TRUE)
 ```
 
 ## Why not base?
@@ -37,6 +32,15 @@ purrr addresses some of the friction identified in the base functions for "split
   * The `map()` family of functions is highly internally consistent, making it easier to transfer expertise from one function to another.
   * Greater encouragement for type-safe simplification, i.e. conversion from list to atomic vector or data frame.
   * Concise syntax for defining anonymous functions.
+
+We load purrr now. Below we also use example lists from [repurrrsive](https://github.com/jennybc/repurrrsive) which are [introduced and explored elsewhere](index.html).
+
+```{r}
+library(purrr)
+library(repurrrsive)
+```
+
+
   
 ## Why not plyr?
 
@@ -50,7 +54,7 @@ In terms of understanding or translating plyr code, here's the minimum you need 
 XYply()
 ```
 
-where `X` and `Y` specify the type of input and output respectively. `X` and `Y` take values from here:
+where `X` and `Y` specify the type of input and output, respectively. `X` and `Y` take values from here:
 
   * `a` = "array"
   * `d` = "data frame"
@@ -59,9 +63,9 @@ where `X` and `Y` specify the type of input and output respectively. `X` and `Y`
   
 The most useful function proved to be `ddply()`: data frame in, data frame out. This is now handled by dplyr and tidyr. Most tasks suitable for `a*ply()` and, especially `l*ply()` are now handled by purrr's `map()` family. The functions called for their side effects, as opposed to return value, are those named `*_ply()`; this is handled by purrr's `walk()` functions. Marching through a data frame row by row is now a job for purrr's `pmap()`.
 
-## `lapply()` and `purrr::map()`
+## `lapply()` vs. `purrr::map()`
 
-The main (only?) difference is access to purrr's shortcuts for anonymous functions.
+These are the core mapping functions of base and purrr, respectively. They are "list in, list out". The main (only?) difference is access to purrr's shortcuts for anonymous functions.
 
 <div class = "row">
 <div class = "col-md-6">
@@ -83,22 +87,28 @@ This is also `plyr::llply()`, although it offers some other arguments, such as `
 plyr::llply(got_chars[1:3], function(x) x[["name"]])
 ```
 
-## `sapply()` and ???
+## `sapply()` vs. ¯\\\_(ツ)\_/¯
 
 `sapply()` is a base function that attempts to apply a reasonable simplification to the output of `lapply()`. It's fine for interactive use, but due to the unpredictability of it return value, it's unwise to use it in programming. There is no equivalent in purrr or plyr.
 
-Problem demonstration: The characters in Game of Thrones can have aliases. Some have several, some have one, some have none. Depending on which characters I work with, the same code can return an object of entirely different class, i.e. a list or a character vector:
+Problem demonstration: The characters in Game of Thrones can have aliases. Some have several, some have one, some have none. Depending on which characters I work with, the same `sapply()` call can return an object of entirely different class, i.e. a list or a character vector. This can be a source of mysterious bugs in code meant to run non-interactively.
 
 ```{r}
-(aliases1 <- sapply(got_chars[2:4], function(x) x[["aliases"]]))
+aliases1 <- sapply(got_chars[2:4], function(x) x[["aliases"]])
 str(aliases1)
-(aliases2 <- sapply(got_chars[c(14, 22, 25)], function(x) x[["aliases"]]))
+aliases2 <- sapply(got_chars[c(14, 22, 25)], function(x) x[["aliases"]])
 str(aliases2)
 ```
 
-## `vapply()` and `map_*()`
+With purrr, you would use `map()` to get a list back or `map_chr()` to get atomic character vector. If you use `map_chr()` when you should not, you'll get an error and can adjust your approach accordingly.
 
-`vapply()`, some similarities with `map_chr()`, `map_lgl()`, etc. Touted as the base option for programming, but still unpredictable.
+```{r}
+map_chr(got_chars[2:4], "aliases")
+```
+
+## `vapply()` vs. `map_*()`
+
+Base `vapply()` requires you to specify a template for the return value and is described as a safer alternative to `sapply()`. The closest purrr functions are the type-specific mapping functions: `map_lgl()`, `map_int()`, `map_dbl()`, and `map_chr()`. Here's comparable use of `vapply()` and `map_chr()` to get some of the Game of Thrones characters' names.
 
 <div class = "row">
 <div class = "col-md-6">
@@ -114,10 +124,10 @@ map_chr(got_chars[1:3], "name")
 </div>
 </div>
 
-Example gotcha from real life. Using `vapply()` inside a function. `n` can vary depending on input. But `vapply()`'s simplifying behavior means it will return 2D or 1D object, depending on `n`. It has no way to say `drop = FALSE`.
+What's not to love with `vapply()` then? It suffers from the `drop = FALSE` problem we can have when requesting columns of 2-dimensional objects. Except `vapply()` has no `drop` argument to control this behavior! It's another example of the base functions being more difficult to program around.
 
-<div class = "row">
-<div class = "col-md-6">
+I adapt this example from my real life, where I have `vapply()` inside a function and `n` is an argument to that function, i.e. it varies. Here I just define `n` prior to the `vapply()` call. Note how `vapply()` returns a 2 dimensional object in the first case and atomic vector in the second. As it says in the docs: "Simplification is always done in `vapply`." Believe it.
+
 ```{r}
 f <- function(x, n) rep(x, n)
 n <- 3
@@ -125,16 +135,33 @@ vapply(c("a", "b"), f, character(n), n = n)
 n <- 1
 vapply(c("a", "b"), f, character(n), n = n)
 ```
-</div>
-<div class = "col-md-6">
-```{r}
-f <- function(x, n) rep(x, n)
-map(c("a", "b"), f, n = 3) %>% lift_dl(cbind)(.)
-map(c("a", "b"), f, n = 1) %>% lift_dl(cbind)(.)
-```
-</div>
-</div>
 
-## `mapply()` and `map2()`, `pmap()`
+## `mapply()` vs. `map2()`, `pmap()`
+
+*for when you want to iterate over the i-th elements of multiple vectors/lists*
 
 ## `tapply()`, `aggregate()`
+
+*for when you want to chop a vector or data frame into pieces based on one or more factors and compute on the pieces ... tidyverse way would be `group_by() + summarize()` or `map()` inside `mutate()` with a nested data frame or `map()` over a list of split data frames ... this gets a bit off topic, i.e. more into dplyr/tidyr territory??? ... issue w/ `tapply()` and data.frame method of `aggregate()` is there's no concept of common data frame for the splitter and splittee, return values quite variable*
+
+```{r}
+library(gapminder)
+mini_gap <- gapminder %>%
+  dplyr::filter(country %in% c("Canada", "Germany"), year > 2000) %>% 
+  droplevels()
+
+## in this specific case, output is quite nice
+aggregate(lifeExp ~ country, mini_gap, mean) 
+
+## frustrating that mini_gap can't be specified as the data frame in which to
+## find everything ... Group.1?
+aggregate(mini_gap[c("lifeExp", "gdpPercap")], list(mini_gap$country), mean)
+
+## named vector comes back
+tapply(mini_gap$lifeExp, mini_gap$country, mean)
+
+## or a list ... but what you really want is a data frame
+tapply(mini_gap$lifeExp, mini_gap$country, mean, simplify = FALSE)
+```
+
+sapply()_vs_%AF\_(%C4)_%AF
