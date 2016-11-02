@@ -1,5 +1,6 @@
 ---
 title: "Vectors and lists"
+comment: "*review of vectors, lists, and indexing*"
 output:
   html_document:
     toc: true
