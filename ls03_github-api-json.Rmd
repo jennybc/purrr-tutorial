@@ -49,7 +49,7 @@ str(gh_users[[1]], list.len = 6)
 You can also use `listviewer::jsonedit()` to explore it interactively:
 
 ```{r echo = FALSE}
-jsonedit(gh_users, mode = "view")
+jsonedit(gh_users, mode = "view", elementId = "gh_users")
 ```
 
 <!--

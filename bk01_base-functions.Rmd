@@ -95,9 +95,9 @@ plyr::llply(got_chars[1:3], function(x) x[["name"]])
 Problem demonstration: The characters in Game of Thrones can have aliases. Some have several, some have one, some have none. Depending on which characters I work with, the same `sapply()` call can return an object of entirely different class, i.e. a list or a character vector. This can be a source of mysterious bugs in code meant to run non-interactively.
 
 ```{r}
-aliases1 <- sapply(got_chars[2:4], function(x) x[["aliases"]])
+aliases1 <- sapply(got_chars[20:22], function(x) x[["aliases"]])
 str(aliases1)
-aliases2 <- sapply(got_chars[c(14, 22, 25)], function(x) x[["aliases"]])
+aliases2 <- sapply(got_chars[c(3, 22, 27)], function(x) x[["aliases"]])
 str(aliases2)
 ```
 

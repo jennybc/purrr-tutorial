@@ -349,24 +349,24 @@ library(repurrrsive)</code></pre>
 <pre class="r"><code>lapply(got_chars[1:3],
        function(x) x[[&quot;name&quot;]])
 #&gt; [[1]]
-#&gt; [1] &quot;Arya Stark&quot;
+#&gt; [1] &quot;Theon Greyjoy&quot;
 #&gt; 
 #&gt; [[2]]
-#&gt; [1] &quot;Brandon Stark&quot;
+#&gt; [1] &quot;Tyrion Lannister&quot;
 #&gt; 
 #&gt; [[3]]
-#&gt; [1] &quot;Catelyn Stark&quot;</code></pre>
+#&gt; [1] &quot;Victarion Greyjoy&quot;</code></pre>
 </div>
 <div class="col-md-6">
 <pre class="r"><code>map(got_chars[1:3], &quot;name&quot;)
 #&gt; [[1]]
-#&gt; [1] &quot;Arya Stark&quot;
+#&gt; [1] &quot;Theon Greyjoy&quot;
 #&gt; 
 #&gt; [[2]]
-#&gt; [1] &quot;Brandon Stark&quot;
+#&gt; [1] &quot;Tyrion Lannister&quot;
 #&gt; 
 #&gt; [[3]]
-#&gt; [1] &quot;Catelyn Stark&quot;</code></pre>
+#&gt; [1] &quot;Victarion Greyjoy&quot;</code></pre>
 </div>
 </div>
 <p>This is also <code>plyr::llply()</code>, although it offers some other arguments, such as <code>.progress</code> and <code>.parallel</code>.</p>
@@ -376,15 +376,15 @@ library(repurrrsive)</code></pre>
 <h2><code>sapply()</code> vs. ¯\_(ツ)_/¯</h2>
 <p><code>sapply()</code> is a base function that attempts to apply a reasonable simplification to the output of <code>lapply()</code>. It’s fine for interactive use, but due to the unpredictability of it return value, it’s unwise to use it in programming. There is no equivalent in purrr or plyr.</p>
 <p>Problem demonstration: The characters in Game of Thrones can have aliases. Some have several, some have one, some have none. Depending on which characters I work with, the same <code>sapply()</code> call can return an object of entirely different class, i.e. a list or a character vector. This can be a source of mysterious bugs in code meant to run non-interactively.</p>
-<pre class="r"><code>aliases1 &lt;- sapply(got_chars[2:4], function(x) x[[&quot;aliases&quot;]])
+<pre class="r"><code>aliases1 &lt;- sapply(got_chars[20:22], function(x) x[[&quot;aliases&quot;]])
 str(aliases1)
 #&gt; List of 3
-#&gt;  $ : chr [1:3] &quot;Bran&quot; &quot;Bran the Broken&quot; &quot;The Winged Wolf&quot;
-#&gt;  $ : chr [1:5] &quot;Catelyn Tully&quot; &quot;Lady Stoneheart&quot; &quot;The Silent Sistet&quot; &quot;Mother Mercilesr&quot; ...
 #&gt;  $ : chr [1:3] &quot;Ned&quot; &quot;The Ned&quot; &quot;The Quiet Wolf&quot;
-aliases2 &lt;- sapply(got_chars[c(14, 22, 25)], function(x) x[[&quot;aliases&quot;]])
+#&gt;  $ : chr [1:4] &quot;The Kingslayer&quot; &quot;The Lion of Lannister&quot; &quot;The Young Lion&quot; &quot;Cripple&quot;
+#&gt;  $ : chr &quot;Griffthe Mad King&#39;s Hand&quot;
+aliases2 &lt;- sapply(got_chars[c(3, 22, 27)], function(x) x[[&quot;aliases&quot;]])
 str(aliases2)
-#&gt;  chr [1:3] &quot;Merrett Muttonhead&quot; &quot;The Iron Captain&quot; ...</code></pre>
+#&gt;  chr [1:3] &quot;The Iron Captain&quot; &quot;Griffthe Mad King&#39;s Hand&quot; ...</code></pre>
 <p>With purrr, you would use <code>map()</code> to get a list back or <code>map_chr()</code> to get atomic character vector. If you use <code>map_chr()</code> when you should not, you’ll get an error and can adjust your approach accordingly.</p>
 <pre class="r"><code>map_chr(got_chars[2:4], &quot;aliases&quot;)
 #&gt; Error: Result 1 is not a length 1 atomic vector</code></pre>
@@ -396,11 +396,11 @@ str(aliases2)
 <div class="col-md-6">
 <pre class="r"><code>vapply(got_chars[1:3],
        function(x) x[[&quot;name&quot;]], character(1))
-#&gt; [1] &quot;Arya Stark&quot;    &quot;Brandon Stark&quot; &quot;Catelyn Stark&quot;</code></pre>
+#&gt; [1] &quot;Theon Greyjoy&quot;     &quot;Tyrion Lannister&quot;  &quot;Victarion Greyjoy&quot;</code></pre>
 </div>
 <div class="col-md-6">
 <pre class="r"><code>map_chr(got_chars[1:3], &quot;name&quot;)
-#&gt; [1] &quot;Arya Stark&quot;    &quot;Brandon Stark&quot; &quot;Catelyn Stark&quot;</code></pre>
+#&gt; [1] &quot;Theon Greyjoy&quot;     &quot;Tyrion Lannister&quot;  &quot;Victarion Greyjoy&quot;</code></pre>
 </div>
 </div>
 <p>What’s not to love with <code>vapply()</code> then? It suffers from the <code>drop = FALSE</code> problem we can have when requesting columns of 2-dimensional objects. Except <code>vapply()</code> has no <code>drop</code> argument to control this behavior! It’s another example of the base functions being more difficult to program around.</p>
