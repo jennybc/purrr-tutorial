@@ -1,0 +1,198 @@
+---
+title: "Introduction to `map()`: extract elements"
+comment: "*name and position shortcuts, type-specific and simplifying map*"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", error = TRUE)
+```
+
+## Load packages
+
+Load purrr and repurrrsive, which contains recursive list examples. listviewer provides the interactive list viewing widgets.
+
+```{r}
+library(purrr)
+## install_github("jennybc/repurrrsive")
+library(repurrrsive)
+library(listviewer)
+```
+
+## Vectorized and "list-ized" operations
+
+This lesson picks up where [the primer on vectors and lists](https://jennybc.github.io/purrr-tutorial/bk00_vectors-and-lists.html#vectorized_operations) left off. Recall that many operations "just work" in a vectorized fashion in R:
+
+```{r}
+(3:5) ^ 2
+sqrt(c(9, 16, 25))
+```
+
+Through the magic of R, the operations "raise to the power of 2" and "take the square root" were applied to each individual element of the numeric vector input. Someone -- but not you! -- has written a `for()` loop:
+
+```
+for (i in 1:n) {
+  output[[i]] <- f(input[[i]])
+}
+```
+
+Automatic vectorization is possible because our input is an atomic vector: always of length one, always of uniform type.
+
+What if the input is a list? You have to be more intentional to apply a function `f()` to each element of a list, i.e. to "list-ize" computation. This makes sense because the data structure itself does not guarantee that it makes any sense at all to apply a common function `f()` to each element of the list. You must guarantee that.
+
+`purrr::map()` is a function for applying a function to each element of a list. The [closest base R function](bk01_base-functions.html) is `lapply()`. Here's how the square root example of the above would look if the input was in a list.
+
+```{r}
+map(c(9, 16, 25), sqrt)
+```
+
+A template for basic `map()` usage:
+
+```{r eval = FALSE}
+map(YOUR_LIST, YOUR_FUNCTION)
+```
+
+Below we explore these useful features of `purrr::map()` and friends:
+
+  * Shortcuts for `YOUR_FUNCTION` when you want to extract list elements by name or position
+  * Simplify and specify the type of output via `map_chr()`, `map_lgl()`, etc.
+
+### Name and position shortcuts
+
+Who are these Game of Thrones characters?
+
+We want the elements with name "name", so we do this (we restrict to the first few elements purely to conserve space):
+
+```{r}
+map(got_chars[1:4], "name")
+```
+
+We are exploiting one of purrr's most useful features: a shortcut to create a function that extracts an element based on its name.
+
+A companion shortcut is used if you provide a positive integer to `map()`. This creates a function that extracts an element based on position.
+
+The 3rd element of each character's list is his or her name and we get them like so:
+
+```{r}
+map(got_chars[5:8], 3)
+```
+
+To recap, here are two shortcuts for making the `.f` function that `map()` will apply:
+
+  * provide "TEXT" to extract the element named "TEXT"
+    - equivalent to `function(x) x[["TEXT"]]`
+  * provide `i` to extract the `i`-th element
+    - equivalent to `function(x) x[[i]]`
+
+You will frequently see `map()` used together with [the pipe `%>%`](http://r4ds.had.co.nz/pipes.html). These calls produce the same result as the above.
+
+```{r eval = FALSE}
+got_chars %>% 
+  map("name")
+got_chars %>% 
+  map(3)
+```
+
+#### Exercises
+
+1. Use `names()` to inspect the names of the list elements associated with a single character. What is the index or position of the `playedBy` element? Use the character and position shortcuts to extract the `playedBy` elements for all characters.
+1. What happens if you use the character shortcut with a string that does not appear in the lists' names?
+1. What happens if you use the position shortcut with a number greater than the length of the lists?
+1. What if these shortcuts did not exist? Write a function that takes a list and a string as input and returns the list element that bears the name in the string. Apply this to `got_chars` via `map()`. Do you get the same result as with the shortcut? Reflect on code length and readability.
+1. Write another function that takes a list and an integer as input and returns the list element at that position. Apply this to `got_chars` via `map()`. How does this result and process compare with the shortcut?
+
+### Type-specific map
+
+`map()` always returns a list, even if all the elements have the same flavor and are of length one. But in that case, you might prefer a simpler object: **an atomic vector**.
+
+If you expect `map()` to return output that can be turned into an atomic vector, it is best to use a type-specific variant of `map()`. This is more efficient than using `map()` to get a list and then simplifying the result in a second step. Also purrr will alert you to any problems, i.e. if one or more inputs has the wrong type or length. This is the [increased rigor about type alluded to in the section about coercion](bk00_vectors-and-lists.html#coercion).
+
+Our current examples are suitable for demonstrating `map_chr()`, since the requested elements are always character.
+
+```{r}
+map_chr(got_chars[9:12], "name")
+map_chr(got_chars[13:16], 3)
+```
+
+Besides `map_chr()`, there are other variants of `map()`, with the target type conveyed by the name:
+
+  * `map_lgl()`, `map_int()`, `map_dbl()`
+  
+#### Exercises
+
+1. For each character, the second element is named "id". This is the character's id in the [API Of Ice And Fire](https://anapioficeandfire.com). Use a type-specific form of `map()` and an extraction shortcut to extract these ids into an integer vector.
+1. Use your list inspection strategies to find the list element that is logical. There is one! Use a type-specific form of `map()` and an extraction shortcut to extract these values for all characters into a logical vector.
+
+### Extract multiple values
+
+What if you want to retrieve multiple elements? Such as the character's name and culture? First, recall how we do this with the list for a single user:
+
+```{r}
+got_chars[[3]][c("name", "culture", "gender", "born")]
+```
+
+We use single square bracket indexing and a character vector to index by name. How will we ram this into the `map()` framework? To paraphrase Chambers, ["everything that happens in R is a function call"](http://adv-r.had.co.nz/Functions.html#all-calls) and indexing with `[` is no exception.
+
+It feels (and maybe looks) weird, but we can map `[` just like any other function. Recall `map()` usage:
+
+```{r eval = FALSE}
+map(.x, .f, ...)
+```
+
+The function `.f` will be `[`. And we finally get to use `...`! This is where we pass the character vector of the names of our desired elements. We inspect the result for two characters.
+
+```{r}
+x <- map(got_chars, `[`, c("name", "culture", "gender", "born"))
+str(x[16:17])
+```
+
+Some people find this ugly and might prefer the `extract()` function from magrittr.
+
+```{r}
+library(magrittr)
+x <- map(got_chars, extract, c("name", "culture", "gender", "born"))
+str(x[18:19])
+```
+
+#### Exercises
+
+1. Use your list inspection skills to determine the position of the elements named "name", "gender", "culture", "born", and "died". Map `[` or `magrittr::extract()` over users, requesting these elements by position instead of name.
+
+### Data frame output
+
+We just learned how to extract multiple elements per user by mapping `[`. But, since `[` is non-simplifying, each user's elements are returned in a list. And, as it must, `map()` itself returns list. We've traded one recursive list for another recursive list, albeit a slightly less complicated one.
+
+How can we "stack up" these results row-wise, i.e. one row per user and variables for "name", "gender", etc.? A data frame would be the perfect data structure for this information.
+
+This is what `map_df()` is for.
+
+```{r}
+map_df(got_chars, extract, c("name", "culture", "gender", "id", "born", "alive"))
+```
+
+Finally! A data frame! Hallelujah!
+
+Notice how the variables have been automatically type converted. It's a beautiful thing. Until it's not. When programming, it is safer, but more cumbersome, to explicitly specify type and build your data frame the usual way.
+
+```{r}
+library(tibble)
+got_chars %>% {
+  tibble(
+       name = map_chr(., "name"),
+    culture = map_chr(., "culture"),
+     gender = map_chr(., "gender"),       
+         id = map_int(., "id"),
+       born = map_chr(., "born"),
+      alive = map_lgl(., "alive")
+  )
+}
+```
+
+*Syntax notes: The dot `.` above is the placeholder for the primary input: `got_chars` in this case. The curly braces `{}` surrounding the `tibble()` call prevent `got_chars` from being passed in as the first argument of `tibble()`.*
+
+#### Exercises
+
+1. Use `map_df()` to create the same data frame as above, but indexing with a vector of positive integers instead of names.

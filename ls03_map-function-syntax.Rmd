@@ -1,0 +1,38 @@
+---
+title: "Syntax for specifying the function to map"
+comment: "*all the purrr shortcuts*"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+## Load packages
+
+Load purrr and repurrrsive, which contains recursive list examples. listviewer provides the interactive list viewing widgets.
+
+```{r}
+library(purrr)
+## install_github("jennybc/repurrrsive")
+library(repurrrsive)
+library(listviewer)
+```
+
+
+### Function specification
+
+Flexible and concise syntax for specifying `YOUR_FUNCTION`
+
+```{r}
+nms <- map_chr(got_chars, "name")
+aliases <- map(got_chars, "aliases")
+aliases <- set_names(aliases, nms)
+map(aliases, function(x) paste(x, collapse = "|"))
+map(aliases, paste, collapse = "|")
+map(aliases, ~ paste(.x, collapse = " | "))
+```
+

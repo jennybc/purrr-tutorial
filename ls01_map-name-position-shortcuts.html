@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Introduction to map(): extract elements</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.9em;
+  padding-left: 5px;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">purrr tutorial</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Lessons and examples</a>
+</li>
+<li>
+  <a href="more-resources.html">More resources</a>
+</li>
+<li>
+  <a href="slides.html">Slides</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Introduction to <code>map()</code>: extract elements</h1>
+
+</div>
+
+
+<div id="load-packages" class="section level2">
+<h2>Load packages</h2>
+<p>Load purrr and repurrrsive, which contains recursive list examples. listviewer provides the interactive list viewing widgets.</p>
+<pre class="r"><code>library(purrr)
+## install_github(&quot;jennybc/repurrrsive&quot;)
+library(repurrrsive)
+library(listviewer)</code></pre>
+</div>
+<div id="vectorized-and-list-ized-operations" class="section level2">
+<h2>Vectorized and “list-ized” operations</h2>
+<p>This lesson picks up where <a href="https://jennybc.github.io/purrr-tutorial/bk00_vectors-and-lists.html#vectorized_operations">the primer on vectors and lists</a> left off. Recall that many operations “just work” in a vectorized fashion in R:</p>
+<pre class="r"><code>(3:5) ^ 2
+#&gt; [1]  9 16 25
+sqrt(c(9, 16, 25))
+#&gt; [1] 3 4 5</code></pre>
+<p>Through the magic of R, the operations “raise to the power of 2” and “take the square root” were applied to each individual element of the numeric vector input. Someone – but not you! – has written a <code>for()</code> loop:</p>
+<pre><code>for (i in 1:n) {
+  output[[i]] &lt;- f(input[[i]])
+}</code></pre>
+<p>Automatic vectorization is possible because our input is an atomic vector: always of length one, always of uniform type.</p>
+<p>What if the input is a list? You have to be more intentional to apply a function <code>f()</code> to each element of a list, i.e. to “list-ize” computation. This makes sense because the data structure itself does not guarantee that it makes any sense at all to apply a common function <code>f()</code> to each element of the list. You must guarantee that.</p>
+<p><code>purrr::map()</code> is a function for applying a function to each element of a list. The <a href="bk01_base-functions.html">closest base R function</a> is <code>lapply()</code>. Here’s how the square root example of the above would look if the input was in a list.</p>
+<pre class="r"><code>map(c(9, 16, 25), sqrt)
+#&gt; [[1]]
+#&gt; [1] 3
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] 4
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] 5</code></pre>
+<p>A template for basic <code>map()</code> usage:</p>
+<pre class="r"><code>map(YOUR_LIST, YOUR_FUNCTION)</code></pre>
+<p>Below we explore these useful features of <code>purrr::map()</code> and friends:</p>
+<ul>
+<li>Shortcuts for <code>YOUR_FUNCTION</code> when you want to extract list elements by name or position</li>
+<li>Simplify and specify the type of output via <code>map_chr()</code>, <code>map_lgl()</code>, etc.</li>
+</ul>
+<div id="name-and-position-shortcuts" class="section level3">
+<h3>Name and position shortcuts</h3>
+<p>Who are these Game of Thrones characters?</p>
+<p>We want the elements with name “name”, so we do this (we restrict to the first few elements purely to conserve space):</p>
+<pre class="r"><code>map(got_chars[1:4], &quot;name&quot;)
+#&gt; [[1]]
+#&gt; [1] &quot;Theon Greyjoy&quot;
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] &quot;Tyrion Lannister&quot;
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] &quot;Victarion Greyjoy&quot;
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] &quot;Will&quot;</code></pre>
+<p>We are exploiting one of purrr’s most useful features: a shortcut to create a function that extracts an element based on its name.</p>
+<p>A companion shortcut is used if you provide a positive integer to <code>map()</code>. This creates a function that extracts an element based on position.</p>
+<p>The 3rd element of each character’s list is his or her name and we get them like so:</p>
+<pre class="r"><code>map(got_chars[5:8], 3)
+#&gt; [[1]]
+#&gt; [1] &quot;Areo Hotah&quot;
+#&gt; 
+#&gt; [[2]]
+#&gt; [1] &quot;Chett&quot;
+#&gt; 
+#&gt; [[3]]
+#&gt; [1] &quot;Cressen&quot;
+#&gt; 
+#&gt; [[4]]
+#&gt; [1] &quot;Arianne Martell&quot;</code></pre>
+<p>To recap, here are two shortcuts for making the <code>.f</code> function that <code>map()</code> will apply:</p>
+<ul>
+<li>provide “TEXT” to extract the element named “TEXT”
+<ul>
+<li>equivalent to <code>function(x) x[[&quot;TEXT&quot;]]</code></li>
+</ul></li>
+<li>provide <code>i</code> to extract the <code>i</code>-th element
+<ul>
+<li>equivalent to <code>function(x) x[[i]]</code></li>
+</ul></li>
+</ul>
+<p>You will frequently see <code>map()</code> used together with <a href="http://r4ds.had.co.nz/pipes.html">the pipe <code>%&gt;%</code></a>. These calls produce the same result as the above.</p>
+<pre class="r"><code>got_chars %&gt;% 
+  map(&quot;name&quot;)
+got_chars %&gt;% 
+  map(3)</code></pre>
+<div id="exercises" class="section level4">
+<h4>Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>Use <code>names()</code> to inspect the names of the list elements associated with a single character. What is the index or position of the <code>playedBy</code> element? Use the character and position shortcuts to extract the <code>playedBy</code> elements for all characters.</li>
+<li>What happens if you use the character shortcut with a string that does not appear in the lists’ names?</li>
+<li>What happens if you use the position shortcut with a number greater than the length of the lists?</li>
+<li>What if these shortcuts did not exist? Write a function that takes a list and a string as input and returns the list element that bears the name in the string. Apply this to <code>got_chars</code> via <code>map()</code>. Do you get the same result as with the shortcut? Reflect on code length and readability.</li>
+<li>Write another function that takes a list and an integer as input and returns the list element at that position. Apply this to <code>got_chars</code> via <code>map()</code>. How does this result and process compare with the shortcut?</li>
+</ol>
+</div>
+</div>
+<div id="type-specific-map" class="section level3">
+<h3>Type-specific map</h3>
+<p><code>map()</code> always returns a list, even if all the elements have the same flavor and are of length one. But in that case, you might prefer a simpler object: <strong>an atomic vector</strong>.</p>
+<p>If you expect <code>map()</code> to return output that can be turned into an atomic vector, it is best to use a type-specific variant of <code>map()</code>. This is more efficient than using <code>map()</code> to get a list and then simplifying the result in a second step. Also purrr will alert you to any problems, i.e. if one or more inputs has the wrong type or length. This is the <a href="bk00_vectors-and-lists.html#coercion">increased rigor about type alluded to in the section about coercion</a>.</p>
+<p>Our current examples are suitable for demonstrating <code>map_chr()</code>, since the requested elements are always character.</p>
+<pre class="r"><code>map_chr(got_chars[9:12], &quot;name&quot;)
+#&gt; [1] &quot;Daenerys Targaryen&quot; &quot;Davos Seaworth&quot;     &quot;Arya Stark&quot;        
+#&gt; [4] &quot;Arys Oakheart&quot;
+map_chr(got_chars[13:16], 3)
+#&gt; [1] &quot;Asha Greyjoy&quot;    &quot;Barristan Selmy&quot; &quot;Varamyr&quot;         &quot;Brandon Stark&quot;</code></pre>
+<p>Besides <code>map_chr()</code>, there are other variants of <code>map()</code>, with the target type conveyed by the name:</p>
+<ul>
+<li><code>map_lgl()</code>, <code>map_int()</code>, <code>map_dbl()</code></li>
+</ul>
+<div id="exercises-1" class="section level4">
+<h4>Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>For each character, the second element is named “id”. This is the character’s id in the <a href="https://anapioficeandfire.com">API Of Ice And Fire</a>. Use a type-specific form of <code>map()</code> and an extraction shortcut to extract these ids into an integer vector.</li>
+<li>Use your list inspection strategies to find the list element that is logical. There is one! Use a type-specific form of <code>map()</code> and an extraction shortcut to extract these values for all characters into a logical vector.</li>
+</ol>
+</div>
+</div>
+<div id="extract-multiple-values" class="section level3">
+<h3>Extract multiple values</h3>
+<p>What if you want to retrieve multiple elements? Such as the character’s name and culture? First, recall how we do this with the list for a single user:</p>
+<pre class="r"><code>got_chars[[3]][c(&quot;name&quot;, &quot;culture&quot;, &quot;gender&quot;, &quot;born&quot;)]
+#&gt; $name
+#&gt; [1] &quot;Victarion Greyjoy&quot;
+#&gt; 
+#&gt; $culture
+#&gt; [1] &quot;Ironborn&quot;
+#&gt; 
+#&gt; $gender
+#&gt; [1] &quot;Male&quot;
+#&gt; 
+#&gt; $born
+#&gt; [1] &quot;In 268 AC or before, at Pyke&quot;</code></pre>
+<p>We use single square bracket indexing and a character vector to index by name. How will we ram this into the <code>map()</code> framework? To paraphrase Chambers, <a href="http://adv-r.had.co.nz/Functions.html#all-calls">“everything that happens in R is a function call”</a> and indexing with <code>[</code> is no exception.</p>
+<p>It feels (and maybe looks) weird, but we can map <code>[</code> just like any other function. Recall <code>map()</code> usage:</p>
+<pre class="r"><code>map(.x, .f, ...)</code></pre>
+<p>The function <code>.f</code> will be <code>[</code>. And we finally get to use <code>...</code>! This is where we pass the character vector of the names of our desired elements. We inspect the result for two characters.</p>
+<pre class="r"><code>x &lt;- map(got_chars, `[`, c(&quot;name&quot;, &quot;culture&quot;, &quot;gender&quot;, &quot;born&quot;))
+str(x[16:17])
+#&gt; List of 2
+#&gt;  $ :List of 4
+#&gt;   ..$ name   : chr &quot;Brandon Stark&quot;
+#&gt;   ..$ culture: chr &quot;Northmen&quot;
+#&gt;   ..$ gender : chr &quot;Male&quot;
+#&gt;   ..$ born   : chr &quot;In 290 AC, at Winterfell&quot;
+#&gt;  $ :List of 4
+#&gt;   ..$ name   : chr &quot;Brienne of Tarth&quot;
+#&gt;   ..$ culture: chr &quot;&quot;
+#&gt;   ..$ gender : chr &quot;Female&quot;
+#&gt;   ..$ born   : chr &quot;In 280 AC&quot;</code></pre>
+<p>Some people find this ugly and might prefer the <code>extract()</code> function from magrittr.</p>
+<pre class="r"><code>library(magrittr)
+#&gt; 
+#&gt; Attaching package: &#39;magrittr&#39;
+#&gt; The following object is masked from &#39;package:tidyr&#39;:
+#&gt; 
+#&gt;     extract
+#&gt; The following object is masked from &#39;package:purrr&#39;:
+#&gt; 
+#&gt;     set_names
+x &lt;- map(got_chars, extract, c(&quot;name&quot;, &quot;culture&quot;, &quot;gender&quot;, &quot;born&quot;))
+str(x[18:19])
+#&gt; List of 2
+#&gt;  $ :List of 4
+#&gt;   ..$ name   : chr &quot;Catelyn Stark&quot;
+#&gt;   ..$ culture: chr &quot;Rivermen&quot;
+#&gt;   ..$ gender : chr &quot;Female&quot;
+#&gt;   ..$ born   : chr &quot;In 264 AC, at Riverrun&quot;
+#&gt;  $ :List of 4
+#&gt;   ..$ name   : chr &quot;Cersei Lannister&quot;
+#&gt;   ..$ culture: chr &quot;Westerman&quot;
+#&gt;   ..$ gender : chr &quot;Female&quot;
+#&gt;   ..$ born   : chr &quot;In 266 AC, at Casterly Rock&quot;</code></pre>
+<div id="exercises-2" class="section level4">
+<h4>Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>Use your list inspection skills to determine the position of the elements named “name”, “gender”, “culture”, “born”, and “died”. Map <code>[</code> or <code>magrittr::extract()</code> over users, requesting these elements by position instead of name.</li>
+</ol>
+</div>
+</div>
+<div id="data-frame-output" class="section level3">
+<h3>Data frame output</h3>
+<p>We just learned how to extract multiple elements per user by mapping <code>[</code>. But, since <code>[</code> is non-simplifying, each user’s elements are returned in a list. And, as it must, <code>map()</code> itself returns list. We’ve traded one recursive list for another recursive list, albeit a slightly less complicated one.</p>
+<p>How can we “stack up” these results row-wise, i.e. one row per user and variables for “name”, “gender”, etc.? A data frame would be the perfect data structure for this information.</p>
+<p>This is what <code>map_df()</code> is for.</p>
+<pre class="r"><code>map_df(got_chars, extract, c(&quot;name&quot;, &quot;culture&quot;, &quot;gender&quot;, &quot;id&quot;, &quot;born&quot;, &quot;alive&quot;))
+#&gt; # A tibble: 29 × 6
+#&gt;                  name  culture gender    id
+#&gt;                 &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt; &lt;int&gt;
+#&gt; 1       Theon Greyjoy Ironborn   Male  1022
+#&gt; 2    Tyrion Lannister            Male  1052
+#&gt; 3   Victarion Greyjoy Ironborn   Male  1074
+#&gt; 4                Will            Male  1109
+#&gt; 5          Areo Hotah Norvoshi   Male  1166
+#&gt; 6               Chett            Male  1267
+#&gt; 7             Cressen            Male  1295
+#&gt; 8     Arianne Martell  Dornish Female   130
+#&gt; 9  Daenerys Targaryen Valyrian Female  1303
+#&gt; 10     Davos Seaworth Westeros   Male  1319
+#&gt; # ... with 19 more rows, and 2 more variables: born &lt;chr&gt;, alive &lt;lgl&gt;</code></pre>
+<p>Finally! A data frame! Hallelujah!</p>
+<p>Notice how the variables have been automatically type converted. It’s a beautiful thing. Until it’s not. When programming, it is safer, but more cumbersome, to explicitly specify type and build your data frame the usual way.</p>
+<pre class="r"><code>library(tibble)
+got_chars %&gt;% {
+  tibble(
+       name = map_chr(., &quot;name&quot;),
+    culture = map_chr(., &quot;culture&quot;),
+     gender = map_chr(., &quot;gender&quot;),       
+         id = map_int(., &quot;id&quot;),
+       born = map_chr(., &quot;born&quot;),
+      alive = map_lgl(., &quot;alive&quot;)
+  )
+}
+#&gt; # A tibble: 29 × 6
+#&gt;                  name  culture gender    id
+#&gt;                 &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt; &lt;int&gt;
+#&gt; 1       Theon Greyjoy Ironborn   Male  1022
+#&gt; 2    Tyrion Lannister            Male  1052
+#&gt; 3   Victarion Greyjoy Ironborn   Male  1074
+#&gt; 4                Will            Male  1109
+#&gt; 5          Areo Hotah Norvoshi   Male  1166
+#&gt; 6               Chett            Male  1267
+#&gt; 7             Cressen            Male  1295
+#&gt; 8     Arianne Martell  Dornish Female   130
+#&gt; 9  Daenerys Targaryen Valyrian Female  1303
+#&gt; 10     Davos Seaworth Westeros   Male  1319
+#&gt; # ... with 19 more rows, and 2 more variables: born &lt;chr&gt;, alive &lt;lgl&gt;</code></pre>
+<p><em>Syntax notes: The dot <code>.</code> above is the placeholder for the primary input: <code>got_chars</code> in this case. The curly braces <code>{}</code> surrounding the <code>tibble()</code> call prevent <code>got_chars</code> from being passed in as the first argument of <code>tibble()</code>.</em></p>
+<div id="exercises-3" class="section level4">
+<h4>Exercises</h4>
+<ol style="list-style-type: decimal">
+<li>Use <code>map_df()</code> to create the same data frame as above, but indexing with a vector of positive integers instead of names.</li>
+</ol>
+</div>
+</div>
+</div>
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

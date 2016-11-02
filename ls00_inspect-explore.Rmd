@@ -1,5 +1,6 @@
 ---
-title: "Inspect, explore: Wes Anderson, Game of Thrones, GitHub"
+title: "Explore the example lists: Wes Anderson, Game of Thrones, GitHub"
+comment: "*how to get to know a list*"
 output:
   html_document:
     toc: true
@@ -90,7 +91,7 @@ jsonedit(number_unnamed(got_chars), mode = "view", elementId = "got_chars")
 jsonedit(number_unnamed(gh_users), mode = "view", elementId = "gh_users")
 ```
 
-### Explore `gh_repos`
+## listview `gh_repos`
 
 ```{r echo = FALSE}
 jsonedit(number_unnamed(gh_repos), mode = "view", elementId = "gh_repos")

@@ -17,3 +17,5 @@ dplyr
 stringr
 htmltools
 listviewer
+magrittr
+jsonlite

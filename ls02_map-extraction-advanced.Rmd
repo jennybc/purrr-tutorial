@@ -1,6 +1,6 @@
 ---
 title: "Simplifying data from a list of GitHub users"
-comment: "*suitable for a hands-on activity*"
+comment: "*end to end: inspection, extraction and simplification, more advanced*"
 output:
   html_document:
     toc: true
