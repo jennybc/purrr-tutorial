@@ -1,5 +1,6 @@
 ---
 title: "Relationship to base and plyr functions"
+comment: "*for the skeptics*"
 output:
   html_document:
     toc: true

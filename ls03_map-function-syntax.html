@@ -11,7 +11,7 @@
 
 
 
-<title>Syntax for specifying the function to map</title>
+<title>Specifying the function in map() + parallel mapping</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -295,285 +295,240 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Syntax for specifying the function to map</h1>
+<h1 class="title toc-ignore">Specifying the function in map() + parallel mapping</h1>
 
 </div>
 
 
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
-<p>Load purrr and repurrrsive, which contains recursive list examples. listviewer provides the interactive list viewing widgets.</p>
+<p>Load purrr and repurrrsive, which contains recursive list examples. If you’re just jumping here, the example datasets are introduced <a href="https://jennybc.github.io/purrr-tutorial/ls00_inspect-explore.html">elsewhere</a>, including via interactive listviewer widgets.</p>
 <pre class="r"><code>library(purrr)
 ## install_github(&quot;jennybc/repurrrsive&quot;)
-library(repurrrsive)
-library(listviewer)</code></pre>
-<div id="function-specification" class="section level3">
-<h3>Function specification</h3>
-<p>Flexible and concise syntax for specifying <code>YOUR_FUNCTION</code></p>
-<pre class="r"><code>nms &lt;- map_chr(got_chars, &quot;name&quot;)
-aliases &lt;- map(got_chars, &quot;aliases&quot;)
-aliases &lt;- set_names(aliases, nms)
-map(aliases, function(x) paste(x, collapse = &quot;|&quot;))
+library(repurrrsive)</code></pre>
+</div>
+<div id="map-overview" class="section level2">
+<h2><code>map()</code> overview</h2>
+<p>Recall the usage of purrr’s core <code>map()</code> function:</p>
+<pre class="r"><code>map(.x, .f, ...)
+map(VECTOR_OR_LIST_INPUT, FUNCTION_TO_APPLY, OPTIONAL_OTHER_STUFF)</code></pre>
+<p>You can provide further arguments via <code>...</code>, but you don’t have to. The above expands to something like this:</p>
+<pre class="r"><code>res &lt;- vector(mode = &quot;list&quot;, length = length(.x))
+res[[1]] &lt;- .f(.x[[1]], ...)
+res[[2]] &lt;- .f(.x[[2]], ...)
+## and so on, until the end of .x
+res</code></pre>
+<p>Note that any additional arguments provided via <code>...</code> are used “as is” in each call to <code>.f</code>. In other words, <code>map()</code> is not vectorized over these arguments. If you need that, check out <code>map2()</code>, <code>pmap()</code>, and friends.</p>
+</div>
+<div id="map-function-specification" class="section level2">
+<h2><code>map()</code> function specification</h2>
+<p>One of the main reasons to use purrr is the flexible and concise syntax for specifying <code>.f</code>, the function to apply.</p>
+<p>The <a href="ls01_map-name-position-shortcuts.html">shortcuts for extracting by name and position</a> are covered thoroughly elsewhere and won’t be repeated here.</p>
+<p>We demonstrate three more ways to specify general <code>.f</code>:</p>
+<ul>
+<li>an existing function</li>
+<li>an anonymous function, defined on-the-fly, as usual</li>
+<li>a formula: this is unique to purrr and provides a very concise way to define an anonymous function</li>
+</ul>
+<p>We work with the Game of Thrones character list, <code>got_chars</code>. Each character can have aliases, which are stored in a vector in each character’s component. We pull out the aliases for three characters to use as our demo.</p>
+<pre class="r"><code>aliases &lt;- set_names(map(got_chars, &quot;aliases&quot;), map_chr(got_chars, &quot;name&quot;))
+(aliases &lt;- aliases[c(&quot;Theon Greyjoy&quot;, &quot;Asha Greyjoy&quot;, &quot;Brienne of Tarth&quot;)])
 #&gt; $`Theon Greyjoy`
-#&gt; [1] &quot;Prince of Fools|Theon Turncloak|Reek|Theon Kinslayer&quot;
-#&gt; 
-#&gt; $`Tyrion Lannister`
-#&gt; [1] &quot;The Imp|Halfman|The boyman|Giant of Lannister|Lord Tywin&#39;s Doom|Lord Tywin&#39;s Bane|Yollo|Hugor Hill|No-Nose|Freak|Dwarf&quot;
-#&gt; 
-#&gt; $`Victarion Greyjoy`
-#&gt; [1] &quot;The Iron Captain&quot;
-#&gt; 
-#&gt; $Will
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Areo Hotah`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $Chett
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $Cressen
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Arianne Martell`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Daenerys Targaryen`
-#&gt; [1] &quot;Dany|Daenerys Stormborn|The Unburnt|Mother of Dragons|Mother|Mhysa|The Silver Queen|Silver Lady|Dragonmother|The Dragon Queen|The Mad King&#39;s daughter&quot;
-#&gt; 
-#&gt; $`Davos Seaworth`
-#&gt; [1] &quot;Onion Knight|Davos Shorthand|Ser Onions|Onion Lord|Smuggler&quot;
-#&gt; 
-#&gt; $`Arya Stark`
-#&gt; [1] &quot;Arya Horseface|Arya Underfoot|Arry|Lumpyface|Lumpyhead|Stickboy|Weasel|Nymeria|Squan|Saltb|Cat of the Canaly|Bets|The Blind Girh|The Ugly Little Girl|Mercedenl|Mercye&quot;
-#&gt; 
-#&gt; $`Arys Oakheart`
-#&gt; [1] &quot;&quot;
+#&gt; [1] &quot;Prince of Fools&quot; &quot;Theon Turncloak&quot; &quot;Reek&quot;            &quot;Theon Kinslayer&quot;
 #&gt; 
 #&gt; $`Asha Greyjoy`
-#&gt; [1] &quot;Esgred|The Kraken&#39;s Daughter&quot;
-#&gt; 
-#&gt; $`Barristan Selmy`
-#&gt; [1] &quot;Barristan the Bold|Arstan Whitebeard|Ser Grandfather|Barristan the Old|Old Ser&quot;
-#&gt; 
-#&gt; $Varamyr
-#&gt; [1] &quot;Varamyr Sixskins|Haggon|Lump&quot;
-#&gt; 
-#&gt; $`Brandon Stark`
-#&gt; [1] &quot;Bran|Bran the Broken|The Winged Wolf&quot;
+#&gt; [1] &quot;Esgred&quot;                &quot;The Kraken&#39;s Daughter&quot;
 #&gt; 
 #&gt; $`Brienne of Tarth`
-#&gt; [1] &quot;The Maid of Tarth|Brienne the Beauty|Brienne the Blue&quot;
-#&gt; 
-#&gt; $`Catelyn Stark`
-#&gt; [1] &quot;Catelyn Tully|Lady Stoneheart|The Silent Sistet|Mother Mercilesr|The Hangwomans&quot;
-#&gt; 
-#&gt; $`Cersei Lannister`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Eddard Stark`
-#&gt; [1] &quot;Ned|The Ned|The Quiet Wolf&quot;
-#&gt; 
-#&gt; $`Jaime Lannister`
-#&gt; [1] &quot;The Kingslayer|The Lion of Lannister|The Young Lion|Cripple&quot;
-#&gt; 
-#&gt; $`Jon Connington`
-#&gt; [1] &quot;Griffthe Mad King&#39;s Hand&quot;
-#&gt; 
-#&gt; $`Jon Snow`
-#&gt; [1] &quot;Lord Snow|Ned Stark&#39;s Bastard|The Snow of Winterfell|The Crow-Come-Over|The 998th Lord Commander of the Night&#39;s Watch|The Bastard of Winterfell|The Black Bastard of the Wall|Lord Crow&quot;
-#&gt; 
-#&gt; $`Aeron Greyjoy`
-#&gt; [1] &quot;The Damphair|Aeron Damphair&quot;
-#&gt; 
-#&gt; $`Kevan Lannister`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $Melisandre
-#&gt; [1] &quot;The Red Priestess|The Red Woman|The King&#39;s Red Shadow|Lady Red|Lot Seven&quot;
-#&gt; 
-#&gt; $`Merrett Frey`
-#&gt; [1] &quot;Merrett Muttonhead&quot;
-#&gt; 
-#&gt; $`Quentyn Martell`
-#&gt; [1] &quot;Frog|Prince Frog|The prince who came too late|The Dragonrider&quot;
-#&gt; 
-#&gt; $`Sansa Stark`
-#&gt; [1] &quot;Little bird|Alayne Stone|Jonquil&quot;
-map(aliases, paste, collapse = &quot;|&quot;)
-#&gt; $`Theon Greyjoy`
-#&gt; [1] &quot;Prince of Fools|Theon Turncloak|Reek|Theon Kinslayer&quot;
-#&gt; 
-#&gt; $`Tyrion Lannister`
-#&gt; [1] &quot;The Imp|Halfman|The boyman|Giant of Lannister|Lord Tywin&#39;s Doom|Lord Tywin&#39;s Bane|Yollo|Hugor Hill|No-Nose|Freak|Dwarf&quot;
-#&gt; 
-#&gt; $`Victarion Greyjoy`
-#&gt; [1] &quot;The Iron Captain&quot;
-#&gt; 
-#&gt; $Will
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Areo Hotah`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $Chett
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $Cressen
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Arianne Martell`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Daenerys Targaryen`
-#&gt; [1] &quot;Dany|Daenerys Stormborn|The Unburnt|Mother of Dragons|Mother|Mhysa|The Silver Queen|Silver Lady|Dragonmother|The Dragon Queen|The Mad King&#39;s daughter&quot;
-#&gt; 
-#&gt; $`Davos Seaworth`
-#&gt; [1] &quot;Onion Knight|Davos Shorthand|Ser Onions|Onion Lord|Smuggler&quot;
-#&gt; 
-#&gt; $`Arya Stark`
-#&gt; [1] &quot;Arya Horseface|Arya Underfoot|Arry|Lumpyface|Lumpyhead|Stickboy|Weasel|Nymeria|Squan|Saltb|Cat of the Canaly|Bets|The Blind Girh|The Ugly Little Girl|Mercedenl|Mercye&quot;
-#&gt; 
-#&gt; $`Arys Oakheart`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Asha Greyjoy`
-#&gt; [1] &quot;Esgred|The Kraken&#39;s Daughter&quot;
-#&gt; 
-#&gt; $`Barristan Selmy`
-#&gt; [1] &quot;Barristan the Bold|Arstan Whitebeard|Ser Grandfather|Barristan the Old|Old Ser&quot;
-#&gt; 
-#&gt; $Varamyr
-#&gt; [1] &quot;Varamyr Sixskins|Haggon|Lump&quot;
-#&gt; 
-#&gt; $`Brandon Stark`
-#&gt; [1] &quot;Bran|Bran the Broken|The Winged Wolf&quot;
-#&gt; 
-#&gt; $`Brienne of Tarth`
-#&gt; [1] &quot;The Maid of Tarth|Brienne the Beauty|Brienne the Blue&quot;
-#&gt; 
-#&gt; $`Catelyn Stark`
-#&gt; [1] &quot;Catelyn Tully|Lady Stoneheart|The Silent Sistet|Mother Mercilesr|The Hangwomans&quot;
-#&gt; 
-#&gt; $`Cersei Lannister`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Eddard Stark`
-#&gt; [1] &quot;Ned|The Ned|The Quiet Wolf&quot;
-#&gt; 
-#&gt; $`Jaime Lannister`
-#&gt; [1] &quot;The Kingslayer|The Lion of Lannister|The Young Lion|Cripple&quot;
-#&gt; 
-#&gt; $`Jon Connington`
-#&gt; [1] &quot;Griffthe Mad King&#39;s Hand&quot;
-#&gt; 
-#&gt; $`Jon Snow`
-#&gt; [1] &quot;Lord Snow|Ned Stark&#39;s Bastard|The Snow of Winterfell|The Crow-Come-Over|The 998th Lord Commander of the Night&#39;s Watch|The Bastard of Winterfell|The Black Bastard of the Wall|Lord Crow&quot;
-#&gt; 
-#&gt; $`Aeron Greyjoy`
-#&gt; [1] &quot;The Damphair|Aeron Damphair&quot;
-#&gt; 
-#&gt; $`Kevan Lannister`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $Melisandre
-#&gt; [1] &quot;The Red Priestess|The Red Woman|The King&#39;s Red Shadow|Lady Red|Lot Seven&quot;
-#&gt; 
-#&gt; $`Merrett Frey`
-#&gt; [1] &quot;Merrett Muttonhead&quot;
-#&gt; 
-#&gt; $`Quentyn Martell`
-#&gt; [1] &quot;Frog|Prince Frog|The prince who came too late|The Dragonrider&quot;
-#&gt; 
-#&gt; $`Sansa Stark`
-#&gt; [1] &quot;Little bird|Alayne Stone|Jonquil&quot;
-map(aliases, ~ paste(.x, collapse = &quot; | &quot;))
+#&gt; [1] &quot;The Maid of Tarth&quot;  &quot;Brienne the Beauty&quot; &quot;Brienne the Blue&quot;</code></pre>
+<div id="existing-function" class="section level3">
+<h3>Existing function</h3>
+<p>Use a pre-existing function. Or, as here, define one ourselves, which gives a nice way to build-in our specification for the <code>collapse</code> argument.</p>
+<pre class="r"><code>my_fun &lt;- function(x) paste(x, collapse = &quot; | &quot;)
+map(aliases, my_fun)
 #&gt; $`Theon Greyjoy`
 #&gt; [1] &quot;Prince of Fools | Theon Turncloak | Reek | Theon Kinslayer&quot;
-#&gt; 
-#&gt; $`Tyrion Lannister`
-#&gt; [1] &quot;The Imp | Halfman | The boyman | Giant of Lannister | Lord Tywin&#39;s Doom | Lord Tywin&#39;s Bane | Yollo | Hugor Hill | No-Nose | Freak | Dwarf&quot;
-#&gt; 
-#&gt; $`Victarion Greyjoy`
-#&gt; [1] &quot;The Iron Captain&quot;
-#&gt; 
-#&gt; $Will
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Areo Hotah`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $Chett
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $Cressen
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Arianne Martell`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $`Daenerys Targaryen`
-#&gt; [1] &quot;Dany | Daenerys Stormborn | The Unburnt | Mother of Dragons | Mother | Mhysa | The Silver Queen | Silver Lady | Dragonmother | The Dragon Queen | The Mad King&#39;s daughter&quot;
-#&gt; 
-#&gt; $`Davos Seaworth`
-#&gt; [1] &quot;Onion Knight | Davos Shorthand | Ser Onions | Onion Lord | Smuggler&quot;
-#&gt; 
-#&gt; $`Arya Stark`
-#&gt; [1] &quot;Arya Horseface | Arya Underfoot | Arry | Lumpyface | Lumpyhead | Stickboy | Weasel | Nymeria | Squan | Saltb | Cat of the Canaly | Bets | The Blind Girh | The Ugly Little Girl | Mercedenl | Mercye&quot;
-#&gt; 
-#&gt; $`Arys Oakheart`
-#&gt; [1] &quot;&quot;
 #&gt; 
 #&gt; $`Asha Greyjoy`
 #&gt; [1] &quot;Esgred | The Kraken&#39;s Daughter&quot;
 #&gt; 
-#&gt; $`Barristan Selmy`
-#&gt; [1] &quot;Barristan the Bold | Arstan Whitebeard | Ser Grandfather | Barristan the Old | Old Ser&quot;
+#&gt; $`Brienne of Tarth`
+#&gt; [1] &quot;The Maid of Tarth | Brienne the Beauty | Brienne the Blue&quot;</code></pre>
+</div>
+<div id="anonymous-function-conventional" class="section level3">
+<h3>Anonymous function, conventional</h3>
+<p>Define an anonymous function on-the-fly, in the conventional way. Here we put our desired value for the <code>collapse</code> argument into the function defintion itself.</p>
+<pre class="r"><code>map(aliases, function(x) paste(x, collapse = &quot; | &quot;)) 
+#&gt; $`Theon Greyjoy`
+#&gt; [1] &quot;Prince of Fools | Theon Turncloak | Reek | Theon Kinslayer&quot;
 #&gt; 
-#&gt; $Varamyr
-#&gt; [1] &quot;Varamyr Sixskins | Haggon | Lump&quot;
-#&gt; 
-#&gt; $`Brandon Stark`
-#&gt; [1] &quot;Bran | Bran the Broken | The Winged Wolf&quot;
+#&gt; $`Asha Greyjoy`
+#&gt; [1] &quot;Esgred | The Kraken&#39;s Daughter&quot;
 #&gt; 
 #&gt; $`Brienne of Tarth`
-#&gt; [1] &quot;The Maid of Tarth | Brienne the Beauty | Brienne the Blue&quot;
+#&gt; [1] &quot;The Maid of Tarth | Brienne the Beauty | Brienne the Blue&quot;</code></pre>
+<p>Alternatively you can simply name the function and provide <code>collapse</code> via <code>...</code>.</p>
+<pre class="r"><code>map(aliases, paste, collapse = &quot; | &quot;)
+#&gt; $`Theon Greyjoy`
+#&gt; [1] &quot;Prince of Fools | Theon Turncloak | Reek | Theon Kinslayer&quot;
 #&gt; 
-#&gt; $`Catelyn Stark`
-#&gt; [1] &quot;Catelyn Tully | Lady Stoneheart | The Silent Sistet | Mother Mercilesr | The Hangwomans&quot;
+#&gt; $`Asha Greyjoy`
+#&gt; [1] &quot;Esgred | The Kraken&#39;s Daughter&quot;
 #&gt; 
-#&gt; $`Cersei Lannister`
-#&gt; [1] &quot;&quot;
+#&gt; $`Brienne of Tarth`
+#&gt; [1] &quot;The Maid of Tarth | Brienne the Beauty | Brienne the Blue&quot;</code></pre>
+</div>
+<div id="anonymous-function-formula" class="section level3">
+<h3>Anonymous function, formula</h3>
+<p>We saved possibly the best for last.</p>
+<p>purrr provides a very concise way to define an anonymous function: as a formula. This should start with the <code>~</code> symbol and then look like a typical top-level expression, as you might write in a script. Use <code>.x</code> to refer to the input, i.e. an individual element of the primary vector or list.</p>
+<pre class="r"><code>map(aliases, ~ paste(.x, collapse = &quot; | &quot;))
+#&gt; $`Theon Greyjoy`
+#&gt; [1] &quot;Prince of Fools | Theon Turncloak | Reek | Theon Kinslayer&quot;
 #&gt; 
-#&gt; $`Eddard Stark`
-#&gt; [1] &quot;Ned | The Ned | The Quiet Wolf&quot;
+#&gt; $`Asha Greyjoy`
+#&gt; [1] &quot;Esgred | The Kraken&#39;s Daughter&quot;
 #&gt; 
-#&gt; $`Jaime Lannister`
-#&gt; [1] &quot;The Kingslayer | The Lion of Lannister | The Young Lion | Cripple&quot;
-#&gt; 
-#&gt; $`Jon Connington`
-#&gt; [1] &quot;Griffthe Mad King&#39;s Hand&quot;
-#&gt; 
-#&gt; $`Jon Snow`
-#&gt; [1] &quot;Lord Snow | Ned Stark&#39;s Bastard | The Snow of Winterfell | The Crow-Come-Over | The 998th Lord Commander of the Night&#39;s Watch | The Bastard of Winterfell | The Black Bastard of the Wall | Lord Crow&quot;
-#&gt; 
-#&gt; $`Aeron Greyjoy`
-#&gt; [1] &quot;The Damphair | Aeron Damphair&quot;
-#&gt; 
-#&gt; $`Kevan Lannister`
-#&gt; [1] &quot;&quot;
-#&gt; 
-#&gt; $Melisandre
-#&gt; [1] &quot;The Red Priestess | The Red Woman | The King&#39;s Red Shadow | Lady Red | Lot Seven&quot;
-#&gt; 
-#&gt; $`Merrett Frey`
-#&gt; [1] &quot;Merrett Muttonhead&quot;
-#&gt; 
-#&gt; $`Quentyn Martell`
-#&gt; [1] &quot;Frog | Prince Frog | The prince who came too late | The Dragonrider&quot;
-#&gt; 
-#&gt; $`Sansa Stark`
-#&gt; [1] &quot;Little bird | Alayne Stone | Jonquil&quot;</code></pre>
+#&gt; $`Brienne of Tarth`
+#&gt; [1] &quot;The Maid of Tarth | Brienne the Beauty | Brienne the Blue&quot;</code></pre>
+</div>
+<div id="workflow-advice" class="section level3">
+<h3>Workflow advice</h3>
+<p>It’s rare to write these calls perfect and whole the first time. You should probably pilot your idea on a single element. Then drop your <strong>proven, working logic</strong> into one of the above templates. When things aren’t working as expected, consider: have you tried to skip too many steps? Pull out an example, get everything to work there, check it on another example, then scale back up again.</p>
+<p>A development process for the above might look like this:</p>
+<pre class="r"><code>(a &lt;- map(got_chars, &quot;aliases&quot;)[[19]]) ## OOPS! empty --&gt; a useless example
+#&gt; list()
+(a &lt;- map(got_chars, &quot;aliases&quot;)[[16]]) ## ok good
+#&gt; [1] &quot;Bran&quot;            &quot;Bran the Broken&quot; &quot;The Winged Wolf&quot;
+paste(a, sep = &quot; | &quot;)                  ## OOPS! not what I want
+#&gt; [1] &quot;Bran&quot;            &quot;Bran the Broken&quot; &quot;The Winged Wolf&quot;
+paste(a, collapse = &quot; | &quot;)             ## ok good
+#&gt; [1] &quot;Bran | Bran the Broken | The Winged Wolf&quot;
+got_chars[15:17] %&gt;%                   ## I am a programming god
+  map(&quot;aliases&quot;) %&gt;% 
+  map_chr(paste, collapse = &quot; | &quot;)
+#&gt; [1] &quot;Varamyr Sixskins | Haggon | Lump&quot;                         
+#&gt; [2] &quot;Bran | Bran the Broken | The Winged Wolf&quot;                 
+#&gt; [3] &quot;The Maid of Tarth | Brienne the Beauty | Brienne the Blue&quot;</code></pre>
+</div>
+</div>
+<div id="list-to-data-frame" class="section level2">
+<h2>List to data frame</h2>
+<p>Since we’ve simplifed the aliases to a single string for each character, we can hold them as an atomic character vector instead of as list. Wouldn’t it be nice to put that in a data frame, with another variable holding the names? The <code>enframe()</code> function from tibble takes a named vector and promotes the names to a proper variable.</p>
+<p>From the top, using four characters to conserve space:</p>
+<pre class="r"><code>aliases &lt;- set_names(map(got_chars, &quot;aliases&quot;), map_chr(got_chars, &quot;name&quot;))
+map_chr(aliases[c(3, 10, 20, 24)], ~ paste(.x, collapse = &quot; | &quot;)) %&gt;% 
+  tibble::enframe(value = &quot;aliases&quot;)
+#&gt; # A tibble: 4 × 2
+#&gt;                name
+#&gt;               &lt;chr&gt;
+#&gt; 1 Victarion Greyjoy
+#&gt; 2    Davos Seaworth
+#&gt; 3      Eddard Stark
+#&gt; 4     Aeron Greyjoy
+#&gt; # ... with 1 more variables: aliases &lt;chr&gt;</code></pre>
+<p>Alternative way to get same data frame</p>
+<pre class="r"><code>tibble::tibble(
+  name = map_chr(got_chars, &quot;name&quot;),
+  aliases = got_chars %&gt;% 
+    map(&quot;aliases&quot;) %&gt;% 
+    map_chr(~ paste(.x, collapse = &quot; | &quot;))
+) %&gt;% 
+  dplyr::slice(c(3, 10, 20, 24))
+#&gt; # A tibble: 4 × 2
+#&gt;                name
+#&gt;               &lt;chr&gt;
+#&gt; 1 Victarion Greyjoy
+#&gt; 2    Davos Seaworth
+#&gt; 3      Eddard Stark
+#&gt; 4     Aeron Greyjoy
+#&gt; # ... with 1 more variables: aliases &lt;chr&gt;</code></pre>
+<p>This is a very typical workflow: take an unwieldy nested list and, via extraction and/or simplification, produce a more approachable data frame.</p>
+</div>
+<div id="recap" class="section level2">
+<h2>Recap</h2>
+<p>These are the different ways to specify the function <code>.f</code> in the <code>map()</code>-type functions in purrr.</p>
+<pre class="r"><code>map(aliases, function(x) paste(x, collapse = &quot;|&quot;)) 
+map(aliases, paste, collapse = &quot;|&quot;)
+map(aliases, ~ paste(.x, collapse = &quot; | &quot;))</code></pre>
+<div id="exercises" class="section level3">
+<h3>Exercises</h3>
+<p>Each character can be allied with one of the <a href="https://anapioficeandfire.com/Documentation#houses">houses</a> (or with several or with zero). These allegiances are held as a vector in each character’s component.</p>
+<ol style="list-style-type: decimal">
+<li>Create a list <code>allegiances</code> that holds the characters’ house affiliations.</li>
+<li>Create a character vector <code>nms</code> that holds the characters’ names.</li>
+<li>Apply the names in <code>nms</code> to the <code>allegiances</code> list via <code>set_names</code>.</li>
+<li>Re-use the code from above to collapse each character’s vector of allegiances down to a string.</li>
+<li>We said that any elements passed via <code>...</code> would be used “as is”. Specifically they are not used in a vectorized fashion. What happens if you pass <code>collapse = c(&quot; | &quot;, &quot; * &quot;)</code>? Why is that?</li>
+</ol>
+</div>
+</div>
+<div id="parallel-map" class="section level2">
+<h2>Parallel map</h2>
+<div id="map2" class="section level3">
+<h3><code>map2()</code></h3>
+<p>What if you need to map a function over two vectors or lists in parallel?</p>
+<p>You can use <code>map2()</code> for that. Here is the usage:</p>
+<pre class="r"><code>map2(.x, .y, .f, ...)
+map(INPUT_ONE, INPUT_TWO, FUNCTION_TO_APPLY, OPTIONAL_OTHER_STUFF)</code></pre>
+<p><code>map2()</code> has all the type-specific friends you would expect: <code>map2_chr()</code>, <code>map2_lgl()</code>, etc.</p>
+<p>How will we specify the function to apply? All the usual options are open.</p>
+<p>What shall out example be? Each character has a free text field, giving the date and possibly location of his or her birth. Let’s paste that together with the character’s name to get a sentence.</p>
+<p>First, obtain the two inputs.</p>
+<pre class="r"><code>nms &lt;- got_chars %&gt;% 
+  map_chr(&quot;name&quot;)
+birth &lt;- got_chars %&gt;% 
+  map_chr(&quot;born&quot;)</code></pre>
+<p>Now map over both with an existing function, defined by us.</p>
+<pre class="r"><code>my_fun &lt;- function(x, y) paste(x, &quot;was born&quot;, y)
+map2_chr(nms, birth, my_fun) %&gt;% head()
+#&gt; [1] &quot;Theon Greyjoy was born In 278 AC or 279 AC, at Pyke&quot;    
+#&gt; [2] &quot;Tyrion Lannister was born In 273 AC, at Casterly Rock&quot;  
+#&gt; [3] &quot;Victarion Greyjoy was born In 268 AC or before, at Pyke&quot;
+#&gt; [4] &quot;Will was born &quot;                                         
+#&gt; [5] &quot;Areo Hotah was born In 257 AC or before, at Norvos&quot;     
+#&gt; [6] &quot;Chett was born At Hag&#39;s Mire&quot;</code></pre>
+<p>Anonymous function, conventional form.</p>
+<pre class="r"><code>map2_chr(nms, birth, function(x, y) paste(x, &quot;was born&quot;, y)) %&gt;% head()
+#&gt; [1] &quot;Theon Greyjoy was born In 278 AC or 279 AC, at Pyke&quot;    
+#&gt; [2] &quot;Tyrion Lannister was born In 273 AC, at Casterly Rock&quot;  
+#&gt; [3] &quot;Victarion Greyjoy was born In 268 AC or before, at Pyke&quot;
+#&gt; [4] &quot;Will was born &quot;                                         
+#&gt; [5] &quot;Areo Hotah was born In 257 AC or before, at Norvos&quot;     
+#&gt; [6] &quot;Chett was born At Hag&#39;s Mire&quot;</code></pre>
+<p>Anonymous function via formula. Use <code>.x</code> and <code>.y</code> to refer to the individual elements of the two primary inputs.</p>
+<pre class="r"><code>map2_chr(nms[16:18], birth[16:18], ~ paste(.x, &quot;was born&quot;, .y)) %&gt;% tail()
+#&gt; [1] &quot;Brandon Stark was born In 290 AC, at Winterfell&quot;
+#&gt; [2] &quot;Brienne of Tarth was born In 280 AC&quot;            
+#&gt; [3] &quot;Catelyn Stark was born In 264 AC, at Riverrun&quot;</code></pre>
+</div>
+<div id="pmap" class="section level3">
+<h3><code>pmap()</code></h3>
+<p>What if you need to map a function over <strong>two or more</strong> vectors or lists in parallel?</p>
+<p>You can use <code>pmap()</code> for that. Here is the usage:</p>
+<pre class="r"><code>pmap(.l, .f, ...)
+map(LIST_OF_INPUT_LISTS, FUNCTION_TO_APPLY, OPTIONAL_OTHER_STUFF)</code></pre>
+<p><em>words</em></p>
+<pre class="r"><code>df &lt;- got_chars %&gt;% {
+  tibble::tibble(
+    name = map_chr(., &quot;name&quot;),
+    aliases = map(., &quot;aliases&quot;),
+    allegiances = map(., &quot;allegiances&quot;)
+  )
+}
+my_fun &lt;- function(name, aliases, allegiances) {
+  paste(name, &quot;has&quot;, length(aliases), &quot;aliases and&quot;,
+        length(allegiances), &quot;allegiances&quot;)
+}
+df %&gt;% 
+  pmap_chr(my_fun) %&gt;% 
+  tail()
+#&gt; [1] &quot;Aeron Greyjoy has 2 aliases and 1 allegiances&quot;  
+#&gt; [2] &quot;Kevan Lannister has 0 aliases and 1 allegiances&quot;
+#&gt; [3] &quot;Melisandre has 5 aliases and 0 allegiances&quot;     
+#&gt; [4] &quot;Merrett Frey has 1 aliases and 1 allegiances&quot;   
+#&gt; [5] &quot;Quentyn Martell has 4 aliases and 1 allegiances&quot;
+#&gt; [6] &quot;Sansa Stark has 3 aliases and 2 allegiances&quot;</code></pre>
 </div>
 </div>
 

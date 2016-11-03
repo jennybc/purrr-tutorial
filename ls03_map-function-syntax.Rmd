@@ -1,6 +1,6 @@
 ---
-title: "Syntax for specifying the function to map"
-comment: "*all the purrr shortcuts*"
+title: "Specifying the function in map() + parallel mapping"
+comment: "*all the purrr shortcuts and mapping over multiple lists*"
 output:
   html_document:
     toc: true
@@ -13,26 +13,223 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 
 ## Load packages
 
-Load purrr and repurrrsive, which contains recursive list examples. listviewer provides the interactive list viewing widgets.
+Load purrr and repurrrsive, which contains recursive list examples. If you're just jumping here, the example datasets are introduced [elsewhere](https://jennybc.github.io/purrr-tutorial/ls00_inspect-explore.html), including via interactive listviewer widgets.
 
 ```{r}
 library(purrr)
 ## install_github("jennybc/repurrrsive")
 library(repurrrsive)
-library(listviewer)
 ```
 
+## `map()` overview
 
-### Function specification
+Recall the usage of purrr's core `map()` function:
 
-Flexible and concise syntax for specifying `YOUR_FUNCTION`
+```{r eval = FALSE}
+map(.x, .f, ...)
+map(VECTOR_OR_LIST_INPUT, FUNCTION_TO_APPLY, OPTIONAL_OTHER_STUFF)
+```
+
+You can provide further arguments via `...`, but you don't have to. The above expands to something like this:
+
+```{r eval = FALSE}
+res <- vector(mode = "list", length = length(.x))
+res[[1]] <- .f(.x[[1]], ...)
+res[[2]] <- .f(.x[[2]], ...)
+## and so on, until the end of .x
+res
+```
+
+Note that any additional arguments provided via `...` are used "as is" in each call to `.f`. In other words, `map()` is not vectorized over these arguments. If you need that, check out `map2()`, `pmap()`, and friends.
+
+## `map()` function specification
+
+One of the main reasons to use purrr is the flexible and concise syntax for specifying `.f`, the function to apply.
+
+The [shortcuts for extracting by name and position](ls01_map-name-position-shortcuts.html) are covered thoroughly elsewhere and won't be repeated here.
+
+We demonstrate three more ways to specify general `.f`:
+
+  * an existing function
+  * an anonymous function, defined on-the-fly, as usual
+  * a formula: this is unique to purrr and provides a very concise way to define an anonymous function
+
+We work with the Game of Thrones character list, `got_chars`. Each character can have aliases, which are stored in a vector in each character's component. We pull out the aliases for three characters to use as our demo.
 
 ```{r}
-nms <- map_chr(got_chars, "name")
-aliases <- map(got_chars, "aliases")
-aliases <- set_names(aliases, nms)
-map(aliases, function(x) paste(x, collapse = "|"))
+aliases <- set_names(map(got_chars, "aliases"), map_chr(got_chars, "name"))
+(aliases <- aliases[c("Theon Greyjoy", "Asha Greyjoy", "Brienne of Tarth")])
+```
+
+### Existing function
+
+Use a pre-existing function. Or, as here, define one ourselves, which gives a nice way to build-in our specification for the `collapse` argument.
+
+```{r}
+my_fun <- function(x) paste(x, collapse = " | ")
+map(aliases, my_fun)
+```
+
+### Anonymous function, conventional
+
+Define an anonymous function on-the-fly, in the conventional way. Here we put our desired value for the `collapse` argument into the function defintion itself.
+
+```{r}
+map(aliases, function(x) paste(x, collapse = " | ")) 
+```
+
+Alternatively you can simply name the function and provide `collapse` via `...`.
+
+```{r}
+map(aliases, paste, collapse = " | ")
+```
+
+### Anonymous function, formula
+
+We saved possibly the best for last.
+
+purrr provides a very concise way to define an anonymous function: as a formula. This should start with the `~` symbol and then look like a typical top-level expression, as you might write in a script. Use `.x` to refer to the input, i.e. an individual element of the primary vector or list. 
+
+```{r}
+map(aliases, ~ paste(.x, collapse = " | "))
+```
+
+### Workflow advice
+
+It's rare to write these calls perfect and whole the first time. You should probably pilot your idea on a single element. Then drop your **proven, working logic** into one of the above templates. When things aren't working as expected, consider: have you tried to skip too many steps? Pull out an example, get everything to work there, check it on another example, then scale back up again.
+
+A development process for the above might look like this:
+
+```{r}
+(a <- map(got_chars, "aliases")[[19]]) ## OOPS! empty --> a useless example
+(a <- map(got_chars, "aliases")[[16]]) ## ok good
+paste(a, sep = " | ")                  ## OOPS! not what I want
+paste(a, collapse = " | ")             ## ok good
+got_chars[15:17] %>%                   ## I am a programming god
+  map("aliases") %>% 
+  map_chr(paste, collapse = " | ")
+```
+
+## List to data frame
+
+Since we've simplifed the aliases to a single string for each character, we can hold them as an atomic character vector instead of as list. Wouldn't it be nice to put that in a data frame, with another variable holding the names? The `enframe()` function from tibble takes a named vector and promotes the names to a proper variable.
+
+From the top, using four characters to conserve space:
+
+```{r}
+aliases <- set_names(map(got_chars, "aliases"), map_chr(got_chars, "name"))
+map_chr(aliases[c(3, 10, 20, 24)], ~ paste(.x, collapse = " | ")) %>% 
+  tibble::enframe(value = "aliases")
+```
+
+Alternative way to get same data frame
+
+```{r}
+tibble::tibble(
+  name = map_chr(got_chars, "name"),
+  aliases = got_chars %>% 
+    map("aliases") %>% 
+    map_chr(~ paste(.x, collapse = " | "))
+) %>% 
+  dplyr::slice(c(3, 10, 20, 24))
+```
+
+This is a very typical workflow: take an unwieldy nested list and, via extraction and/or simplification, produce a more approachable data frame.
+
+## Recap
+
+These are the different ways to specify the function `.f` in the `map()`-type functions in purrr.
+
+```{r eval = FALSE}
+map(aliases, function(x) paste(x, collapse = "|")) 
 map(aliases, paste, collapse = "|")
 map(aliases, ~ paste(.x, collapse = " | "))
+```
+
+### Exercises
+
+Each character can be allied with one of the [houses](https://anapioficeandfire.com/Documentation#houses) (or with several or with zero). These allegiances are held as a vector in each character's component.
+
+1. Create a list `allegiances` that holds the characters' house affiliations.
+1. Create a character vector `nms` that holds the characters' names.
+1. Apply the names in `nms` to the `allegiances` list via `set_names`.
+1. Re-use the code from above to collapse each character's vector of allegiances down to a string.
+1. We said that any elements passed via `...` would be used "as is". Specifically they are not used in a vectorized fashion. What happens if you pass `collapse = c(" | ", " * ")`? Why is that?
+
+## Parallel map
+
+### `map2()`
+
+What if you need to map a function over two vectors or lists in parallel?
+
+You can use `map2()` for that. Here is the usage:
+
+```{r eval = FALSE}
+map2(.x, .y, .f, ...)
+map(INPUT_ONE, INPUT_TWO, FUNCTION_TO_APPLY, OPTIONAL_OTHER_STUFF)
+```
+
+`map2()` has all the type-specific friends you would expect: `map2_chr()`, `map2_lgl()`, etc.
+
+How will we specify the function to apply? All the usual options are open.
+
+What shall out example be? Each character has a free text field, giving the date and possibly location of his or her birth. Let's paste that together with the character's name to get a sentence.
+
+First, obtain the two inputs.
+
+```{r}
+nms <- got_chars %>% 
+  map_chr("name")
+birth <- got_chars %>% 
+  map_chr("born")
+```
+
+Now map over both with an existing function, defined by us.
+
+```{r}
+my_fun <- function(x, y) paste(x, "was born", y)
+map2_chr(nms, birth, my_fun) %>% head()
+```
+
+Anonymous function, conventional form.
+
+```{r}
+map2_chr(nms, birth, function(x, y) paste(x, "was born", y)) %>% head()
+```
+
+Anonymous function via formula. Use `.x` and `.y` to refer to the individual elements of the two primary inputs.
+
+```{r}
+map2_chr(nms[16:18], birth[16:18], ~ paste(.x, "was born", .y)) %>% tail()
+```
+
+### `pmap()`
+
+What if you need to map a function over **two or more** vectors or lists in parallel?
+
+You can use `pmap()` for that. Here is the usage:
+
+```{r eval = FALSE}
+pmap(.l, .f, ...)
+map(LIST_OF_INPUT_LISTS, FUNCTION_TO_APPLY, OPTIONAL_OTHER_STUFF)
+```
+
+*words*
+
+```{r}
+df <- got_chars %>% {
+  tibble::tibble(
+    name = map_chr(., "name"),
+    aliases = map(., "aliases"),
+    allegiances = map(., "allegiances")
+  )
+}
+my_fun <- function(name, aliases, allegiances) {
+  paste(name, "has", length(aliases), "aliases and",
+        length(allegiances), "allegiances")
+}
+df %>% 
+  pmap_chr(my_fun) %>% 
+  tail()
 ```
 
