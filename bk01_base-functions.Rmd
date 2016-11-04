@@ -20,21 +20,23 @@ You need a way to iterate in R in a data-structure-informed way. What does that 
   * Iterate over rows or columns of a 2-dimensional object
   * Iterate over tuples formed from the i-th element of several vectors of equal-length
 
-All of this is absolutely possible with base R, using `for()` loops or the "apply" functions, such as `apply()`, `[slvmt]apply()`, `split()`, and `by()`. I know, because I did so religiously for over 15 years.
+**All of this is absolutely possible with base R**, using `for()` loops or the "apply" functions, such as `apply()`, `[slvmt]apply()`, `split()`, and `by()`. I know, because I did so religiously for over 15 years.
 
-What's the problem? As an instructor, I encounter lots of useRs who sheepishly say they know they should be using the apply functions, but they don't. Because they've never quite figured them out or been able to form the habit.
+Why might you do otherwise? As an instructor, I encounter lots of useRs who sheepishly say they know they should be using the apply functions, but they don't. Because they've never quite figured them out or been able to form the habit.
 
 I have a theory about why. The apply functions are not particularly easy or convenient to use. The user interface is not as consistent as it could be, which slows down learning. The return objects frequently require further checking and massage to use downstream, which diminishes the payoff.
+
+Regardless of your preference, hopefully the side-by-side examples below are a helpful demo of different ways to iterate. Even if you prefer purrr/tidyverse in some settings, you might use base methods when you don't want any dependencies.
 
 ## Why purrr?
 
 purrr addresses some of the friction identified in the base functions for "split-apply-combine":
 
   * The `map()` family of functions is highly internally consistent, making it easier to transfer expertise from one function to another.
-  * Greater encouragement for type-safe simplification, i.e. conversion from list to atomic vector or data frame.
+  * Greater encouragement for type-safe simplification to atomic vector or data frame, producing output that is more ready for the next step.
   * Concise syntax for defining anonymous functions.
 
-We load purrr now. Below we also use example lists from [repurrrsive](https://github.com/jennybc/repurrrsive) which are [introduced and explored elsewhere](index.html).
+We load purrr now. Below we also use example lists from [repurrrsive](https://github.com/jennybc/repurrrsive) which are [introduced and explored elsewhere](ls00_inspect-explore.html).
 
 ```{r}
 library(purrr)
@@ -42,8 +44,6 @@ library(purrr)
 library(repurrrsive)
 ```
 
-
-  
 ## Why not plyr?
 
 If you have never heard of the [plyr package](https://CRAN.R-project.org/package=plyr), you can skip this section! Personally, I'm a bit sad that it's time to move on from plyr. But it probably is.
@@ -67,16 +67,18 @@ The most useful function proved to be `ddply()`: data frame in, data frame out. 
 
 ## `lapply()` vs. `purrr::map()`
 
-These are the core mapping functions of base and purrr, respectively. They are "list in, list out". The main (only?) difference is access to purrr's shortcuts for anonymous functions.
+These are the core mapping functions of base and purrr, respectively. They are "list in, list out". The main (only?) difference is access to purrr's shortcuts for indexing by name or position and for creating anonymous functions.
 
 <div class = "row">
 <div class = "col-md-6">
+**base**
 ```{r}
 lapply(got_chars[1:3],
        function(x) x[["name"]])
 ```
 </div>
 <div class = "col-md-6">
+**purrr**
 ```{r}
 map(got_chars[1:3], "name")
 ```
@@ -91,7 +93,7 @@ plyr::llply(got_chars[1:3], function(x) x[["name"]])
 
 ## `sapply()` vs. ¯\\\_(ツ)\_/¯
 
-`sapply()` is a base function that attempts to apply a reasonable simplification to the output of `lapply()`. It's fine for interactive use, but due to the unpredictability of it return value, it's unwise to use it in programming. There is no equivalent in purrr or plyr.
+`sapply()` is a base function that attempts to apply a reasonable simplification to the output of `lapply()`. It's handy for interactive use, but due to the unpredictability of it return value, it's unwise to use it in programming. There is no equivalent in purrr or plyr.
 
 Problem demonstration: The characters in Game of Thrones can have aliases. Some have several, some have one, some have none. Depending on which characters I work with, the same `sapply()` call can return an object of entirely different class, i.e. a list or a character vector. This can be a source of mysterious bugs in code meant to run non-interactively.
 
@@ -102,7 +104,7 @@ aliases2 <- sapply(got_chars[c(3, 22, 27)], function(x) x[["aliases"]])
 str(aliases2)
 ```
 
-With purrr, you would use `map()` to get a list back or `map_chr()` to get atomic character vector. If you use `map_chr()` when you should not, you'll get an error and can adjust your approach accordingly.
+With purrr, you would use `map()` to get a list back or `map_chr()` to get atomic character vector. If you use `map_chr()` when you should not, you'll get an error (shown below) and can adjust your approach accordingly.
 
 ```{r}
 map_chr(got_chars[2:4], "aliases")
@@ -110,23 +112,28 @@ map_chr(got_chars[2:4], "aliases")
 
 ## `vapply()` vs. `map_*()`
 
-Base `vapply()` requires you to specify a template for the return value and is described as a safer alternative to `sapply()`. The closest purrr functions are the type-specific mapping functions: `map_lgl()`, `map_int()`, `map_dbl()`, and `map_chr()`. Here's comparable use of `vapply()` and `map_chr()` to get some of the Game of Thrones characters' names.
+Base `vapply()` requires you to specify a template for the return value and is described as a safer alternative to `sapply()`. The closest purrr functions are the type-specific mapping functions: `map_lgl()`, `map_int()`, `map_dbl()`, and `map_chr()` that are "list in, atomic vector out". Here's comparable use of `vapply()` and `map_chr()` to get some of the Game of Thrones characters' names.
 
 <div class = "row">
 <div class = "col-md-6">
+**base**
 ```{r}
 vapply(got_chars[1:3],
-       function(x) x[["name"]], character(1))
+       function(x) x[["name"]],
+       character(1))
 ```
 </div>
 <div class = "col-md-6">
+**purrr**
 ```{r}
 map_chr(got_chars[1:3], "name")
 ```
 </div>
 </div>
 
-What's not to love with `vapply()` then? It suffers from the `drop = FALSE` problem we can have when requesting columns of 2-dimensional objects. Except `vapply()` has no `drop` argument to control this behavior! It's another example of the base functions being more difficult to program around.
+### `vapply()` always simplifies
+
+What's not to love with `vapply()` then? It suffers from the `drop = FALSE` problem we can have when requesting columns of 2-dimensional objects. Except `vapply()` has no `drop` argument to control this behavior. It's another example of the base functions being more difficult to program around. The template allows you to specify the form of each individual result, but there is no way to specify the form -- such as the dimension -- of the *overall* result.
 
 I adapt this example from my real life, where I have `vapply()` inside a function and `n` is an argument to that function, i.e. it varies. Here I just define `n` prior to the `vapply()` call. Note how `vapply()` returns a 2 dimensional object in the first case and atomic vector in the second. As it says in the docs: "Simplification is always done in `vapply`." Believe it.
 
@@ -138,31 +145,131 @@ n <- 1
 vapply(c("a", "b"), f, character(n), n = n)
 ```
 
+## ¯\\\_(ツ)\_/¯ vs. `map_df()`
+
+The `purrr::map_df()` function is "list in, data frame out" and there is no true base equivalent. Given the centrality of data frames for analysis, it is handy to have a function to produce them, without resorting to `do.call()`.
+
+<div class = "row">
+<div class = "col-md-6">
+**base**
+```{r}
+l <- lapply(got_chars[23:25],
+            `[`, c("name", "playedBy"))
+mat <- do.call(rbind, l)
+(df <- as.data.frame(mat, stringsAsFactors = FALSE))
+```
+</div>
+<div class = "col-md-6">
+**purrr**
+```{r}
+map_df(got_chars[23:25],
+       `[`, c("name", "playedBy"))
+```
+</div>
+</div>
+
 ## `mapply()` vs. `map2()`, `pmap()`
 
-*for when you want to iterate over the i-th elements of multiple vectors/lists*
+When you need to iterate over 2 or more vectors/lists in parallel, the base option is `mapply()`. Unlike the other apply functions, the first argument is `FUN`, the function to apply, and the multiple vector inputs are provided "loose" via `...`.
 
-## `tapply()`, `aggregate()`
+For exactly two vector inputs, purrr has `map2()`, with all the usual type-specific variants. For an arbitrary number of vector inputs, use purrr `pmap()` or type-specific variants, with the inputs packaged in a list. A very handy special case is when the input is a data frame, in which case `pmap_*()` applies `.f` to each row.
 
-*for when you want to chop a vector or data frame into pieces based on one or more factors and compute on the pieces ... tidyverse way would be `group_by() + summarize()` or `map()` inside `mutate()` with a nested data frame or `map()` over a list of split data frames ... this gets a bit off topic, i.e. more into dplyr/tidyr territory??? ... issue w/ `tapply()` and data.frame method of `aggregate()` is there's no concept of common data frame for the splitter and splittee, return values quite variable*
-
+<div class = "row">
+<div class = "col-md-6">
+**base**
 ```{r}
+nms <- vapply(got_chars[16:18],
+              `[[`, character(1), "name")
+birth <- vapply(got_chars[16:18],
+                `[[`, character(1), "born")
+mapply(function(x, y) paste(x, "was born", y),
+       nms, birth)
+```
+</div>
+<div class = "col-md-6">
+**purrr**
+```{r}
+nms <- got_chars[16:18] %>% 
+  map_chr("name")
+birth <- got_chars[16:18] %>% 
+  map_chr("born")
+map2_chr(nms, birth, ~ paste(.x, "was born", .y))
+
+## and again, but with pmap()
+df <- tibble::tibble(
+  nms, 
+  connector = "was born",
+  birth
+)
+pmap_chr(df, paste)
+```
+</div>
+</div>
+
+## `aggregate()`, `tapply()` vs. tidyverse
+
+Consider a data frame, as opposed to a nested list. How do you split it into pieces, according to one or more factors, apply a function to the pieces, and combine the results?
+
+*This isn't currently about lists and is therefore slightly off-topic. But when I push it to more complicated summaries, we'll get to nested/split data frames, which is on topic.*
+
+Create a tiny excerpt of the Gapminder dataset that contains a bit of data for Canada and Germany. Load dplyr, now that we are more in the data frame world.
+
+```{r message = FALSE}
+library(dplyr)
 library(gapminder)
-mini_gap <- gapminder %>%
-  dplyr::filter(country %in% c("Canada", "Germany"), year > 2000) %>% 
-  droplevels()
-
-## in this specific case, output is quite nice
-aggregate(lifeExp ~ country, mini_gap, mean) 
-
-## frustrating that mini_gap can't be specified as the data frame in which to
-## find everything ... Group.1?
-aggregate(mini_gap[c("lifeExp", "gdpPercap")], list(mini_gap$country), mean)
-
-## named vector comes back
-tapply(mini_gap$lifeExp, mini_gap$country, mean)
-
-## or a list ... but what you really want is a data frame
-tapply(mini_gap$lifeExp, mini_gap$country, mean, simplify = FALSE)
+(mini_gap <- gapminder %>%
+    filter(country %in% c("Canada", "Germany"), year > 2000) %>% 
+    droplevels())
 ```
 
+Simple summary of a single variable for each country. In this specific case, the formula method of base `aggregate()` is quite nice.
+
+<div class = "row">
+<div class = "col-md-6">
+**base**
+```{r}
+aggregate(lifeExp ~ country, mini_gap, mean)
+```
+</div>
+<div class = "col-md-6">
+**tidyverse**
+```{r}
+mini_gap %>% 
+  group_by(country) %>% 
+  summarize(lifeExp = mean(lifeExp))
+```
+</div>
+</div>
+
+Simple summary of two variables for each country.
+
+<div class = "row">
+<div class = "col-md-6">
+**base**
+```{r}
+## formula method
+aggregate(cbind(lifeExp, gdpPercap) ~ country, mini_gap, mean)
+
+## data.frame method
+aggregate(mini_gap[c("lifeExp", "gdpPercap")], list(mini_gap$country), mean)
+
+## tapply() more general but output less useful here (data frame?)
+
+## returns named vector
+tapply(mini_gap$lifeExp, mini_gap$country, mean)
+
+## returns list
+tapply(mini_gap$lifeExp, mini_gap$country, mean, simplify = FALSE)
+```
+</div>
+<div class = "col-md-6">
+**tidyverse**
+```{r}
+mini_gap %>% 
+  group_by(country) %>% 
+  summarize_at(vars(lifeExp, gdpPercap), mean)
+```
+</div>
+</div>
+
+*to do: something more complicated that requires `split()` on the base side and that is beyond the reach of `summarize()` on the tidyverse side, i.e. a nested data frame example*

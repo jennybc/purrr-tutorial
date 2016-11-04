@@ -309,19 +309,20 @@ div.tocify {
 <li>Iterate over rows or columns of a 2-dimensional object</li>
 <li>Iterate over tuples formed from the i-th element of several vectors of equal-length</li>
 </ul>
-<p>All of this is absolutely possible with base R, using <code>for()</code> loops or the “apply” functions, such as <code>apply()</code>, <code>[slvmt]apply()</code>, <code>split()</code>, and <code>by()</code>. I know, because I did so religiously for over 15 years.</p>
-<p>What’s the problem? As an instructor, I encounter lots of useRs who sheepishly say they know they should be using the apply functions, but they don’t. Because they’ve never quite figured them out or been able to form the habit.</p>
+<p><strong>All of this is absolutely possible with base R</strong>, using <code>for()</code> loops or the “apply” functions, such as <code>apply()</code>, <code>[slvmt]apply()</code>, <code>split()</code>, and <code>by()</code>. I know, because I did so religiously for over 15 years.</p>
+<p>Why might you do otherwise? As an instructor, I encounter lots of useRs who sheepishly say they know they should be using the apply functions, but they don’t. Because they’ve never quite figured them out or been able to form the habit.</p>
 <p>I have a theory about why. The apply functions are not particularly easy or convenient to use. The user interface is not as consistent as it could be, which slows down learning. The return objects frequently require further checking and massage to use downstream, which diminishes the payoff.</p>
+<p>Regardless of your preference, hopefully the side-by-side examples below are a helpful demo of different ways to iterate. Even if you prefer purrr/tidyverse in some settings, you might use base methods when you don’t want any dependencies.</p>
 </div>
 <div id="why-purrr" class="section level2">
 <h2>Why purrr?</h2>
 <p>purrr addresses some of the friction identified in the base functions for “split-apply-combine”:</p>
 <ul>
 <li>The <code>map()</code> family of functions is highly internally consistent, making it easier to transfer expertise from one function to another.</li>
-<li>Greater encouragement for type-safe simplification, i.e. conversion from list to atomic vector or data frame.</li>
+<li>Greater encouragement for type-safe simplification to atomic vector or data frame, producing output that is more ready for the next step.</li>
 <li>Concise syntax for defining anonymous functions.</li>
 </ul>
-<p>We load purrr now. Below we also use example lists from <a href="https://github.com/jennybc/repurrrsive">repurrrsive</a> which are <a href="index.html">introduced and explored elsewhere</a>.</p>
+<p>We load purrr now. Below we also use example lists from <a href="https://github.com/jennybc/repurrrsive">repurrrsive</a> which are <a href="ls00_inspect-explore.html">introduced and explored elsewhere</a>.</p>
 <pre class="r"><code>library(purrr)
 ## install_github(&quot;jennybc/repurrrsive&quot;)
 library(repurrrsive)</code></pre>
@@ -343,9 +344,10 @@ library(repurrrsive)</code></pre>
 </div>
 <div id="lapply-vs.-purrrmap" class="section level2">
 <h2><code>lapply()</code> vs. <code>purrr::map()</code></h2>
-<p>These are the core mapping functions of base and purrr, respectively. They are “list in, list out”. The main (only?) difference is access to purrr’s shortcuts for anonymous functions.</p>
+<p>These are the core mapping functions of base and purrr, respectively. They are “list in, list out”. The main (only?) difference is access to purrr’s shortcuts for indexing by name or position and for creating anonymous functions.</p>
 <div class="row">
 <div class="col-md-6">
+<p><strong>base</strong></p>
 <pre class="r"><code>lapply(got_chars[1:3],
        function(x) x[[&quot;name&quot;]])
 #&gt; [[1]]
@@ -358,6 +360,7 @@ library(repurrrsive)</code></pre>
 #&gt; [1] &quot;Victarion Greyjoy&quot;</code></pre>
 </div>
 <div class="col-md-6">
+<p><strong>purrr</strong></p>
 <pre class="r"><code>map(got_chars[1:3], &quot;name&quot;)
 #&gt; [[1]]
 #&gt; [1] &quot;Theon Greyjoy&quot;
@@ -374,7 +377,7 @@ library(repurrrsive)</code></pre>
 </div>
 <div id="sapply-vs.-__" class="section level2">
 <h2><code>sapply()</code> vs. ¯\_(ツ)_/¯</h2>
-<p><code>sapply()</code> is a base function that attempts to apply a reasonable simplification to the output of <code>lapply()</code>. It’s fine for interactive use, but due to the unpredictability of it return value, it’s unwise to use it in programming. There is no equivalent in purrr or plyr.</p>
+<p><code>sapply()</code> is a base function that attempts to apply a reasonable simplification to the output of <code>lapply()</code>. It’s handy for interactive use, but due to the unpredictability of it return value, it’s unwise to use it in programming. There is no equivalent in purrr or plyr.</p>
 <p>Problem demonstration: The characters in Game of Thrones can have aliases. Some have several, some have one, some have none. Depending on which characters I work with, the same <code>sapply()</code> call can return an object of entirely different class, i.e. a list or a character vector. This can be a source of mysterious bugs in code meant to run non-interactively.</p>
 <pre class="r"><code>aliases1 &lt;- sapply(got_chars[20:22], function(x) x[[&quot;aliases&quot;]])
 str(aliases1)
@@ -385,25 +388,30 @@ str(aliases1)
 aliases2 &lt;- sapply(got_chars[c(3, 22, 27)], function(x) x[[&quot;aliases&quot;]])
 str(aliases2)
 #&gt;  chr [1:3] &quot;The Iron Captain&quot; &quot;Griffthe Mad King&#39;s Hand&quot; ...</code></pre>
-<p>With purrr, you would use <code>map()</code> to get a list back or <code>map_chr()</code> to get atomic character vector. If you use <code>map_chr()</code> when you should not, you’ll get an error and can adjust your approach accordingly.</p>
+<p>With purrr, you would use <code>map()</code> to get a list back or <code>map_chr()</code> to get atomic character vector. If you use <code>map_chr()</code> when you should not, you’ll get an error (shown below) and can adjust your approach accordingly.</p>
 <pre class="r"><code>map_chr(got_chars[2:4], &quot;aliases&quot;)
 #&gt; Error: Result 1 is not a length 1 atomic vector</code></pre>
 </div>
 <div id="vapply-vs.-map_" class="section level2">
 <h2><code>vapply()</code> vs. <code>map_*()</code></h2>
-<p>Base <code>vapply()</code> requires you to specify a template for the return value and is described as a safer alternative to <code>sapply()</code>. The closest purrr functions are the type-specific mapping functions: <code>map_lgl()</code>, <code>map_int()</code>, <code>map_dbl()</code>, and <code>map_chr()</code>. Here’s comparable use of <code>vapply()</code> and <code>map_chr()</code> to get some of the Game of Thrones characters’ names.</p>
+<p>Base <code>vapply()</code> requires you to specify a template for the return value and is described as a safer alternative to <code>sapply()</code>. The closest purrr functions are the type-specific mapping functions: <code>map_lgl()</code>, <code>map_int()</code>, <code>map_dbl()</code>, and <code>map_chr()</code> that are “list in, atomic vector out”. Here’s comparable use of <code>vapply()</code> and <code>map_chr()</code> to get some of the Game of Thrones characters’ names.</p>
 <div class="row">
 <div class="col-md-6">
+<p><strong>base</strong></p>
 <pre class="r"><code>vapply(got_chars[1:3],
-       function(x) x[[&quot;name&quot;]], character(1))
+       function(x) x[[&quot;name&quot;]],
+       character(1))
 #&gt; [1] &quot;Theon Greyjoy&quot;     &quot;Tyrion Lannister&quot;  &quot;Victarion Greyjoy&quot;</code></pre>
 </div>
 <div class="col-md-6">
+<p><strong>purrr</strong></p>
 <pre class="r"><code>map_chr(got_chars[1:3], &quot;name&quot;)
 #&gt; [1] &quot;Theon Greyjoy&quot;     &quot;Tyrion Lannister&quot;  &quot;Victarion Greyjoy&quot;</code></pre>
 </div>
 </div>
-<p>What’s not to love with <code>vapply()</code> then? It suffers from the <code>drop = FALSE</code> problem we can have when requesting columns of 2-dimensional objects. Except <code>vapply()</code> has no <code>drop</code> argument to control this behavior! It’s another example of the base functions being more difficult to program around.</p>
+<div id="vapply-always-simplifies" class="section level3">
+<h3><code>vapply()</code> always simplifies</h3>
+<p>What’s not to love with <code>vapply()</code> then? It suffers from the <code>drop = FALSE</code> problem we can have when requesting columns of 2-dimensional objects. Except <code>vapply()</code> has no <code>drop</code> argument to control this behavior. It’s another example of the base functions being more difficult to program around. The template allows you to specify the form of each individual result, but there is no way to specify the form – such as the dimension – of the <em>overall</em> result.</p>
 <p>I adapt this example from my real life, where I have <code>vapply()</code> inside a function and <code>n</code> is an argument to that function, i.e. it varies. Here I just define <code>n</code> prior to the <code>vapply()</code> call. Note how <code>vapply()</code> returns a 2 dimensional object in the first case and atomic vector in the second. As it says in the docs: “Simplification is always done in <code>vapply</code>.” Believe it.</p>
 <pre class="r"><code>f &lt;- function(x, n) rep(x, n)
 n &lt;- 3
@@ -417,43 +425,161 @@ vapply(c(&quot;a&quot;, &quot;b&quot;), f, character(n), n = n)
 #&gt;   a   b 
 #&gt; &quot;a&quot; &quot;b&quot;</code></pre>
 </div>
+</div>
+<div id="_-vs.-map_df" class="section level2">
+<h2>¯\_(ツ)_/¯ vs. <code>map_df()</code></h2>
+<p>The <code>purrr::map_df()</code> function is “list in, data frame out” and there is no true base equivalent. Given the centrality of data frames for analysis, it is handy to have a function to produce them, without resorting to <code>do.call()</code>.</p>
+<div class="row">
+<div class="col-md-6">
+<p><strong>base</strong></p>
+<pre class="r"><code>l &lt;- lapply(got_chars[23:25],
+            `[`, c(&quot;name&quot;, &quot;playedBy&quot;))
+mat &lt;- do.call(rbind, l)
+(df &lt;- as.data.frame(mat, stringsAsFactors = FALSE))
+#&gt;              name      playedBy
+#&gt; 1        Jon Snow Kit Harington
+#&gt; 2   Aeron Greyjoy Michael Feast
+#&gt; 3 Kevan Lannister    Ian Gelder</code></pre>
+</div>
+<div class="col-md-6">
+<p><strong>purrr</strong></p>
+<pre class="r"><code>map_df(got_chars[23:25],
+       `[`, c(&quot;name&quot;, &quot;playedBy&quot;))
+#&gt; # A tibble: 3 × 2
+#&gt;              name      playedBy
+#&gt;             &lt;chr&gt;         &lt;chr&gt;
+#&gt; 1        Jon Snow Kit Harington
+#&gt; 2   Aeron Greyjoy Michael Feast
+#&gt; 3 Kevan Lannister    Ian Gelder</code></pre>
+</div>
+</div>
+</div>
 <div id="mapply-vs.-map2-pmap" class="section level2">
 <h2><code>mapply()</code> vs. <code>map2()</code>, <code>pmap()</code></h2>
-<p><em>for when you want to iterate over the i-th elements of multiple vectors/lists</em></p>
+<p>When you need to iterate over 2 or more vectors/lists in parallel, the base option is <code>mapply()</code>. Unlike the other apply functions, the first argument is <code>FUN</code>, the function to apply, and the multiple vector inputs are provided “loose” via <code>...</code>.</p>
+<p>For exactly two vector inputs, purrr has <code>map2()</code>, with all the usual type-specific variants. For an arbitrary number of vector inputs, use purrr <code>pmap()</code> or type-specific variants, with the inputs packaged in a list. A very handy special case is when the input is a data frame, in which case <code>pmap_*()</code> applies <code>.f</code> to each row.</p>
+<div class="row">
+<div class="col-md-6">
+<p><strong>base</strong></p>
+<pre class="r"><code>nms &lt;- vapply(got_chars[16:18],
+              `[[`, character(1), &quot;name&quot;)
+birth &lt;- vapply(got_chars[16:18],
+                `[[`, character(1), &quot;born&quot;)
+mapply(function(x, y) paste(x, &quot;was born&quot;, y),
+       nms, birth)
+#&gt;                                     Brandon Stark 
+#&gt; &quot;Brandon Stark was born In 290 AC, at Winterfell&quot; 
+#&gt;                                  Brienne of Tarth 
+#&gt;             &quot;Brienne of Tarth was born In 280 AC&quot; 
+#&gt;                                     Catelyn Stark 
+#&gt;   &quot;Catelyn Stark was born In 264 AC, at Riverrun&quot;</code></pre>
 </div>
-<div id="tapply-aggregate" class="section level2">
-<h2><code>tapply()</code>, <code>aggregate()</code></h2>
-<p><em>for when you want to chop a vector or data frame into pieces based on one or more factors and compute on the pieces … tidyverse way would be <code>group_by() + summarize()</code> or <code>map()</code> inside <code>mutate()</code> with a nested data frame or <code>map()</code> over a list of split data frames … this gets a bit off topic, i.e. more into dplyr/tidyr territory??? … issue w/ <code>tapply()</code> and data.frame method of <code>aggregate()</code> is there’s no concept of common data frame for the splitter and splittee, return values quite variable</em></p>
-<pre class="r"><code>library(gapminder)
-mini_gap &lt;- gapminder %&gt;%
-  dplyr::filter(country %in% c(&quot;Canada&quot;, &quot;Germany&quot;), year &gt; 2000) %&gt;% 
-  droplevels()
+<div class="col-md-6">
+<p><strong>purrr</strong></p>
+<pre class="r"><code>nms &lt;- got_chars[16:18] %&gt;% 
+  map_chr(&quot;name&quot;)
+birth &lt;- got_chars[16:18] %&gt;% 
+  map_chr(&quot;born&quot;)
+map2_chr(nms, birth, ~ paste(.x, &quot;was born&quot;, .y))
+#&gt; [1] &quot;Brandon Stark was born In 290 AC, at Winterfell&quot;
+#&gt; [2] &quot;Brienne of Tarth was born In 280 AC&quot;            
+#&gt; [3] &quot;Catelyn Stark was born In 264 AC, at Riverrun&quot;
 
-## in this specific case, output is quite nice
-aggregate(lifeExp ~ country, mini_gap, mean) 
+## and again, but with pmap()
+df &lt;- tibble::tibble(
+  nms, 
+  connector = &quot;was born&quot;,
+  birth
+)
+pmap_chr(df, paste)
+#&gt; [1] &quot;Brandon Stark was born In 290 AC, at Winterfell&quot;
+#&gt; [2] &quot;Brienne of Tarth was born In 280 AC&quot;            
+#&gt; [3] &quot;Catelyn Stark was born In 264 AC, at Riverrun&quot;</code></pre>
+</div>
+</div>
+</div>
+<div id="aggregate-tapply-vs.tidyverse" class="section level2">
+<h2><code>aggregate()</code>, <code>tapply()</code> vs. tidyverse</h2>
+<p>Consider a data frame, as opposed to a nested list. How do you split it into pieces, according to one or more factors, apply a function to the pieces, and combine the results?</p>
+<p><em>This isn’t currently about lists and is therefore slightly off-topic. But when I push it to more complicated summaries, we’ll get to nested/split data frames, which is on topic.</em></p>
+<p>Create a tiny excerpt of the Gapminder dataset that contains a bit of data for Canada and Germany. Load dplyr, now that we are more in the data frame world.</p>
+<pre class="r"><code>library(dplyr)
+library(gapminder)
+(mini_gap &lt;- gapminder %&gt;%
+    filter(country %in% c(&quot;Canada&quot;, &quot;Germany&quot;), year &gt; 2000) %&gt;% 
+    droplevels())
+#&gt; # A tibble: 4 × 6
+#&gt;   country continent  year lifeExp      pop gdpPercap
+#&gt;    &lt;fctr&gt;    &lt;fctr&gt; &lt;int&gt;   &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;
+#&gt; 1  Canada  Americas  2002  79.770 31902268  33328.97
+#&gt; 2  Canada  Americas  2007  80.653 33390141  36319.24
+#&gt; 3 Germany    Europe  2002  78.670 82350671  30035.80
+#&gt; 4 Germany    Europe  2007  79.406 82400996  32170.37</code></pre>
+<p>Simple summary of a single variable for each country. In this specific case, the formula method of base <code>aggregate()</code> is quite nice.</p>
+<div class="row">
+<div class="col-md-6">
+<p><strong>base</strong></p>
+<pre class="r"><code>aggregate(lifeExp ~ country, mini_gap, mean)
 #&gt;   country lifeExp
 #&gt; 1  Canada 80.2115
-#&gt; 2 Germany 79.0380
+#&gt; 2 Germany 79.0380</code></pre>
+</div>
+<div class="col-md-6">
+<p><strong>tidyverse</strong></p>
+<pre class="r"><code>mini_gap %&gt;% 
+  group_by(country) %&gt;% 
+  summarize(lifeExp = mean(lifeExp))
+#&gt; # A tibble: 2 × 2
+#&gt;   country lifeExp
+#&gt;    &lt;fctr&gt;   &lt;dbl&gt;
+#&gt; 1  Canada 80.2115
+#&gt; 2 Germany 79.0380</code></pre>
+</div>
+</div>
+<p>Simple summary of two variables for each country.</p>
+<div class="row">
+<div class="col-md-6">
+<p><strong>base</strong></p>
+<pre class="r"><code>## formula method
+aggregate(cbind(lifeExp, gdpPercap) ~ country, mini_gap, mean)
+#&gt;   country lifeExp gdpPercap
+#&gt; 1  Canada 80.2115  34824.10
+#&gt; 2 Germany 79.0380  31103.09
 
-## frustrating that mini_gap can&#39;t be specified as the data frame in which to
-## find everything ... Group.1?
+## data.frame method
 aggregate(mini_gap[c(&quot;lifeExp&quot;, &quot;gdpPercap&quot;)], list(mini_gap$country), mean)
 #&gt;   Group.1 lifeExp gdpPercap
 #&gt; 1  Canada 80.2115  34824.10
 #&gt; 2 Germany 79.0380  31103.09
 
-## named vector comes back
+## tapply() more general but output less useful here (data frame?)
+
+## returns named vector
 tapply(mini_gap$lifeExp, mini_gap$country, mean)
 #&gt;  Canada Germany 
 #&gt; 80.2115 79.0380
 
-## or a list ... but what you really want is a data frame
+## returns list
 tapply(mini_gap$lifeExp, mini_gap$country, mean, simplify = FALSE)
 #&gt; $Canada
 #&gt; [1] 80.2115
 #&gt; 
 #&gt; $Germany
 #&gt; [1] 79.038</code></pre>
+</div>
+<div class="col-md-6">
+<p><strong>tidyverse</strong></p>
+<pre class="r"><code>mini_gap %&gt;% 
+  group_by(country) %&gt;% 
+  summarize_at(vars(lifeExp, gdpPercap), mean)
+#&gt; # A tibble: 2 × 3
+#&gt;   country lifeExp gdpPercap
+#&gt;    &lt;fctr&gt;   &lt;dbl&gt;     &lt;dbl&gt;
+#&gt; 1  Canada 80.2115  34824.10
+#&gt; 2 Germany 79.0380  31103.09</code></pre>
+</div>
+</div>
+<p><em>to do: something more complicated that requires <code>split()</code> on the base side and that is beyond the reach of <code>summarize()</code> on the tidyverse side, i.e. a nested data frame example</em></p>
 </div>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
