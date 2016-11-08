@@ -10,3 +10,5 @@ title: "More resources"
     - [Iteration](http://r4ds.had.co.nz/iteration.html)
     - [Handling hierarchy](http://r4ds.had.co.nz/hierarchy.html)
     - [Many models](http://r4ds.had.co.nz/many-models.html)
+  * Example lists are in the repurrrsive package:
+    - [https://github.com/jennybc/repurrrsive](https://github.com/jennybc/repurrrsive#readme)
