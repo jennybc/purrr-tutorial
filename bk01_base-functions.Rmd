@@ -1,6 +1,6 @@
 ---
 title: "Relationship to base and plyr functions"
-comment: "*for the skeptics*"
+comment: "*side-by-side workflow comparison*"
 output:
   html_document:
     toc: true
@@ -16,17 +16,17 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>", error = TRUE)
 You need a way to iterate in R in a data-structure-informed way. What does that mean?
 
   * Iterate over elements of a list
+  * Iterate over rows or columns of a 2-dimensional object  
   * Iterate over sub data frames induced by one or more factors
-  * Iterate over rows or columns of a 2-dimensional object
-  * Iterate over tuples formed from the i-th element of several vectors of equal-length
+  * Iterate over tuples formed from the i-th element of several vectors of equal length
 
-**All of this is absolutely possible with base R**, using `for()` loops or the "apply" functions, such as `apply()`, `[slvmt]apply()`, `split()`, and `by()`. I know, because I did so religiously for over 15 years.
+**All of this is absolutely possible with base R**, using `for()` loops or the "apply" functions, such as `apply()`, `[slvmt]apply()`, and `by()`. I know, because I did so religiously for over 15 years. It works fine!
 
 Why might you do otherwise? As an instructor, I encounter lots of useRs who sheepishly say they know they should be using the apply functions, but they don't. Because they've never quite figured them out or been able to form the habit.
 
-I have a theory about why. The apply functions are not particularly easy or convenient to use. The user interface is not as consistent as it could be, which slows down learning. The return objects frequently require further checking and massage to use downstream, which diminishes the payoff.
+I have a theory about why. The user interface of the "apply"" functions is not as consistent as it could be, which slows down learning. The return objects frequently require further checking and massage to use downstream, which diminishes the payoff. In particular, there's a tendency to return a vector (atomic or otherwise) or array, instead of data frame, with the original factor levels appearing in a names attribute.
 
-Regardless of your preference, hopefully the side-by-side examples below are a helpful demo of different ways to iterate. Even if you prefer purrr/tidyverse in some settings, you might use base methods when you don't want any dependencies.
+Regardless of your preference, hopefully the side-by-side examples below are a helpful tour of different ways to iterate. Even if you prefer purrr/tidyverse in some settings, you might want base methods when you don't want any dependencies.
 
 ## Why purrr?
 
@@ -104,7 +104,7 @@ aliases2 <- sapply(got_chars[c(3, 22, 27)], function(x) x[["aliases"]])
 str(aliases2)
 ```
 
-With purrr, you would use `map()` to get a list back or `map_chr()` to get atomic character vector. If you use `map_chr()` when you should not, you'll get an error (shown below) and can adjust your approach accordingly.
+With purrr, you would use `map()` to get a list back or `map_chr()` to get atomic character vector. If you use `map_chr()` when you should not, you'll get an informative error right away (shown below) and can adjust your approach accordingly.
 
 ```{r}
 map_chr(got_chars[2:4], "aliases")
@@ -133,9 +133,9 @@ map_chr(got_chars[1:3], "name")
 
 ### `vapply()` always simplifies
 
-What's not to love with `vapply()` then? It suffers from the `drop = FALSE` problem we can have when requesting columns of 2-dimensional objects. Except `vapply()` has no `drop` argument to control this behavior. It's another example of the base functions being more difficult to program around. The template allows you to specify the form of each individual result, but there is no way to specify the form -- such as the dimension -- of the *overall* result.
+What's not to love with `vapply()` then? It suffers from the `drop = TRUE` vs `FALSE` problem we have when requesting a single row or column from a 2-dimensional object. Except `vapply()` has no `drop` argument to control this behavior. It's an example of the base functions being more difficult to program around. The template allows you to specify the form of each individual result, but there is no way to specify the form -- such as the dimension -- of the *overall* result.
 
-I adapt this example from my real life, where I have `vapply()` inside a function and `n` is an argument to that function, i.e. it varies. Here I just define `n` prior to the `vapply()` call. Note how `vapply()` returns a 2 dimensional object in the first case and atomic vector in the second. As it says in the docs: "Simplification is always done in `vapply`." Believe it.
+I adapt this example from my real life, where I have `vapply()` inside a function and `n` is an argument to that function, i.e. it varies. Here I simply define `n` in the global environment prior to the `vapply()` call. Note how `vapply()` returns a 2 dimensional object in the first case and atomic vector in the second. As it says in the docs: "Simplification is always done in `vapply`." Believe it.
 
 ```{r}
 f <- function(x, n) rep(x, n)
@@ -164,6 +164,32 @@ mat <- do.call(rbind, l)
 ```{r}
 map_df(got_chars[23:25],
        `[`, c("name", "playedBy"))
+```
+</div>
+</div>
+
+The base workflow above gets trickier if you're extracting elements of disparate type. At that point, it may make more sense to use `vapply()` repeatedly. For comparability, we'll show similar using purrr's type-specific mapping, which is also safer than relying on automatic type conversion from `map_df()`.
+
+<div class = "row">
+<div class = "col-md-6">
+**base**
+```{r}
+data.frame(
+  name = vapply(got_chars[23:25], `[[`,
+                character(1), "name"),
+  id = vapply(got_chars[23:25], `[[`,
+              integer(1), "id"),
+  stringsAsFactors = FALSE
+)
+```
+</div>
+<div class = "col-md-6">
+**purrr**
+```{r}
+tibble::tibble(
+  name = map_chr(got_chars[23:25], "name"),
+  id = map_int(got_chars[23:25], "id")
+)
 ```
 </div>
 </div>
@@ -206,11 +232,9 @@ pmap_chr(df, paste)
 </div>
 </div>
 
-## `aggregate()`, `tapply()` vs. tidyverse
+## `aggregate()` vs. `dplyr::summarize()`
 
 Consider a data frame, as opposed to a nested list. How do you split it into pieces, according to one or more factors, apply a function to the pieces, and combine the results?
-
-*This isn't currently about lists and is therefore slightly off-topic. But when I push it to more complicated summaries, we'll get to nested/split data frames, which is on topic.*
 
 Create a tiny excerpt of the Gapminder dataset that contains a bit of data for Canada and Germany. Load dplyr, now that we are more in the data frame world.
 
@@ -222,7 +246,7 @@ library(gapminder)
     droplevels())
 ```
 
-Simple summary of a single variable for each country. In this specific case, the formula method of base `aggregate()` is quite nice.
+Simple summary of a single variable for each country. Specifically, take the mean of life expectancy. In this case, the formula method of base `aggregate()` is quite nice, i.e. it returns a convenient data frame.
 
 <div class = "row">
 <div class = "col-md-6">
@@ -241,7 +265,7 @@ mini_gap %>%
 </div>
 </div>
 
-Simple summary of two variables for each country.
+Simple summaries of two variables for each country. We take the mean of life expectancy and of GDP per capita.
 
 <div class = "row">
 <div class = "col-md-6">
@@ -272,4 +296,111 @@ mini_gap %>%
 </div>
 </div>
 
-*to do: something more complicated that requires `split()` on the base side and that is beyond the reach of `summarize()` on the tidyverse side, i.e. a nested data frame example*
+Bivariate summary of two variables for each country. We compute the correlation of life expectancy and year, for the full gapminder dataset now. On the base side, we can no longer use `aggregate()` or `tapply()` and need to graduate to `by()`.
+
+<div class = "row">
+<div class = "col-md-6">
+**base**
+```{r}
+## by() with simplification (the default)
+by_obj <- by(gapminder, gapminder$country, function(df) cor(df$lifeExp, df$year))
+head(by_obj)
+
+## by() without simplification
+by_obj <- by(gapminder, gapminder$country, function(df) cor(df$lifeExp, df$year),
+   simplify = FALSE)
+head(by_obj)
+```
+</div>
+<div class = "col-md-6">
+**tidyverse**
+```{r}
+gapminder %>% 
+  group_by(country) %>% 
+  summarize(cor = cor(lifeExp, year))
+```
+</div>
+</div>
+
+This is a good place to pause and glance back over the base vs tidyverse calls and results in this section. It shows that you can absolutely do these tasks either way, but the consistency of the code and return values is higher in the tidyverse.
+
+## `by()` vs. `tidyr::nest()`
+
+Fit a linear model of life expectancy against year. On the tidyverse side, we now create a nested data frame, with one meta-row per country. Therefore we load tidyr to get `nest()`. The data needed for each country's linear model is stored as a list-column of country-specific data frame.
+
+<div class = "row">
+<div class = "col-md-6">
+**base**
+```{r}
+by_obj <- by(gapminder,
+             gapminder$country, 
+             function(df) lm(lifeExp ~ year, data = df))
+str(by_obj[1:2], max.level = 1)
+by_obj[[1]]
+```
+</div>
+<div class = "col-md-6">
+**tidyverse**
+```{r}
+library(tidyr)
+nested_df <- gapminder %>% 
+  group_by(country, continent) %>% 
+  nest() %>% 
+  mutate(fit = map(data, ~ lm(lifeExp ~ year, data = .x)))
+str(nested_df$fit[1:2], max.level = 1)
+nested_df$fit[[1]]
+```
+</div>
+</div>
+
+What if you want to inspect the fits for Oceania? On the base side, you've got some work to do because the country information lives only in the names and the continent information is not directly linked to the model fits at all. On the tidyverse side, where the fits live in a data frame that carries country and continent info, we can use our usual techniques for filtering rows based on the data.
+
+<div class = "row">
+<div class = "col-md-6">
+**base**
+```{r}
+o_countries <- as.character(unique(gapminder$country[gapminder$continent == "Oceania"]))
+by_obj[names(by_obj) %in% o_countries]
+```
+</div>
+<div class = "col-md-6">
+**tidyverse**
+```{r}
+nested_df %>% 
+  filter(continent == "Oceania") %>% 
+  .$fit
+```
+</div>
+</div>
+
+Let's form a data frame with one row per country and variables for country, continent, estimated intercept, and estimated slope. I also want to guarantee that the country and continent factors have the same levels as they originally had in gapminder.
+
+<div class = "row">
+<div class = "col-md-6">
+**base**
+```{r}
+coefs <- lapply(by_obj, coef)
+coefs <- do.call(rbind, coefs)
+coefs <- data.frame(
+  country = I(rownames(coefs)),
+  coefs
+)
+coefs$continent <- gapminder$continent[match(coefs$country, gapminder$country)]
+coefs$continent <- factor(coefs$continent, levels = levels(gapminder$continent))
+coefs$country <- factor(coefs$country, levels = levels(gapminder$country))
+head(coefs)
+```
+</div>
+<div class = "col-md-6">
+**tidyverse**
+```{r}
+nested_df %>% 
+  mutate(coefs = map(fit, coef),
+         intercept = map_dbl(coefs, 1),
+         slope = map_dbl(coefs, 2)) %>% 
+  select(country, continent, intercept, slope)
+```
+</div>
+</div>
+
+This illustrates the post-processing that is often necessary in a base workflow. We need to restore the country info from the names of `by_obj`, use them to look up the continents in gapminder, and then restore the original factor levels for both country and continent. It illustrates the payoff for temporarily tolerating the `data` and `fit` list-columns in the nested data frame used in the tidyverse workflow. The country and continent factors remain intact and directly associated with the data and fits.

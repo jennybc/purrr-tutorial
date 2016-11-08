@@ -305,14 +305,15 @@ div.tocify {
 <p>You need a way to iterate in R in a data-structure-informed way. What does that mean?</p>
 <ul>
 <li>Iterate over elements of a list</li>
+<li>Iterate over rows or columns of a 2-dimensional object<br />
+</li>
 <li>Iterate over sub data frames induced by one or more factors</li>
-<li>Iterate over rows or columns of a 2-dimensional object</li>
-<li>Iterate over tuples formed from the i-th element of several vectors of equal-length</li>
+<li>Iterate over tuples formed from the i-th element of several vectors of equal length</li>
 </ul>
-<p><strong>All of this is absolutely possible with base R</strong>, using <code>for()</code> loops or the “apply” functions, such as <code>apply()</code>, <code>[slvmt]apply()</code>, <code>split()</code>, and <code>by()</code>. I know, because I did so religiously for over 15 years.</p>
+<p><strong>All of this is absolutely possible with base R</strong>, using <code>for()</code> loops or the “apply” functions, such as <code>apply()</code>, <code>[slvmt]apply()</code>, and <code>by()</code>. I know, because I did so religiously for over 15 years. It works fine!</p>
 <p>Why might you do otherwise? As an instructor, I encounter lots of useRs who sheepishly say they know they should be using the apply functions, but they don’t. Because they’ve never quite figured them out or been able to form the habit.</p>
-<p>I have a theory about why. The apply functions are not particularly easy or convenient to use. The user interface is not as consistent as it could be, which slows down learning. The return objects frequently require further checking and massage to use downstream, which diminishes the payoff.</p>
-<p>Regardless of your preference, hopefully the side-by-side examples below are a helpful demo of different ways to iterate. Even if you prefer purrr/tidyverse in some settings, you might use base methods when you don’t want any dependencies.</p>
+<p>I have a theory about why. The user interface of the “apply”&quot; functions is not as consistent as it could be, which slows down learning. The return objects frequently require further checking and massage to use downstream, which diminishes the payoff. In particular, there’s a tendency to return a vector (atomic or otherwise) or array, instead of data frame, with the original factor levels appearing in a names attribute.</p>
+<p>Regardless of your preference, hopefully the side-by-side examples below are a helpful tour of different ways to iterate. Even if you prefer purrr/tidyverse in some settings, you might want base methods when you don’t want any dependencies.</p>
 </div>
 <div id="why-purrr" class="section level2">
 <h2>Why purrr?</h2>
@@ -388,7 +389,7 @@ str(aliases1)
 aliases2 &lt;- sapply(got_chars[c(3, 22, 27)], function(x) x[[&quot;aliases&quot;]])
 str(aliases2)
 #&gt;  chr [1:3] &quot;The Iron Captain&quot; &quot;Griffthe Mad King&#39;s Hand&quot; ...</code></pre>
-<p>With purrr, you would use <code>map()</code> to get a list back or <code>map_chr()</code> to get atomic character vector. If you use <code>map_chr()</code> when you should not, you’ll get an error (shown below) and can adjust your approach accordingly.</p>
+<p>With purrr, you would use <code>map()</code> to get a list back or <code>map_chr()</code> to get atomic character vector. If you use <code>map_chr()</code> when you should not, you’ll get an informative error right away (shown below) and can adjust your approach accordingly.</p>
 <pre class="r"><code>map_chr(got_chars[2:4], &quot;aliases&quot;)
 #&gt; Error: Result 1 is not a length 1 atomic vector</code></pre>
 </div>
@@ -411,8 +412,8 @@ str(aliases2)
 </div>
 <div id="vapply-always-simplifies" class="section level3">
 <h3><code>vapply()</code> always simplifies</h3>
-<p>What’s not to love with <code>vapply()</code> then? It suffers from the <code>drop = FALSE</code> problem we can have when requesting columns of 2-dimensional objects. Except <code>vapply()</code> has no <code>drop</code> argument to control this behavior. It’s another example of the base functions being more difficult to program around. The template allows you to specify the form of each individual result, but there is no way to specify the form – such as the dimension – of the <em>overall</em> result.</p>
-<p>I adapt this example from my real life, where I have <code>vapply()</code> inside a function and <code>n</code> is an argument to that function, i.e. it varies. Here I just define <code>n</code> prior to the <code>vapply()</code> call. Note how <code>vapply()</code> returns a 2 dimensional object in the first case and atomic vector in the second. As it says in the docs: “Simplification is always done in <code>vapply</code>.” Believe it.</p>
+<p>What’s not to love with <code>vapply()</code> then? It suffers from the <code>drop = TRUE</code> vs <code>FALSE</code> problem we have when requesting a single row or column from a 2-dimensional object. Except <code>vapply()</code> has no <code>drop</code> argument to control this behavior. It’s an example of the base functions being more difficult to program around. The template allows you to specify the form of each individual result, but there is no way to specify the form – such as the dimension – of the <em>overall</em> result.</p>
+<p>I adapt this example from my real life, where I have <code>vapply()</code> inside a function and <code>n</code> is an argument to that function, i.e. it varies. Here I simply define <code>n</code> in the global environment prior to the <code>vapply()</code> call. Note how <code>vapply()</code> returns a 2 dimensional object in the first case and atomic vector in the second. As it says in the docs: “Simplification is always done in <code>vapply</code>.” Believe it.</p>
 <pre class="r"><code>f &lt;- function(x, n) rep(x, n)
 n &lt;- 3
 vapply(c(&quot;a&quot;, &quot;b&quot;), f, character(n), n = n)
@@ -451,6 +452,36 @@ mat &lt;- do.call(rbind, l)
 #&gt; 1        Jon Snow Kit Harington
 #&gt; 2   Aeron Greyjoy Michael Feast
 #&gt; 3 Kevan Lannister    Ian Gelder</code></pre>
+</div>
+</div>
+<p>The base workflow above gets trickier if you’re extracting elements of disparate type. At that point, it may make more sense to use <code>vapply()</code> repeatedly. For comparability, we’ll show similar using purrr’s type-specific mapping, which is also safer than relying on automatic type conversion from <code>map_df()</code>.</p>
+<div class="row">
+<div class="col-md-6">
+<p><strong>base</strong></p>
+<pre class="r"><code>data.frame(
+  name = vapply(got_chars[23:25], `[[`,
+                character(1), &quot;name&quot;),
+  id = vapply(got_chars[23:25], `[[`,
+              integer(1), &quot;id&quot;),
+  stringsAsFactors = FALSE
+)
+#&gt;              name  id
+#&gt; 1        Jon Snow 583
+#&gt; 2   Aeron Greyjoy  60
+#&gt; 3 Kevan Lannister 605</code></pre>
+</div>
+<div class="col-md-6">
+<p><strong>purrr</strong></p>
+<pre class="r"><code>tibble::tibble(
+  name = map_chr(got_chars[23:25], &quot;name&quot;),
+  id = map_int(got_chars[23:25], &quot;id&quot;)
+)
+#&gt; # A tibble: 3 × 2
+#&gt;              name    id
+#&gt;             &lt;chr&gt; &lt;int&gt;
+#&gt; 1        Jon Snow   583
+#&gt; 2   Aeron Greyjoy    60
+#&gt; 3 Kevan Lannister   605</code></pre>
 </div>
 </div>
 </div>
@@ -498,10 +529,9 @@ pmap_chr(df, paste)
 </div>
 </div>
 </div>
-<div id="aggregate-tapply-vs.tidyverse" class="section level2">
-<h2><code>aggregate()</code>, <code>tapply()</code> vs. tidyverse</h2>
+<div id="aggregate-vs.-dplyrsummarize" class="section level2">
+<h2><code>aggregate()</code> vs. <code>dplyr::summarize()</code></h2>
 <p>Consider a data frame, as opposed to a nested list. How do you split it into pieces, according to one or more factors, apply a function to the pieces, and combine the results?</p>
-<p><em>This isn’t currently about lists and is therefore slightly off-topic. But when I push it to more complicated summaries, we’ll get to nested/split data frames, which is on topic.</em></p>
 <p>Create a tiny excerpt of the Gapminder dataset that contains a bit of data for Canada and Germany. Load dplyr, now that we are more in the data frame world.</p>
 <pre class="r"><code>library(dplyr)
 library(gapminder)
@@ -515,7 +545,7 @@ library(gapminder)
 #&gt; 2  Canada  Americas  2007  80.653 33390141  36319.24
 #&gt; 3 Germany    Europe  2002  78.670 82350671  30035.80
 #&gt; 4 Germany    Europe  2007  79.406 82400996  32170.37</code></pre>
-<p>Simple summary of a single variable for each country. In this specific case, the formula method of base <code>aggregate()</code> is quite nice.</p>
+<p>Simple summary of a single variable for each country. Specifically, take the mean of life expectancy. In this case, the formula method of base <code>aggregate()</code> is quite nice, i.e. it returns a convenient data frame.</p>
 <div class="row">
 <div class="col-md-6">
 <p><strong>base</strong></p>
@@ -536,7 +566,7 @@ library(gapminder)
 #&gt; 2 Germany 79.0380</code></pre>
 </div>
 </div>
-<p>Simple summary of two variables for each country.</p>
+<p>Simple summaries of two variables for each country. We take the mean of life expectancy and of GDP per capita.</p>
 <div class="row">
 <div class="col-md-6">
 <p><strong>base</strong></p>
@@ -579,7 +609,207 @@ tapply(mini_gap$lifeExp, mini_gap$country, mean, simplify = FALSE)
 #&gt; 2 Germany 79.0380  31103.09</code></pre>
 </div>
 </div>
-<p><em>to do: something more complicated that requires <code>split()</code> on the base side and that is beyond the reach of <code>summarize()</code> on the tidyverse side, i.e. a nested data frame example</em></p>
+<p>Bivariate summary of two variables for each country. We compute the correlation of life expectancy and year, for the full gapminder dataset now. On the base side, we can no longer use <code>aggregate()</code> or <code>tapply()</code> and need to graduate to <code>by()</code>.</p>
+<div class="row">
+<div class="col-md-6">
+<p><strong>base</strong></p>
+<pre class="r"><code>## by() with simplification (the default)
+by_obj &lt;- by(gapminder, gapminder$country, function(df) cor(df$lifeExp, df$year))
+head(by_obj)
+#&gt; gapminder$country
+#&gt; Afghanistan     Albania     Algeria      Angola   Argentina   Australia 
+#&gt;   0.9735051   0.9542420   0.9925307   0.9422392   0.9977816   0.9897716
+
+## by() without simplification
+by_obj &lt;- by(gapminder, gapminder$country, function(df) cor(df$lifeExp, df$year),
+   simplify = FALSE)
+head(by_obj)
+#&gt; $Afghanistan
+#&gt; [1] 0.9735051
+#&gt; 
+#&gt; $Albania
+#&gt; [1] 0.954242
+#&gt; 
+#&gt; $Algeria
+#&gt; [1] 0.9925307
+#&gt; 
+#&gt; $Angola
+#&gt; [1] 0.9422392
+#&gt; 
+#&gt; $Argentina
+#&gt; [1] 0.9977816
+#&gt; 
+#&gt; $Australia
+#&gt; [1] 0.9897716</code></pre>
+</div>
+<div class="col-md-6">
+<p><strong>tidyverse</strong></p>
+<pre class="r"><code>gapminder %&gt;% 
+  group_by(country) %&gt;% 
+  summarize(cor = cor(lifeExp, year))
+#&gt; # A tibble: 142 × 2
+#&gt;        country       cor
+#&gt;         &lt;fctr&gt;     &lt;dbl&gt;
+#&gt; 1  Afghanistan 0.9735051
+#&gt; 2      Albania 0.9542420
+#&gt; 3      Algeria 0.9925307
+#&gt; 4       Angola 0.9422392
+#&gt; 5    Argentina 0.9977816
+#&gt; 6    Australia 0.9897716
+#&gt; 7      Austria 0.9960592
+#&gt; 8      Bahrain 0.9832293
+#&gt; 9   Bangladesh 0.9946662
+#&gt; 10     Belgium 0.9972665
+#&gt; # ... with 132 more rows</code></pre>
+</div>
+</div>
+<p>This is a good place to pause and glance back over the base vs tidyverse calls and results in this section. It shows that you can absolutely do these tasks either way, but the consistency of the code and return values is higher in the tidyverse.</p>
+</div>
+<div id="by-vs.-tidyrnest" class="section level2">
+<h2><code>by()</code> vs. <code>tidyr::nest()</code></h2>
+<p>Fit a linear model of life expectancy against year. On the tidyverse side, we now create a nested data frame, with one meta-row per country. Therefore we load tidyr to get <code>nest()</code>. The data needed for each country’s linear model is stored as a list-column of country-specific data frame.</p>
+<div class="row">
+<div class="col-md-6">
+<p><strong>base</strong></p>
+<pre class="r"><code>by_obj &lt;- by(gapminder,
+             gapminder$country, 
+             function(df) lm(lifeExp ~ year, data = df))
+str(by_obj[1:2], max.level = 1)
+#&gt; List of 2
+#&gt;  $ Afghanistan:List of 12
+#&gt;   ..- attr(*, &quot;class&quot;)= chr &quot;lm&quot;
+#&gt;  $ Albania    :List of 12
+#&gt;   ..- attr(*, &quot;class&quot;)= chr &quot;lm&quot;
+#&gt;  - attr(*, &quot;dim&quot;)= int 2
+#&gt;  - attr(*, &quot;dimnames&quot;)=List of 1
+by_obj[[1]]
+#&gt; 
+#&gt; Call:
+#&gt; lm(formula = lifeExp ~ year, data = df)
+#&gt; 
+#&gt; Coefficients:
+#&gt; (Intercept)         year  
+#&gt;   -507.5343       0.2753</code></pre>
+</div>
+<div class="col-md-6">
+<p><strong>tidyverse</strong></p>
+<pre class="r"><code>library(tidyr)
+nested_df &lt;- gapminder %&gt;% 
+  group_by(country, continent) %&gt;% 
+  nest() %&gt;% 
+  mutate(fit = map(data, ~ lm(lifeExp ~ year, data = .x)))
+str(nested_df$fit[1:2], max.level = 1)
+#&gt; List of 2
+#&gt;  $ :List of 12
+#&gt;   ..- attr(*, &quot;class&quot;)= chr &quot;lm&quot;
+#&gt;  $ :List of 12
+#&gt;   ..- attr(*, &quot;class&quot;)= chr &quot;lm&quot;
+nested_df$fit[[1]]
+#&gt; 
+#&gt; Call:
+#&gt; lm(formula = lifeExp ~ year, data = .x)
+#&gt; 
+#&gt; Coefficients:
+#&gt; (Intercept)         year  
+#&gt;   -507.5343       0.2753</code></pre>
+</div>
+</div>
+<p>What if you want to inspect the fits for Oceania? On the base side, you’ve got some work to do because the country information lives only in the names and the continent information is not directly linked to the model fits at all. On the tidyverse side, where the fits live in a data frame that carries country and continent info, we can use our usual techniques for filtering rows based on the data.</p>
+<div class="row">
+<div class="col-md-6">
+<p><strong>base</strong></p>
+<pre class="r"><code>o_countries &lt;- as.character(unique(gapminder$country[gapminder$continent == &quot;Oceania&quot;]))
+by_obj[names(by_obj) %in% o_countries]
+#&gt; $Australia
+#&gt; 
+#&gt; Call:
+#&gt; lm(formula = lifeExp ~ year, data = df)
+#&gt; 
+#&gt; Coefficients:
+#&gt; (Intercept)         year  
+#&gt;   -376.1163       0.2277  
+#&gt; 
+#&gt; 
+#&gt; $`New Zealand`
+#&gt; 
+#&gt; Call:
+#&gt; lm(formula = lifeExp ~ year, data = df)
+#&gt; 
+#&gt; Coefficients:
+#&gt; (Intercept)         year  
+#&gt;   -307.6996       0.1928</code></pre>
+</div>
+<div class="col-md-6">
+<p><strong>tidyverse</strong></p>
+<pre class="r"><code>nested_df %&gt;% 
+  filter(continent == &quot;Oceania&quot;) %&gt;% 
+  .$fit
+#&gt; [[1]]
+#&gt; 
+#&gt; Call:
+#&gt; lm(formula = lifeExp ~ year, data = .x)
+#&gt; 
+#&gt; Coefficients:
+#&gt; (Intercept)         year  
+#&gt;   -376.1163       0.2277  
+#&gt; 
+#&gt; 
+#&gt; [[2]]
+#&gt; 
+#&gt; Call:
+#&gt; lm(formula = lifeExp ~ year, data = .x)
+#&gt; 
+#&gt; Coefficients:
+#&gt; (Intercept)         year  
+#&gt;   -307.6996       0.1928</code></pre>
+</div>
+</div>
+<p>Let’s form a data frame with one row per country and variables for country, continent, estimated intercept, and estimated slope. I also want to guarantee that the country and continent factors have the same levels as they originally had in gapminder.</p>
+<div class="row">
+<div class="col-md-6">
+<p><strong>base</strong></p>
+<pre class="r"><code>coefs &lt;- lapply(by_obj, coef)
+coefs &lt;- do.call(rbind, coefs)
+coefs &lt;- data.frame(
+  country = I(rownames(coefs)),
+  coefs
+)
+coefs$continent &lt;- gapminder$continent[match(coefs$country, gapminder$country)]
+coefs$continent &lt;- factor(coefs$continent, levels = levels(gapminder$continent))
+coefs$country &lt;- factor(coefs$country, levels = levels(gapminder$country))
+head(coefs)
+#&gt;                 country X.Intercept.      year continent
+#&gt; Afghanistan Afghanistan    -507.5343 0.2753287      Asia
+#&gt; Albania         Albania    -594.0725 0.3346832    Europe
+#&gt; Algeria         Algeria   -1067.8590 0.5692797    Africa
+#&gt; Angola           Angola    -376.5048 0.2093399    Africa
+#&gt; Argentina     Argentina    -389.6063 0.2317084  Americas
+#&gt; Australia     Australia    -376.1163 0.2277238   Oceania</code></pre>
+</div>
+<div class="col-md-6">
+<p><strong>tidyverse</strong></p>
+<pre class="r"><code>nested_df %&gt;% 
+  mutate(coefs = map(fit, coef),
+         intercept = map_dbl(coefs, 1),
+         slope = map_dbl(coefs, 2)) %&gt;% 
+  select(country, continent, intercept, slope)
+#&gt; # A tibble: 142 × 4
+#&gt;        country continent  intercept     slope
+#&gt;         &lt;fctr&gt;    &lt;fctr&gt;      &lt;dbl&gt;     &lt;dbl&gt;
+#&gt; 1  Afghanistan      Asia  -507.5343 0.2753287
+#&gt; 2      Albania    Europe  -594.0725 0.3346832
+#&gt; 3      Algeria    Africa -1067.8590 0.5692797
+#&gt; 4       Angola    Africa  -376.5048 0.2093399
+#&gt; 5    Argentina  Americas  -389.6063 0.2317084
+#&gt; 6    Australia   Oceania  -376.1163 0.2277238
+#&gt; 7      Austria    Europe  -405.9205 0.2419923
+#&gt; 8      Bahrain      Asia  -859.8258 0.4675077
+#&gt; 9   Bangladesh      Asia  -936.2158 0.4981308
+#&gt; 10     Belgium    Europe  -340.2412 0.2090846
+#&gt; # ... with 132 more rows</code></pre>
+</div>
+</div>
+<p>This illustrates the post-processing that is often necessary in a base workflow. We need to restore the country info from the names of <code>by_obj</code>, use them to look up the continents in gapminder, and then restore the original factor levels for both country and continent. It illustrates the payoff for temporarily tolerating the <code>data</code> and <code>fit</code> list-columns in the nested data frame used in the tidyverse workflow. The country and continent factors remain intact and directly associated with the data and fits.</p>
 </div>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
