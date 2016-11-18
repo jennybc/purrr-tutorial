@@ -12,3 +12,5 @@ title: "More resources"
     - [Many models](http://r4ds.had.co.nz/many-models.html)
   * Example lists are in the repurrrsive package:
     - [https://github.com/jennybc/repurrrsive](https://github.com/jennybc/repurrrsive#readme)
+  * Depicting R data structures and operations via lego:
+      - [https://github.com/jennybc/lego-rstats](https://github.com/jennybc/lego-rstats#readme)
