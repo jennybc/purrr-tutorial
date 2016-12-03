@@ -1,6 +1,6 @@
 ---
 title: "Trump Android words"
-comment: "*suitable for a live-coding*"
+comment: "*suitable for live-coding*"
 ---
 
 ```{r, echo = FALSE}
