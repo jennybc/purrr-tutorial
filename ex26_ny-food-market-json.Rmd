@@ -16,9 +16,9 @@ knitr::opts_chunk$set(
 
 Mara Averick [recently tweeted](https://twitter.com/dataandme/status/804385103178825729) about a blog post from February 2015 by Zev Ross, demonstrating the conversion of JSON data into a data frame ([Using R to download and parse JSON: an example using data from an open data portal](http://zevross.com/blog/2015/02/12/using-r-to-download-and-parse-json-an-example-using-data-from-an-open-data-portal/)). I thought it would be interesting to revisit this data wrangling task with purrr, which has only been on CRAN since fall 2015.
 
-Zev is dealing with data on food markets in New York State that, sadly but realistically, cannot be well-represented in simple rectangular form, such as CSV. Therefore the data is available as JSON and it's our job to turn it into a useful data frame. This is a very, very common task and a common use case for purrr.
+Zev is dealing with data on food markets in New York State that, sadly but realistically, cannot be well-represented in simple rectangular form, such as CSV. Therefore the data is available as JSON and it's our job to turn it into a useful data frame. This is a very, very common task and a typical use case for purrr.
 
-*I downloaded and unpacked the zip archive provided by Zev: [foodMarkets.zip](http://zevross.com/blog/wp-content/uploads/2015/02/foodMarkets.zip]).*
+*I downloaded and unpacked the zip archive provided by Zev: [foodMarkets.zip](http://zevross.com/blog/wp-content/uploads/2015/02/foodMarkets.zip]). These files are available in this tutorial's repo in an unpacked state: [foodMarkets](https://github.com/jennybc/purrr-tutorial/tree/gh-pages/foodMarkets).*
 
 ## Load packages and the data
 
@@ -27,8 +27,7 @@ Packages used below:
   * jsonlite for parsing JSON
   * purrr for obvious reasons
   * listviewer for doing recon on awkard lists
-  * tibble for forming data frames that are especially friendly to list-columns
-  * dplyr for `mutate()`
+  * tibble and dplyr for forming and manipulating data frames, especially the "tibble" variant (class `tbl_df`), which is friendly to list-columns.
 
 ```{r}
 library(jsonlite)
@@ -56,7 +55,7 @@ str(food_mkts_raw$data, max.level = 1, list.len = 5)
 
 Working hypothesis: we have data of similar form for each of `r length(food_mkts_raw$data)` food markets. A slightly mysterious, but homogeneous list.
 
-Pull out just the `data` component and define as `food_mkts`.
+Pull out just the `data` component and store as `food_mkts`.
 
 ```{r}
 food_mkts <- food_mkts_raw[["data"]]
@@ -100,9 +99,9 @@ food_mkts %>%
 
 I think we'll want to trim whitespace at some point!
 
-## (Almost) All the variables
+## Data frame of (almost) everything
 
-Again, freeriding on Zev's post, I know that 22 of the 23 variables can be extracted in a fairly simple way. Everything but `Location`, which holds some semi-mangled JSON we must tackle separately. 
+Again, freeriding on Zev's post, I know that 22 of the 23 variables can be extracted in a fairly simple way. Everything but `Location`, which holds some unparsed JSON we must tackle separately. 
 
 Create a vector of our targetted variable names:
 
@@ -110,15 +109,15 @@ Create a vector of our targetted variable names:
 (to_process <- cnames[cnames != "Location"])
 ```
 
-Goal: create a data frame with these variables and one row per food market.
+**Goal: create a data frame with these variables and one row per food market.**
 
 ### "Rows first"
 
 Voice from the future: not all of these 22 variables are populated for every food market. There are explicit `NULL`s. Zev handled this with a two-layered approach: catch the `NULL`s and replace with `NA`s, prior to combining with data from other markets via `sapply()` and `data.frame()`.
 
-purrr's handling of void, explicit `NULL`, and implicit `NULL` is quite good, but arguably still incomplete? Therefore I too must fanny around with `NULL`s before I can make my beautiful data frame.
+purrr's handling of void, explicit `NULL`, and implicit `NULL` is quite good, but doesn't address this case either. Therefore I too must fanny around with `NULL`s before I can make my beautiful data frame.
 
-In an ideal world, I could use `map_df()` like this for food markets instead of just the first 3:
+Ideally, I would use `map_df()` like this for food markets instead of just the first 3:
 
 ```{r}
 food_mkts[1:3] %>% 
@@ -153,13 +152,15 @@ safe_extract(food_mkts[[67]][14:16])
 Now I can get a data frame easily.
 
 ```{r}
-(food_df <- food_mkts %>% 
+(mkts_df <- food_mkts %>% 
     map_df(safe_extract, to_process))
 ```
 
 Victory is ours. Well, partial victory. We still need to deal with `Location`.
 
-Recap: from raw JSON to data frame for 22 out of 23 variables, relying on automatic type conversion.
+### "Rows first" Recap
+
+Self-contained code to go from raw JSON to data frame for 22 out of 23 variables, relying on automatic type conversion.
 
 ```{r eval = FALSE}
 food_mkts_raw <- fromJSON("foodMarkets/retail_food_markets.json",
@@ -177,8 +178,8 @@ safe_extract <- function(l, wut) {
   res[null_here] <- NA
   res
 }
-(food_df <- food_mkts %>% 
-    map_df(safe_extract, to_process))
+mkts_df <- food_mkts %>% 
+  map_df(safe_extract, to_process)
 ```
 
 ### "Columns first"
@@ -207,7 +208,7 @@ However, because I can, I store the type of each variable and do extraction + ty
 I exploit the variable types learned from the automatic type conversion in the "rows first" approach. Here's a data frame with one row per variable, providing the expected class and the type-appropriate `map_*()` and `NA`. It will soon become clear why I use the specific variable names, `.f` and `.null`.
 
 ```{r}
-(vdf <- food_df %>% 
+(vdf <- mkts_df %>% 
    map_chr(class) %>%
    enframe(name = ".f", value = "type") %>% 
    mutate(vname = .f %>% tolower() %>% gsub("\\s+", "_", .),
@@ -228,7 +229,7 @@ do.call(vdf$mapper[i],
 
 `do.call()` is a base R function that constructs and executes a function call from a function (name or actual function) and a list of arguments. It's exactly what we need. But we also want to do this for each of the 22 variables.
 
-How to scale up? We use the `invoke()` family of functions in purrr. `invoke()` itself is a pipe-friendly wrapper around `do.call()`. `invoke_map()` and friends allow you to map over functions and arguments in parallel, analagous to `map2()`. The big difference with `invoke_map()` is that the two primary inputs are a vector of functions and a vector of argument values. That's what we use here.
+How to scale up? We use the `invoke()` family of functions in purrr. `invoke()` itself is a pipe-friendly wrapper around `do.call()`. `invoke_map()` and friends allow you to map over functions and arguments in parallel, analagous to `map2()`. The big difference with `invoke_map()` is that the two primary inputs are a vector of functions and a vector of argument values. We use `invoke_map_df()` here, which is the variant that requests to get a data frame back.
 
 ```{r}
 (mkts_df <- invoke_map_df(.f = set_names(vdf$mapper, vdf$vname),
@@ -244,7 +245,9 @@ Partial victory is ours again! A data frame, one row per food market, with 22 va
     - `transpose()` is needed to repackage the `.f` and `.null` variables. Instead of a list of two same-length vectors, we want a single list holding lists of length two.
   * `food_mkts` is the `...` argument. It's a common input across all units of iteration.
 
-Recap: from raw JSON to data frame for 22 out of 23 variables, with type specification.
+### "Columns first" Recap
+
+Self-contained code to go from raw JSON to data frame for 22 out of 23 variables, with explicit type specification.
 
 ```{r eval = FALSE}
 food_mkts_raw <- fromJSON("foodMarkets/retail_food_markets.json",
@@ -289,3 +292,79 @@ mkts_df <- invoke_map_df(.f = set_names(vdf$mapper, vdf$vname),
 ```
 
 ## Rescue `Location`
+
+We need to process the 23rd variable, `Location`. There are no big new principles here, so this will heavy on the code and light on explanation.
+
+### Prepare `Location`
+
+Pull `Location` into its own list and inspect one element.
+
+```{r}
+loc_raw <- food_mkts %>%
+  map("Location")
+loc_raw[[345]]
+```
+
+Ah, more key-less JSON, giving rise to name-less lists. Before we do anything else, extract names from the `meta` component and apply them. Re-inspect an element to verify we've succeeded.
+
+```{r}
+i <- which(cnames == "Location")
+location_meta <- food_mkts_raw[[c("meta", "view", "columns")]][[i]]
+(lnames <- location_meta[["subColumnTypes"]] %>% flatten_chr())
+loc_raw <- loc_raw %>% 
+  map(set_names, lnames)
+loc_raw[[345]]
+```
+
+### Parse the JSON string holding human address
+
+The `human_address` element of each location holds a JSON string:
+
+  * Parse it.
+  * Rowbind elements into a data frame.
+  * Prepend `ha_` to the variable names to avoid name conflicts downstream.
+
+```{r}
+ha <- loc_raw %>% 
+  map("human_address") %>%
+  map_df(fromJSON) %>% 
+  set_names(paste0("ha_", names(.)))
+head(ha)
+```
+
+### Convert remaining variables into a data frame
+
+Convert everything else left in the location data to a data frame. Convert `latitude` and `longitude` into numeric variables and make sure they don't look insane. [This New York latitude and longitude map](http://www.mapsofworld.com/usa/states/new-york/lat-long.html) indicates that latitude should range between 40° and 50° and longitude between -80° and -72°.
+
+
+```{r}
+ee <- loc_raw %>% 
+  map_df(safe_extract, lnames[lnames != "human_address"]) %>% 
+  mutate_at(vars(latitude, longitude), as.numeric)
+head(ee)
+ee %>% 
+  select(latitude, longitude) %>% 
+  map(summary)
+```
+
+## Put everything together
+
+Column bind the main data frame `mkts_df` with the human address data in `ha` and everything else from `Location`.
+```{r}
+(mkts_df <- bind_cols(mkts_df, ha, ee))
+```
+
+Trim any leading/trailing whitespace from the character variables.
+
+```{r}
+mkts_df <- mkts_df %>% 
+  mutate_if(is.character, trimws)
+```
+
+Take a look at some of the most interpretable variables.
+
+```{r}
+mkts_df %>% 
+  select(dba_name, city, latitude, longitude, square_footage)
+```
+
