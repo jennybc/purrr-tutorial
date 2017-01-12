@@ -3,3 +3,6 @@
 .RData
 purrr-slides.key
 purrr-slides.pdf
+ideas.R
+json-to-tibble.Rmd
+memory_lane.R
