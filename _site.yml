@@ -7,8 +7,8 @@ navbar:
       href: index.html
     - text: "More resources"
       href: more-resources.html
-    - text: "Slides"
-      href: slides.html
+    - text: "Talks"
+      href: talks.html
   right:
     - text: "About"
       href: about.html

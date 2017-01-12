@@ -1,10 +1,23 @@
 ---
-title: "Slides"
+title: "Talks"
 ---
 
-Slides from a related talk:
+Talks related to purrr.
+
+### rstudio::conf 2017
+
+Slides *not posted yet*
+
+Scripts *not posted yet*
+
+
+### Data Rectangling
+
+Various versions given at EARL Boston 2015, Plotcon NY 2016, Johns Hopkins Biostat Seminar
 
 <script async class="speakerdeck-embed" data-id="907f3dc0cdb5496c8d35efca70e5f6bd" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script> <div style="margin-bottom:5px"> <strong> <a href="https://speakerdeck.com/jennybc/data-rectangling" title="Data rectangling" target="_blank">Data rectangling</a> </strong> from <strong><a href="https://speakerdeck.com/jennybc" target="_blank">Jennifer Bryan</a></strong> </div>
+
+### 2016 summer/fall teaching
 
 Selected slides I've shown before and during live-coding in class:
 
