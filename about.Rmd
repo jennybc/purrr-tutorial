@@ -6,7 +6,13 @@ This is an [R Markdown website](http://rmarkdown.rstudio.com/rmarkdown_websites.
 
 <https://jennybc.github.io/purrr-tutorial>
 
-Materials created to support:
+Who am I?
+
+  * Jenny Bryan
+  * <https://github.com/jennybc/>
+  * <https://twitter.com/JennyBryan>
+
+Materials initially created to support:
 
   * [2016-08-12 meeting](https://github.com/minisciencegirl/studyGroup/issues/131) of the Vancouver R Study Group.  
   * [STAT 545](http://stat545.com) Exploratory Data Analysis

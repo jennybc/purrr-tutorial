@@ -8,7 +8,12 @@ Talks related to purrr.
 
 Slides *not posted yet*
 
-Scripts *not posted yet*
+Scripts
+
+  * Trump tweet preparation: [trump-tweets-setup.R](talks/trump-tweets-setup.R)
+  * Trump tweet list-column example: [trump-tweets.R](talks/trump-tweets.R)
+  * Game of Thrones POV character list-column example: [got-pov.R](talks/got-pov.R)
+  * Gapminder nested data frame example *not here yet*
 
 
 ### Data Rectangling
