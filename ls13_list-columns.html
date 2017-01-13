@@ -385,187 +385,430 @@ tb &lt;- tb_raw %&gt;%
 </div>
 <div id="json-from-an-api-and-game-of-thrones" class="section level2">
 <h2>JSON from an API and Game of Thrones</h2>
+<div id="load-packages-1" class="section level3">
+<h3>Load packages</h3>
+<pre class="r"><code>library(repurrrsive)
+library(tidyverse)
+library(httr)
+library(stringr)
+library(here)</code></pre>
+</div>
+<div id="call-the-api-of-ice-and-fire" class="section level3">
+<h3>Call the API of Ice and Fire</h3>
+<p>Here’s a simplified version of how we obtained the data on the Game of Thrones POV characters. This data appears as a more processed list in the <a href="https://github.com/jennybc/repurrrsive#readme">repurrrsive</a> package.</p>
+<ul>
+<li>Get character IDs from repurrrsive. <em>cheating a little, humor me</em></li>
+<li>Put IDs and character names in a tibble.</li>
+</ul>
+<pre class="r"><code>pov &lt;- set_names(map_int(got_chars, &quot;id&quot;),
+                 map_chr(got_chars, &quot;name&quot;))
+tail(pov, 5)
+#&gt; Kevan Lannister      Melisandre    Merrett Frey Quentyn Martell 
+#&gt;             605             743             751             844 
+#&gt;     Sansa Stark 
+#&gt;             957
+ice &lt;- pov %&gt;%
+  enframe(value = &quot;id&quot;)
+ice
+#&gt; # A tibble: 29 × 2
+#&gt;                  name    id
+#&gt;                 &lt;chr&gt; &lt;int&gt;
+#&gt; 1       Theon Greyjoy  1022
+#&gt; 2    Tyrion Lannister  1052
+#&gt; 3   Victarion Greyjoy  1074
+#&gt; 4                Will  1109
+#&gt; 5          Areo Hotah  1166
+#&gt; 6               Chett  1267
+#&gt; 7             Cressen  1295
+#&gt; 8     Arianne Martell   130
+#&gt; 9  Daenerys Targaryen  1303
+#&gt; 10     Davos Seaworth  1319
+#&gt; # ... with 19 more rows</code></pre>
+<p>Request info for each character and store what comes back – whatever that may be – in the list-column <code>stuff</code>.</p>
+<pre class="r"><code>ice_and_fire_url &lt;- &quot;https://anapioficeandfire.com/&quot;
+if (file.exists(here(&quot;talks&quot;, &quot;ice.rds&quot;))) {
+  ice &lt;- readRDS(here(&quot;talks&quot;, &quot;ice.rds&quot;))
+} else {
+  ice &lt;- ice %&gt;%
+    mutate(
+      response = map(id,
+                     ~ GET(ice_and_fire_url,
+                           path = c(&quot;api&quot;, &quot;characters&quot;, .x))),
+      stuff = map(response, ~ content(.x, as = &quot;parsed&quot;,
+                                      simplifyVector = TRUE))
+    ) %&gt;%
+    select(-id, -response)
+  saveRDS(ice, here(&quot;talks&quot;, &quot;ice.rds&quot;))
+}
+ice
+#&gt; # A tibble: 29 × 2
+#&gt;                  name       stuff
+#&gt;                 &lt;chr&gt;      &lt;list&gt;
+#&gt; 1       Theon Greyjoy &lt;list [16]&gt;
+#&gt; 2    Tyrion Lannister &lt;list [16]&gt;
+#&gt; 3   Victarion Greyjoy &lt;list [16]&gt;
+#&gt; 4                Will &lt;list [16]&gt;
+#&gt; 5          Areo Hotah &lt;list [16]&gt;
+#&gt; 6               Chett &lt;list [16]&gt;
+#&gt; 7             Cressen &lt;list [16]&gt;
+#&gt; 8     Arianne Martell &lt;list [16]&gt;
+#&gt; 9  Daenerys Targaryen &lt;list [16]&gt;
+#&gt; 10     Davos Seaworth &lt;list [16]&gt;
+#&gt; # ... with 19 more rows</code></pre>
+<p>Let’s switch to a nicer version of <code>ice</code>, based on the list in repurrrsive, because it already has books and houses replaced with names instead of URLs.</p>
+<pre class="r"><code>ice2 &lt;- tibble(
+  name = map_chr(got_chars, &quot;name&quot;),
+  stuff = got_chars
+)
+ice2
+#&gt; # A tibble: 29 × 2
+#&gt;                  name       stuff
+#&gt;                 &lt;chr&gt;      &lt;list&gt;
+#&gt; 1       Theon Greyjoy &lt;list [18]&gt;
+#&gt; 2    Tyrion Lannister &lt;list [18]&gt;
+#&gt; 3   Victarion Greyjoy &lt;list [18]&gt;
+#&gt; 4                Will &lt;list [18]&gt;
+#&gt; 5          Areo Hotah &lt;list [18]&gt;
+#&gt; 6               Chett &lt;list [18]&gt;
+#&gt; 7             Cressen &lt;list [18]&gt;
+#&gt; 8     Arianne Martell &lt;list [18]&gt;
+#&gt; 9  Daenerys Targaryen &lt;list [18]&gt;
+#&gt; 10     Davos Seaworth &lt;list [18]&gt;
+#&gt; # ... with 19 more rows</code></pre>
+<p>Inspect the list-column.</p>
+<pre class="r"><code>str(ice2$stuff[[9]], max.level = 1)
+#&gt; List of 18
+#&gt;  $ url        : chr &quot;http://www.anapioficeandfire.com/api/characters/1303&quot;
+#&gt;  $ id         : int 1303
+#&gt;  $ name       : chr &quot;Daenerys Targaryen&quot;
+#&gt;  $ gender     : chr &quot;Female&quot;
+#&gt;  $ culture    : chr &quot;Valyrian&quot;
+#&gt;  $ born       : chr &quot;In 284 AC, at Dragonstone&quot;
+#&gt;  $ died       : chr &quot;&quot;
+#&gt;  $ alive      : logi TRUE
+#&gt;  $ titles     : chr [1:5] &quot;Queen of the Andals and the Rhoynar and the First Men, Lord of the Seven Kingdoms&quot; &quot;Khaleesi of the Great Grass Sea&quot; &quot;Breaker of Shackles/Chains&quot; &quot;Queen of Meereen&quot; ...
+#&gt;  $ aliases    : chr [1:11] &quot;Dany&quot; &quot;Daenerys Stormborn&quot; &quot;The Unburnt&quot; &quot;Mother of Dragons&quot; ...
+#&gt;  $ father     : chr &quot;&quot;
+#&gt;  $ mother     : chr &quot;&quot;
+#&gt;  $ spouse     : chr &quot;http://www.anapioficeandfire.com/api/characters/1346&quot;
+#&gt;  $ allegiances: chr &quot;House Targaryen of King&#39;s Landing&quot;
+#&gt;  $ books      : chr &quot;A Feast for Crows&quot;
+#&gt;  $ povBooks   : chr [1:4] &quot;A Game of Thrones&quot; &quot;A Clash of Kings&quot; &quot;A Storm of Swords&quot; &quot;A Dance with Dragons&quot;
+#&gt;  $ tvSeries   : chr [1:6] &quot;Season 1&quot; &quot;Season 2&quot; &quot;Season 3&quot; &quot;Season 4&quot; ...
+#&gt;  $ playedBy   : chr &quot;Emilia Clarke&quot;
+# if (interactive()) {
+#   listviewer::jsonedit(ice2$stuff[[2]], mode = &quot;view&quot;, width = 500, height = 530)
+# }</code></pre>
+</div>
+<div id="use-regular-data-manipulation-toolkit-1" class="section level3">
+<h3>Use regular data manipulation toolkit</h3>
+<p>Form a sentence of the form “NAME was born AT THIS TIME, IN THIS PLACE” by digging info out of the <code>stuff</code> list-column and placing into a string template. No list-columns left!</p>
+<pre class="r"><code>template &lt;- &quot;${name} was born ${born}.&quot;
+birth_announcements &lt;- ice2 %&gt;%
+  mutate(birth = map_chr(stuff, str_interp, string = template)) %&gt;%
+  select(-stuff)
+birth_announcements
+#&gt; # A tibble: 29 × 2
+#&gt;                  name
+#&gt;                 &lt;chr&gt;
+#&gt; 1       Theon Greyjoy
+#&gt; 2    Tyrion Lannister
+#&gt; 3   Victarion Greyjoy
+#&gt; 4                Will
+#&gt; 5          Areo Hotah
+#&gt; 6               Chett
+#&gt; 7             Cressen
+#&gt; 8     Arianne Martell
+#&gt; 9  Daenerys Targaryen
+#&gt; 10     Davos Seaworth
+#&gt; # ... with 19 more rows, and 1 more variables: birth &lt;chr&gt;</code></pre>
+<p>Extract each character’s house allegiances. Keep only those with more than one allegiance. Then unnest to explode the <code>houses</code> list-column and get a tibble with one row per character * house combination. No list-columns left!</p>
+<pre class="r"><code>allegiances &lt;- ice2 %&gt;%
+  transmute(name,
+            houses = map(stuff, &quot;allegiances&quot;)) %&gt;%
+  filter(lengths(houses) &gt; 1) %&gt;%
+  unnest()
+allegiances
+#&gt; # A tibble: 15 × 2
+#&gt;                name                              houses
+#&gt;               &lt;chr&gt;                               &lt;chr&gt;
+#&gt; 1    Davos Seaworth      House Baratheon of Dragonstone
+#&gt; 2    Davos Seaworth        House Seaworth of Cape Wrath
+#&gt; 3      Asha Greyjoy               House Greyjoy of Pyke
+#&gt; 4      Asha Greyjoy                     House Ironmaker
+#&gt; 5   Barristan Selmy         House Selmy of Harvest Hall
+#&gt; 6   Barristan Selmy   House Targaryen of King&#39;s Landing
+#&gt; 7  Brienne of Tarth      House Baratheon of Storm&#39;s End
+#&gt; 8  Brienne of Tarth           House Stark of Winterfell
+#&gt; 9  Brienne of Tarth        House Tarth of Evenfall Hall
+#&gt; 10    Catelyn Stark           House Stark of Winterfell
+#&gt; 11    Catelyn Stark             House Tully of Riverrun
+#&gt; 12   Jon Connington House Connington of Griffin&#39;s Roost
+#&gt; 13   Jon Connington   House Targaryen of King&#39;s Landing
+#&gt; 14      Sansa Stark          House Baelish of Harrenhal
+#&gt; 15      Sansa Stark           House Stark of Winterfell</code></pre>
+</div>
+</div>
+<div id="aliases-and-allegiances-of-game-of-thrones-characters" class="section level2">
+<h2>Aliases and allegiances of Game of Thrones characters</h2>
+<div id="load-packages-2" class="section level3">
+<h3>Load packages</h3>
+<pre class="r"><code>library(tidyverse)
+## install_github(&quot;jennybc/repurrrsive&quot;)
+library(repurrrsive)
+library(stringr)</code></pre>
+</div>
+</div>
+<div id="lists-as-variables-in-a-data-frame" class="section level2">
+<h2>Lists as variables in a data frame</h2>
+<p>One row per GoT character. List columns for aliases and allegiances.</p>
+<pre class="r"><code>x &lt;- tibble(
+  name = got_chars %&gt;% map_chr(&quot;name&quot;),
+  aliases = got_chars %&gt;% map(&quot;aliases&quot;),
+  allegiances = got_chars %&gt;% map(&quot;allegiances&quot;)
+)
+x
+#&gt; # A tibble: 29 × 3
+#&gt;                  name    aliases allegiances
+#&gt;                 &lt;chr&gt;     &lt;list&gt;      &lt;list&gt;
+#&gt; 1       Theon Greyjoy  &lt;chr [4]&gt;   &lt;chr [1]&gt;
+#&gt; 2    Tyrion Lannister &lt;chr [11]&gt;   &lt;chr [1]&gt;
+#&gt; 3   Victarion Greyjoy  &lt;chr [1]&gt;   &lt;chr [1]&gt;
+#&gt; 4                Will &lt;list [0]&gt;  &lt;list [0]&gt;
+#&gt; 5          Areo Hotah &lt;list [0]&gt;   &lt;chr [1]&gt;
+#&gt; 6               Chett &lt;list [0]&gt;  &lt;list [0]&gt;
+#&gt; 7             Cressen &lt;list [0]&gt;  &lt;list [0]&gt;
+#&gt; 8     Arianne Martell &lt;list [0]&gt;   &lt;chr [1]&gt;
+#&gt; 9  Daenerys Targaryen &lt;chr [11]&gt;   &lt;chr [1]&gt;
+#&gt; 10     Davos Seaworth  &lt;chr [5]&gt;   &lt;chr [2]&gt;
+#&gt; # ... with 19 more rows
+#View(x)</code></pre>
+<p>What if we only care about characters with a “Lannister” alliance? Practice operating on a list-column.</p>
+<pre class="r"><code>x %&gt;%
+  mutate(lannister = map(allegiances, str_detect, pattern = &quot;Lannister&quot;),
+         lannister = map_lgl(lannister, any))
+#&gt; # A tibble: 29 × 4
+#&gt;                  name    aliases allegiances lannister
+#&gt;                 &lt;chr&gt;     &lt;list&gt;      &lt;list&gt;     &lt;lgl&gt;
+#&gt; 1       Theon Greyjoy  &lt;chr [4]&gt;   &lt;chr [1]&gt;     FALSE
+#&gt; 2    Tyrion Lannister &lt;chr [11]&gt;   &lt;chr [1]&gt;      TRUE
+#&gt; 3   Victarion Greyjoy  &lt;chr [1]&gt;   &lt;chr [1]&gt;     FALSE
+#&gt; 4                Will &lt;list [0]&gt;  &lt;list [0]&gt;     FALSE
+#&gt; 5          Areo Hotah &lt;list [0]&gt;   &lt;chr [1]&gt;     FALSE
+#&gt; 6               Chett &lt;list [0]&gt;  &lt;list [0]&gt;     FALSE
+#&gt; 7             Cressen &lt;list [0]&gt;  &lt;list [0]&gt;     FALSE
+#&gt; 8     Arianne Martell &lt;list [0]&gt;   &lt;chr [1]&gt;     FALSE
+#&gt; 9  Daenerys Targaryen &lt;chr [11]&gt;   &lt;chr [1]&gt;     FALSE
+#&gt; 10     Davos Seaworth  &lt;chr [5]&gt;   &lt;chr [2]&gt;     FALSE
+#&gt; # ... with 19 more rows</code></pre>
+<p>Keep only the Lannisters and Starks allegiances. You can use <code>filter()</code> with list-columns, but you will need to <code>map()</code> to list-ize your operation. Once I’ve got the characters I want, I drop <code>allegiances</code> and use <code>unnest()</code> to get back to a simple data frame with no list columns.</p>
+<pre class="r"><code>x %&gt;%
+  filter(allegiances %&gt;%
+           map(str_detect, &quot;Lannister|Stark&quot;) %&gt;%
+           map_lgl(any)) %&gt;%
+  select(-allegiances) %&gt;%
+  filter(lengths(aliases) &gt; 0) %&gt;%
+  unnest() %&gt;% 
+  print(n = Inf)
+#&gt; # A tibble: 56 × 2
+#&gt;                name                                       aliases
+#&gt;               &lt;chr&gt;                                         &lt;chr&gt;
+#&gt; 1  Tyrion Lannister                                       The Imp
+#&gt; 2  Tyrion Lannister                                       Halfman
+#&gt; 3  Tyrion Lannister                                    The boyman
+#&gt; 4  Tyrion Lannister                            Giant of Lannister
+#&gt; 5  Tyrion Lannister                             Lord Tywin&#39;s Doom
+#&gt; 6  Tyrion Lannister                             Lord Tywin&#39;s Bane
+#&gt; 7  Tyrion Lannister                                         Yollo
+#&gt; 8  Tyrion Lannister                                    Hugor Hill
+#&gt; 9  Tyrion Lannister                                       No-Nose
+#&gt; 10 Tyrion Lannister                                         Freak
+#&gt; 11 Tyrion Lannister                                         Dwarf
+#&gt; 12       Arya Stark                                Arya Horseface
+#&gt; 13       Arya Stark                                Arya Underfoot
+#&gt; 14       Arya Stark                                          Arry
+#&gt; 15       Arya Stark                                     Lumpyface
+#&gt; 16       Arya Stark                                     Lumpyhead
+#&gt; 17       Arya Stark                                      Stickboy
+#&gt; 18       Arya Stark                                        Weasel
+#&gt; 19       Arya Stark                                       Nymeria
+#&gt; 20       Arya Stark                                         Squan
+#&gt; 21       Arya Stark                                         Saltb
+#&gt; 22       Arya Stark                             Cat of the Canaly
+#&gt; 23       Arya Stark                                          Bets
+#&gt; 24       Arya Stark                                The Blind Girh
+#&gt; 25       Arya Stark                          The Ugly Little Girl
+#&gt; 26       Arya Stark                                     Mercedenl
+#&gt; 27       Arya Stark                                        Mercye
+#&gt; 28    Brandon Stark                                          Bran
+#&gt; 29    Brandon Stark                               Bran the Broken
+#&gt; 30    Brandon Stark                               The Winged Wolf
+#&gt; 31 Brienne of Tarth                             The Maid of Tarth
+#&gt; 32 Brienne of Tarth                            Brienne the Beauty
+#&gt; 33 Brienne of Tarth                              Brienne the Blue
+#&gt; 34    Catelyn Stark                                 Catelyn Tully
+#&gt; 35    Catelyn Stark                               Lady Stoneheart
+#&gt; 36    Catelyn Stark                             The Silent Sistet
+#&gt; 37    Catelyn Stark                              Mother Mercilesr
+#&gt; 38    Catelyn Stark                                The Hangwomans
+#&gt; 39     Eddard Stark                                           Ned
+#&gt; 40     Eddard Stark                                       The Ned
+#&gt; 41     Eddard Stark                                The Quiet Wolf
+#&gt; 42  Jaime Lannister                                The Kingslayer
+#&gt; 43  Jaime Lannister                         The Lion of Lannister
+#&gt; 44  Jaime Lannister                                The Young Lion
+#&gt; 45  Jaime Lannister                                       Cripple
+#&gt; 46         Jon Snow                                     Lord Snow
+#&gt; 47         Jon Snow                           Ned Stark&#39;s Bastard
+#&gt; 48         Jon Snow                        The Snow of Winterfell
+#&gt; 49         Jon Snow                            The Crow-Come-Over
+#&gt; 50         Jon Snow The 998th Lord Commander of the Night&#39;s Watch
+#&gt; 51         Jon Snow                     The Bastard of Winterfell
+#&gt; 52         Jon Snow                 The Black Bastard of the Wall
+#&gt; 53         Jon Snow                                     Lord Crow
+#&gt; 54      Sansa Stark                                   Little bird
+#&gt; 55      Sansa Stark                                  Alayne Stone
+#&gt; 56      Sansa Stark                                       Jonquil</code></pre>
 </div>
 <div id="nested-data-frame-modelling-and-gapminder" class="section level2">
 <h2>Nested data frame, modelling, and Gapminder</h2>
-</div>
-<div id="nesting-data-frames-in-a-list-column" class="section level2">
-<h2>Nesting data frames in a list column</h2>
-<p><em>under development … for now …</em></p>
-<p>Head over to <a href="http://stat545.com/block024_group-nest-split-map.html">Split-Apply-Combine in STAT 545</a></p>
-<p>o4</p>
+<p>Another version of this same example is here:</p>
 <p><a href="http://r4ds.had.co.nz/many-models.html" class="uri">http://r4ds.had.co.nz/many-models.html</a></p>
-<!--
-
-Remember Gapminder?
-
-
-```r
+<p><em>mostly code at this point, more words needed</em></p>
+<div id="load-packages-3" class="section level3">
+<h3>Load packages</h3>
+<pre class="r"><code>library(tidyverse)
 library(gapminder)
-gapminder %>% 
+library(broom)</code></pre>
+</div>
+<div id="hello-again-gapminder" class="section level3">
+<h3>Hello, again, Gapminder</h3>
+<pre class="r"><code>gapminder %&gt;% 
   ggplot(aes(year, lifeExp, group = country)) +
-    geom_line(alpha = 1/3)
-```
-
-<img src="ls13_list-columns_files/figure-html/unnamed-chunk-9-1.png" width="672" />
-
-Get one meta-row per country
-
-
-```r
-by_country <- gapminder %>% 
-  group_by(country, continent) %>% 
+    geom_line(alpha = 1/3)</code></pre>
+<p><img src="ls13_list-columns_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<p>What if we fit a line to each country?</p>
+<pre class="r"><code>gapminder %&gt;%
+  ggplot(aes(year, lifeExp, group = country)) +
+  geom_line(stat = &quot;smooth&quot;, method = &quot;lm&quot;,
+            alpha = 1/3, se = FALSE, colour = &quot;black&quot;)</code></pre>
+<p><img src="ls13_list-columns_files/figure-html/unnamed-chunk-23-1.png" width="672" /></p>
+<p>What if you actually want those fits? To access estimates, p-values, etc. In that case, you need to fit them yourself. How to do that?</p>
+<ul>
+<li>Put the variables needed for country-specific models into nested dataframe. In a <strong>list-column</strong>!</li>
+<li>Use the usual “map inside mutate”, possibly with the broom package, to pull interesting information out of the 142 fitted linear models.</li>
+</ul>
+</div>
+<div id="nested-data-frame" class="section level3">
+<h3>Nested data frame</h3>
+<p>Nest the data frames, i.e. get one meta-row per country:</p>
+<pre class="r"><code>gap_nested &lt;- gapminder %&gt;%
+  group_by(country) %&gt;%
   nest()
-by_country
-#> # A tibble: 142 × 3
-#>        country continent              data
-#>         <fctr>    <fctr>            <list>
-#> 1  Afghanistan      Asia <tibble [12 × 4]>
-#> 2      Albania    Europe <tibble [12 × 4]>
-#> 3      Algeria    Africa <tibble [12 × 4]>
-#> 4       Angola    Africa <tibble [12 × 4]>
-#> 5    Argentina  Americas <tibble [12 × 4]>
-#> 6    Australia   Oceania <tibble [12 × 4]>
-#> 7      Austria    Europe <tibble [12 × 4]>
-#> 8      Bahrain      Asia <tibble [12 × 4]>
-#> 9   Bangladesh      Asia <tibble [12 × 4]>
-#> 10     Belgium    Europe <tibble [12 × 4]>
-#> # ... with 132 more rows
-by_country$data[[1]]
-#> # A tibble: 12 × 4
-#>     year lifeExp      pop gdpPercap
-#>    <int>   <dbl>    <int>     <dbl>
-#> 1   1952  28.801  8425333  779.4453
-#> 2   1957  30.332  9240934  820.8530
-#> 3   1962  31.997 10267083  853.1007
-#> 4   1967  34.020 11537966  836.1971
-#> 5   1972  36.088 13079460  739.9811
-#> 6   1977  38.438 14880372  786.1134
-#> 7   1982  39.854 12881816  978.0114
-#> 8   1987  40.822 13867957  852.3959
-#> 9   1992  41.674 16317921  649.3414
-#> 10  1997  41.763 22227415  635.3414
-#> 11  2002  42.129 25268405  726.7341
-#> 12  2007  43.828 31889923  974.5803
-```
-
-Compare contrast to a data frame grouped by country. *Or split on country?*.
-
-Fit a model for each country.
-
-
-```r
-country_model <- function(df) {
-  lm(lifeExp ~ year, data = df)
-}
-models <- map(by_country$data, country_model)
-by_country <- by_country %>% 
-  mutate(model = map(data, country_model))
-by_country
-#> # A tibble: 142 × 4
-#>        country continent              data    model
-#>         <fctr>    <fctr>            <list>   <list>
-#> 1  Afghanistan      Asia <tibble [12 × 4]> <S3: lm>
-#> 2      Albania    Europe <tibble [12 × 4]> <S3: lm>
-#> 3      Algeria    Africa <tibble [12 × 4]> <S3: lm>
-#> 4       Angola    Africa <tibble [12 × 4]> <S3: lm>
-#> 5    Argentina  Americas <tibble [12 × 4]> <S3: lm>
-#> 6    Australia   Oceania <tibble [12 × 4]> <S3: lm>
-#> 7      Austria    Europe <tibble [12 × 4]> <S3: lm>
-#> 8      Bahrain      Asia <tibble [12 × 4]> <S3: lm>
-#> 9   Bangladesh      Asia <tibble [12 × 4]> <S3: lm>
-#> 10     Belgium    Europe <tibble [12 × 4]> <S3: lm>
-#> # ... with 132 more rows
-```
-
-You can still use `filter()`, `arrange()`, etc.
-
-
-```r
-by_country %>% 
-  filter(continent == "Europe")
-#> # A tibble: 30 × 4
-#>                   country continent              data    model
-#>                    <fctr>    <fctr>            <list>   <list>
-#> 1                 Albania    Europe <tibble [12 × 4]> <S3: lm>
-#> 2                 Austria    Europe <tibble [12 × 4]> <S3: lm>
-#> 3                 Belgium    Europe <tibble [12 × 4]> <S3: lm>
-#> 4  Bosnia and Herzegovina    Europe <tibble [12 × 4]> <S3: lm>
-#> 5                Bulgaria    Europe <tibble [12 × 4]> <S3: lm>
-#> 6                 Croatia    Europe <tibble [12 × 4]> <S3: lm>
-#> 7          Czech Republic    Europe <tibble [12 × 4]> <S3: lm>
-#> 8                 Denmark    Europe <tibble [12 × 4]> <S3: lm>
-#> 9                 Finland    Europe <tibble [12 × 4]> <S3: lm>
-#> 10                 France    Europe <tibble [12 × 4]> <S3: lm>
-#> # ... with 20 more rows
-by_country %>% 
-  arrange(continent, country)
-#> # A tibble: 142 × 4
-#>                     country continent              data    model
-#>                      <fctr>    <fctr>            <list>   <list>
-#> 1                   Algeria    Africa <tibble [12 × 4]> <S3: lm>
-#> 2                    Angola    Africa <tibble [12 × 4]> <S3: lm>
-#> 3                     Benin    Africa <tibble [12 × 4]> <S3: lm>
-#> 4                  Botswana    Africa <tibble [12 × 4]> <S3: lm>
-#> 5              Burkina Faso    Africa <tibble [12 × 4]> <S3: lm>
-#> 6                   Burundi    Africa <tibble [12 × 4]> <S3: lm>
-#> 7                  Cameroon    Africa <tibble [12 × 4]> <S3: lm>
-#> 8  Central African Republic    Africa <tibble [12 × 4]> <S3: lm>
-#> 9                      Chad    Africa <tibble [12 × 4]> <S3: lm>
-#> 10                  Comoros    Africa <tibble [12 × 4]> <S3: lm>
-#> # ... with 132 more rows
-```
-
-
-```r
-library(broom)
-by_country$model[[1]]
-#> 
-#> Call:
-#> lm(formula = lifeExp ~ year, data = df)
-#> 
-#> Coefficients:
-#> (Intercept)         year  
-#>   -507.5343       0.2753
-tidy(by_country$model[[1]])
-#>          term     estimate   std.error statistic      p.value
-#> 1 (Intercept) -507.5342716 40.48416195 -12.53661 1.934055e-07
-#> 2        year    0.2753287  0.02045093  13.46289 9.835213e-08
-glance(by_country$model[[1]])
-#>   r.squared adj.r.squared    sigma statistic      p.value df    logLik
-#> 1 0.9477123     0.9424835 1.222788  181.2494 9.835213e-08  2 -18.34693
-#>        AIC      BIC deviance df.residual
-#> 1 42.69387 44.14859  14.9521          10
-augment(by_country$model[[1]])
-#>    lifeExp year  .fitted   .se.fit      .resid       .hat   .sigma
-#> 1   28.801 1952 29.90729 0.6639995 -1.10629487 0.29487179 1.211813
-#> 2   30.332 1957 31.28394 0.5799442 -0.95193823 0.22494172 1.237512
-#> 3   31.997 1962 32.66058 0.5026799 -0.66358159 0.16899767 1.265886
-#> 4   34.020 1967 34.03722 0.4358337 -0.01722494 0.12703963 1.288917
-#> 5   36.088 1972 35.41387 0.3848726  0.67413170 0.09906760 1.267003
-#> 6   38.438 1977 36.79051 0.3566719  1.64748834 0.08508159 1.154002
-#> 7   39.854 1982 38.16716 0.3566719  1.68684499 0.08508159 1.147076
-#> 8   40.822 1987 39.54380 0.3848726  1.27820163 0.09906760 1.208243
-#> 9   41.674 1992 40.92044 0.4358337  0.75355828 0.12703963 1.260583
-#> 10  41.763 1997 42.29709 0.5026799 -0.53408508 0.16899767 1.274051
-#> 11  42.129 2002 43.67373 0.5799442 -1.54472844 0.22494172 1.148593
-#> 12  43.828 2007 45.05037 0.6639995 -1.22237179 0.29487179 1.194109
-#>         .cooksd  .std.resid
-#> 1  2.427205e-01 -1.07742164
-#> 2  1.134714e-01 -0.88428127
-#> 3  3.603567e-02 -0.59530844
-#> 4  1.653992e-05 -0.01507681
-#> 5  1.854831e-02  0.58082792
-#> 6  9.225358e-02  1.40857509
-#> 7  9.671389e-02  1.44222437
-#> 8  6.668277e-02  1.10129103
-#> 9  3.165567e-02  0.65958143
-#> 10 2.334344e-02 -0.47913530
-#> 11 2.987950e-01 -1.43494020
-#> 12 2.963271e-01 -1.19046907
-```
-
--->
+gap_nested
+#&gt; # A tibble: 142 × 2
+#&gt;        country              data
+#&gt;         &lt;fctr&gt;            &lt;list&gt;
+#&gt; 1  Afghanistan &lt;tibble [12 × 5]&gt;
+#&gt; 2      Albania &lt;tibble [12 × 5]&gt;
+#&gt; 3      Algeria &lt;tibble [12 × 5]&gt;
+#&gt; 4       Angola &lt;tibble [12 × 5]&gt;
+#&gt; 5    Argentina &lt;tibble [12 × 5]&gt;
+#&gt; 6    Australia &lt;tibble [12 × 5]&gt;
+#&gt; 7      Austria &lt;tibble [12 × 5]&gt;
+#&gt; 8      Bahrain &lt;tibble [12 × 5]&gt;
+#&gt; 9   Bangladesh &lt;tibble [12 × 5]&gt;
+#&gt; 10     Belgium &lt;tibble [12 × 5]&gt;
+#&gt; # ... with 132 more rows
+gap_nested$data[[1]]
+#&gt; # A tibble: 12 × 5
+#&gt;    continent  year lifeExp      pop gdpPercap
+#&gt;       &lt;fctr&gt; &lt;int&gt;   &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;
+#&gt; 1       Asia  1952  28.801  8425333  779.4453
+#&gt; 2       Asia  1957  30.332  9240934  820.8530
+#&gt; 3       Asia  1962  31.997 10267083  853.1007
+#&gt; 4       Asia  1967  34.020 11537966  836.1971
+#&gt; 5       Asia  1972  36.088 13079460  739.9811
+#&gt; 6       Asia  1977  38.438 14880372  786.1134
+#&gt; 7       Asia  1982  39.854 12881816  978.0114
+#&gt; 8       Asia  1987  40.822 13867957  852.3959
+#&gt; 9       Asia  1992  41.674 16317921  649.3414
+#&gt; 10      Asia  1997  41.763 22227415  635.3414
+#&gt; 11      Asia  2002  42.129 25268405  726.7341
+#&gt; 12      Asia  2007  43.828 31889923  974.5803</code></pre>
+<p><em>Compare/contrast to a data frame grouped by country (dplyr-style) or split on country (base)</em>.</p>
+</div>
+<div id="fit-models-extract-results" class="section level3">
+<h3>Fit models, extract results</h3>
+<p>Fit a model for each country.</p>
+<pre class="r"><code>gap_fits &lt;- gap_nested %&gt;%
+  mutate(fit = map(data, ~ lm(lifeExp ~ year, data = .x)))</code></pre>
+<p>Look at one fitted model, for concreteness.</p>
+<pre class="r"><code>gap_fits %&gt;% tail(3)
+#&gt; # A tibble: 3 × 3
+#&gt;       country              data      fit
+#&gt;        &lt;fctr&gt;            &lt;list&gt;   &lt;list&gt;
+#&gt; 1 Yemen, Rep. &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt;
+#&gt; 2      Zambia &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt;
+#&gt; 3    Zimbabwe &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt;
+canada &lt;- which(gap_fits$country == &quot;Canada&quot;)
+summary(gap_fits$fit[[canada]])
+#&gt; 
+#&gt; Call:
+#&gt; lm(formula = lifeExp ~ year, data = .x)
+#&gt; 
+#&gt; Residuals:
+#&gt;     Min      1Q  Median      3Q     Max 
+#&gt; -0.3812 -0.1368 -0.0471  0.2481  0.3157 
+#&gt; 
+#&gt; Coefficients:
+#&gt;               Estimate Std. Error t value Pr(&gt;|t|)    
+#&gt; (Intercept) -3.583e+02  8.252e+00  -43.42 1.01e-12 ***
+#&gt; year         2.189e-01  4.169e-03   52.50 1.52e-13 ***
+#&gt; ---
+#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+#&gt; 
+#&gt; Residual standard error: 0.2492 on 10 degrees of freedom
+#&gt; Multiple R-squared:  0.9964, Adjusted R-squared:  0.996 
+#&gt; F-statistic:  2757 on 1 and 10 DF,  p-value: 1.521e-13</code></pre>
+<p>Let’s get all the r-squared values!</p>
+<pre class="r"><code>gap_fits %&gt;%
+  mutate(rsq = map_dbl(fit, ~ summary(.x)[[&quot;r.squared&quot;]])) %&gt;%
+  arrange(rsq)
+#&gt; # A tibble: 142 × 4
+#&gt;             country              data      fit        rsq
+#&gt;              &lt;fctr&gt;            &lt;list&gt;   &lt;list&gt;      &lt;dbl&gt;
+#&gt; 1            Rwanda &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.01715964
+#&gt; 2          Botswana &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.03402340
+#&gt; 3          Zimbabwe &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.05623196
+#&gt; 4            Zambia &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.05983644
+#&gt; 5         Swaziland &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.06821087
+#&gt; 6           Lesotho &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.08485635
+#&gt; 7     Cote d&#39;Ivoire &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.28337240
+#&gt; 8      South Africa &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.31246865
+#&gt; 9            Uganda &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.34215382
+#&gt; 10 Congo, Dem. Rep. &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.34820278
+#&gt; # ... with 132 more rows</code></pre>
+<p>Let’s use a function from broom to get the usual coefficient table from <code>summary.lm()</code> but in a friendlier form for downstream work.</p>
+<pre class="r"><code>library(broom)
+gap_fits %&gt;%
+  mutate(coef = map(fit, tidy)) %&gt;%
+  unnest(coef)
+#&gt; # A tibble: 284 × 6
+#&gt;        country        term      estimate    std.error  statistic
+#&gt;         &lt;fctr&gt;       &lt;chr&gt;         &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;
+#&gt; 1  Afghanistan (Intercept)  -507.5342716 40.484161954 -12.536613
+#&gt; 2  Afghanistan        year     0.2753287  0.020450934  13.462890
+#&gt; 3      Albania (Intercept)  -594.0725110 65.655359062  -9.048348
+#&gt; 4      Albania        year     0.3346832  0.033166387  10.091036
+#&gt; 5      Algeria (Intercept) -1067.8590396 43.802200843 -24.379118
+#&gt; 6      Algeria        year     0.5692797  0.022127070  25.727749
+#&gt; 7       Angola (Intercept)  -376.5047531 46.583370599  -8.082385
+#&gt; 8       Angola        year     0.2093399  0.023532003   8.895964
+#&gt; 9    Argentina (Intercept)  -389.6063445  9.677729641 -40.258031
+#&gt; 10   Argentina        year     0.2317084  0.004888791  47.395847
+#&gt; # ... with 274 more rows, and 1 more variables: p.value &lt;dbl&gt;</code></pre>
+</div>
 </div>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>

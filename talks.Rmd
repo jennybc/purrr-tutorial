@@ -6,7 +6,7 @@ Talks related to purrr.
 
 ### rstudio::conf 2017
 
-Slides *not posted yet*
+<script async class="speakerdeck-embed" data-id="8d8ba68c2ba14d42954fa2c96cf8bd5d" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script> <div style="margin-bottom:5px"> <strong> <a href="https://speakerdeck.com/jennybc/putting-square-pegs-in-round-holes-using-list-cols-in-your-dataframe" title="Using list-cols in your dataframe" target="_blank">Using list-cols in your dataframe</a> </strong> from <strong><a href="https://speakerdeck.com/jennybc" target="_blank">Jennifer Bryan</a></strong> </div>
 
 Scripts
 
@@ -14,7 +14,6 @@ Scripts
   * Trump tweet list-column example: [trump-tweets.R](talks/trump-tweets.R)
   * Game of Thrones POV character list-column example: [got-pov.R](talks/got-pov.R)
   * Gapminder nested data frame example *not here yet*
-
 
 ### Data Rectangling
 
