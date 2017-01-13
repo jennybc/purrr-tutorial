@@ -1,0 +1,168 @@
+---
+title: "List columns"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+Data frames are a fantastic data structure for data analysis. We usually think of them as a data receptacle for several atomic vectors with a common length and with a notion of "observation", i.e. the i-th value of each atomic vector is related to all the other i-th values.
+
+But data frame are not limited to atomic vectors. They can host general vectors, i.e. *lists* as well. This is what I call a **list-column**.
+
+List-columns and the data frame that hosts them require some special handling. In particular, it is highly advantageous if the data frame is a [tibble](https://github.com/tidyverse/tibble#readme), which anticipates list-columns. To work comfortably with list-columns, you need to develop techniques to:
+
+  * **Inspect**. What have I created?
+  * **Index**. How do I pull out specific bits by name or position?
+  * **Compute**. How do I operate on my list-column to make another vector or list-column?
+  * **Simplify**. How do I get rid of this list-column and back to a normal data frame?
+  
+The purrr package and all the techniques depicted in the other lessons come into heavy play here. This is a collection of worked examples that show these techniques applied specifically to list-columns.
+
+## Regex and Trump tweets
+
+### Load packages
+
+```{r message = FALSE}
+library(tidyverse)
+library(stringr)
+library(lubridate)
+library(here) ## install.packages("krlmlr/here")
+```
+
+### Bring tweets in
+
+Working with the same 7 tweets as [Trump Android words](ls08_trump-tweets.html) lesson. Go there for the rationale for choosing these 7 tweets.
+
+```{r}
+tb_raw <- read_csv(here("talks", "trump-tweets.csv"))
+```
+
+### Create a list-column of Trump Android words
+
+Clean a variable and create a list-column:
+
+  * `source` comes in an unfriendly form. Simplify to convey if tweet came from Android or iPhone.
+  * `twords` are what we'll call the "Trump Android words". See [Trump Android words](ls08_trump-tweets.html) lesson for backstory. **This is a list-column!**
+
+```{r}
+source_regex <- "android|iphone"
+tword_regex <- "badly|crazy|weak|spent|strong|dumb|joke|guns|funny|dead"
+
+tb <- tb_raw %>%
+  mutate(source = str_extract(source, source_regex),
+         twords = str_extract_all(tweet, tword_regex))
+```
+
+### Derive new variables
+
+Add variables, two of which are based on the `twords` list-column.
+
+ * `n`: How many twords are in the tweet?
+ * `hour`: At which hour of the day was the tweet?
+ * `start`: Start character of each tword.
+ 
+```{r}
+tb <- tb %>%
+  mutate(n = lengths(twords),
+         hour = hour(created),
+         start = gregexpr(tword_regex, tweet))
+```
+
+```{r include = FALSE}
+# another possibilty that would require more processing
+# so less useful for a talk example
+# but more useful IRL:
+# str_locate_all(tweet, tword_regex))
+```
+
+### Use regular data manipulation toolkit
+
+Let's isolate tweets created before 2pm, containing 1 or 2 twords, in which there's an tword that starts within the first 30 characters.
+
+```{r}
+tb %>%
+  filter(hour < 14,
+         between(n, 1, 2),
+         between(map_int(start, min), 0, 30))
+```
+
+Let's isolate tweets that contain both the twords "strong" and "weak".
+
+```{r}
+tb %>%
+  filter(map_lgl(twords, ~ all(c("strong", "weak") %in% .x)))
+```
+
+## JSON from an API and Game of Thrones
+
+## Nested data frame, modelling, and Gapminder
+
+
+## Nesting data frames in a list column
+
+*under development ... for now ...*
+
+Head over to [Split-Apply-Combine in STAT 545](http://stat545.com/block024_group-nest-split-map.html)
+
+o4
+
+<http://r4ds.had.co.nz/many-models.html>
+
+<!--
+
+Remember Gapminder?
+
+```{r}
+library(gapminder)
+gapminder %>% 
+  ggplot(aes(year, lifeExp, group = country)) +
+    geom_line(alpha = 1/3)
+```
+
+Get one meta-row per country
+
+```{r}
+by_country <- gapminder %>% 
+  group_by(country, continent) %>% 
+  nest()
+by_country
+by_country$data[[1]]
+```
+
+Compare contrast to a data frame grouped by country. *Or split on country?*.
+
+Fit a model for each country.
+
+```{r}
+country_model <- function(df) {
+  lm(lifeExp ~ year, data = df)
+}
+models <- map(by_country$data, country_model)
+by_country <- by_country %>% 
+  mutate(model = map(data, country_model))
+by_country
+```
+
+You can still use `filter()`, `arrange()`, etc.
+
+```{r}
+by_country %>% 
+  filter(continent == "Europe")
+by_country %>% 
+  arrange(continent, country)
+```
+
+```{r}
+library(broom)
+by_country$model[[1]]
+tidy(by_country$model[[1]])
+glance(by_country$model[[1]])
+augment(by_country$model[[1]])
+```
+
+-->

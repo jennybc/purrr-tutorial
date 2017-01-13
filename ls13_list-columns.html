@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>List columns</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+  padding-left: 25px;
+  text-indent: 0;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">purrr tutorial</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Lessons and examples</a>
+</li>
+<li>
+  <a href="more-resources.html">More resources</a>
+</li>
+<li>
+  <a href="talks.html">Talks</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="about.html">About</a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">List columns</h1>
+
+</div>
+
+
+<p>Data frames are a fantastic data structure for data analysis. We usually think of them as a data receptacle for several atomic vectors with a common length and with a notion of “observation”, i.e. the i-th value of each atomic vector is related to all the other i-th values.</p>
+<p>But data frame are not limited to atomic vectors. They can host general vectors, i.e. <em>lists</em> as well. This is what I call a <strong>list-column</strong>.</p>
+<p>List-columns and the data frame that hosts them require some special handling. In particular, it is highly advantageous if the data frame is a <a href="https://github.com/tidyverse/tibble#readme">tibble</a>, which anticipates list-columns. To work comfortably with list-columns, you need to develop techniques to:</p>
+<ul>
+<li><strong>Inspect</strong>. What have I created?</li>
+<li><strong>Index</strong>. How do I pull out specific bits by name or position?</li>
+<li><strong>Compute</strong>. How do I operate on my list-column to make another vector or list-column?</li>
+<li><strong>Simplify</strong>. How do I get rid of this list-column and back to a normal data frame?</li>
+</ul>
+<p>The purrr package and all the techniques depicted in the other lessons come into heavy play here. This is a collection of worked examples that show these techniques applied specifically to list-columns.</p>
+<div id="regex-and-trump-tweets" class="section level2">
+<h2>Regex and Trump tweets</h2>
+<div id="load-packages" class="section level3">
+<h3>Load packages</h3>
+<pre class="r"><code>library(tidyverse)
+library(stringr)
+library(lubridate)
+library(here) ## install.packages(&quot;krlmlr/here&quot;)</code></pre>
+</div>
+<div id="bring-tweets-in" class="section level3">
+<h3>Bring tweets in</h3>
+<p>Working with the same 7 tweets as <a href="ls08_trump-tweets.html">Trump Android words</a> lesson. Go there for the rationale for choosing these 7 tweets.</p>
+<pre class="r"><code>tb_raw &lt;- read_csv(here(&quot;talks&quot;, &quot;trump-tweets.csv&quot;))
+#&gt; Parsed with column specification:
+#&gt; cols(
+#&gt;   tweet = col_character(),
+#&gt;   source = col_character(),
+#&gt;   created = col_datetime(format = &quot;&quot;)
+#&gt; )</code></pre>
+</div>
+<div id="create-a-list-column-of-trump-android-words" class="section level3">
+<h3>Create a list-column of Trump Android words</h3>
+<p>Clean a variable and create a list-column:</p>
+<ul>
+<li><code>source</code> comes in an unfriendly form. Simplify to convey if tweet came from Android or iPhone.</li>
+<li><code>twords</code> are what we’ll call the “Trump Android words”. See <a href="ls08_trump-tweets.html">Trump Android words</a> lesson for backstory. <strong>This is a list-column!</strong></li>
+</ul>
+<pre class="r"><code>source_regex &lt;- &quot;android|iphone&quot;
+tword_regex &lt;- &quot;badly|crazy|weak|spent|strong|dumb|joke|guns|funny|dead&quot;
+
+tb &lt;- tb_raw %&gt;%
+  mutate(source = str_extract(source, source_regex),
+         twords = str_extract_all(tweet, tword_regex))</code></pre>
+</div>
+<div id="derive-new-variables" class="section level3">
+<h3>Derive new variables</h3>
+<p>Add variables, two of which are based on the <code>twords</code> list-column.</p>
+<ul>
+<li><code>n</code>: How many twords are in the tweet?</li>
+<li><code>hour</code>: At which hour of the day was the tweet?</li>
+<li><code>start</code>: Start character of each tword.</li>
+</ul>
+<pre class="r"><code>tb &lt;- tb %&gt;%
+  mutate(n = lengths(twords),
+         hour = hour(created),
+         start = gregexpr(tword_regex, tweet))</code></pre>
+</div>
+<div id="use-regular-data-manipulation-toolkit" class="section level3">
+<h3>Use regular data manipulation toolkit</h3>
+<p>Let’s isolate tweets created before 2pm, containing 1 or 2 twords, in which there’s an tword that starts within the first 30 characters.</p>
+<pre class="r"><code>tb %&gt;%
+  filter(hour &lt; 14,
+         between(n, 1, 2),
+         between(map_int(start, min), 0, 30))
+#&gt; # A tibble: 1 × 7
+#&gt;                                                                         tweet
+#&gt;                                                                         &lt;chr&gt;
+#&gt; 1 Bernie Sanders started off strong, but with the selection of Kaine for V.P.
+#&gt; # ... with 6 more variables: source &lt;chr&gt;, created &lt;dttm&gt;, twords &lt;list&gt;,
+#&gt; #   n &lt;int&gt;, hour &lt;int&gt;, start &lt;list&gt;</code></pre>
+<p>Let’s isolate tweets that contain both the twords “strong” and “weak”.</p>
+<pre class="r"><code>tb %&gt;%
+  filter(map_lgl(twords, ~ all(c(&quot;strong&quot;, &quot;weak&quot;) %in% .x)))
+#&gt; # A tibble: 2 × 7
+#&gt;                                                                         tweet
+#&gt;                                                                         &lt;chr&gt;
+#&gt; 1 Bernie Sanders started off strong, but with the selection of Kaine for V.P.
+#&gt; 2 Crooked Hillary Clinton is unfit to serve as President of the U.S. Her temp
+#&gt; # ... with 6 more variables: source &lt;chr&gt;, created &lt;dttm&gt;, twords &lt;list&gt;,
+#&gt; #   n &lt;int&gt;, hour &lt;int&gt;, start &lt;list&gt;</code></pre>
+</div>
+</div>
+<div id="json-from-an-api-and-game-of-thrones" class="section level2">
+<h2>JSON from an API and Game of Thrones</h2>
+</div>
+<div id="nested-data-frame-modelling-and-gapminder" class="section level2">
+<h2>Nested data frame, modelling, and Gapminder</h2>
+</div>
+<div id="nesting-data-frames-in-a-list-column" class="section level2">
+<h2>Nesting data frames in a list column</h2>
+<p><em>under development … for now …</em></p>
+<p>Head over to <a href="http://stat545.com/block024_group-nest-split-map.html">Split-Apply-Combine in STAT 545</a></p>
+<p>o4</p>
+<p><a href="http://r4ds.had.co.nz/many-models.html" class="uri">http://r4ds.had.co.nz/many-models.html</a></p>
+<!--
+
+Remember Gapminder?
+
+
+```r
+library(gapminder)
+gapminder %>% 
+  ggplot(aes(year, lifeExp, group = country)) +
+    geom_line(alpha = 1/3)
+```
+
+<img src="ls13_list-columns_files/figure-html/unnamed-chunk-9-1.png" width="672" />
+
+Get one meta-row per country
+
+
+```r
+by_country <- gapminder %>% 
+  group_by(country, continent) %>% 
+  nest()
+by_country
+#> # A tibble: 142 × 3
+#>        country continent              data
+#>         <fctr>    <fctr>            <list>
+#> 1  Afghanistan      Asia <tibble [12 × 4]>
+#> 2      Albania    Europe <tibble [12 × 4]>
+#> 3      Algeria    Africa <tibble [12 × 4]>
+#> 4       Angola    Africa <tibble [12 × 4]>
+#> 5    Argentina  Americas <tibble [12 × 4]>
+#> 6    Australia   Oceania <tibble [12 × 4]>
+#> 7      Austria    Europe <tibble [12 × 4]>
+#> 8      Bahrain      Asia <tibble [12 × 4]>
+#> 9   Bangladesh      Asia <tibble [12 × 4]>
+#> 10     Belgium    Europe <tibble [12 × 4]>
+#> # ... with 132 more rows
+by_country$data[[1]]
+#> # A tibble: 12 × 4
+#>     year lifeExp      pop gdpPercap
+#>    <int>   <dbl>    <int>     <dbl>
+#> 1   1952  28.801  8425333  779.4453
+#> 2   1957  30.332  9240934  820.8530
+#> 3   1962  31.997 10267083  853.1007
+#> 4   1967  34.020 11537966  836.1971
+#> 5   1972  36.088 13079460  739.9811
+#> 6   1977  38.438 14880372  786.1134
+#> 7   1982  39.854 12881816  978.0114
+#> 8   1987  40.822 13867957  852.3959
+#> 9   1992  41.674 16317921  649.3414
+#> 10  1997  41.763 22227415  635.3414
+#> 11  2002  42.129 25268405  726.7341
+#> 12  2007  43.828 31889923  974.5803
+```
+
+Compare contrast to a data frame grouped by country. *Or split on country?*.
+
+Fit a model for each country.
+
+
+```r
+country_model <- function(df) {
+  lm(lifeExp ~ year, data = df)
+}
+models <- map(by_country$data, country_model)
+by_country <- by_country %>% 
+  mutate(model = map(data, country_model))
+by_country
+#> # A tibble: 142 × 4
+#>        country continent              data    model
+#>         <fctr>    <fctr>            <list>   <list>
+#> 1  Afghanistan      Asia <tibble [12 × 4]> <S3: lm>
+#> 2      Albania    Europe <tibble [12 × 4]> <S3: lm>
+#> 3      Algeria    Africa <tibble [12 × 4]> <S3: lm>
+#> 4       Angola    Africa <tibble [12 × 4]> <S3: lm>
+#> 5    Argentina  Americas <tibble [12 × 4]> <S3: lm>
+#> 6    Australia   Oceania <tibble [12 × 4]> <S3: lm>
+#> 7      Austria    Europe <tibble [12 × 4]> <S3: lm>
+#> 8      Bahrain      Asia <tibble [12 × 4]> <S3: lm>
+#> 9   Bangladesh      Asia <tibble [12 × 4]> <S3: lm>
+#> 10     Belgium    Europe <tibble [12 × 4]> <S3: lm>
+#> # ... with 132 more rows
+```
+
+You can still use `filter()`, `arrange()`, etc.
+
+
+```r
+by_country %>% 
+  filter(continent == "Europe")
+#> # A tibble: 30 × 4
+#>                   country continent              data    model
+#>                    <fctr>    <fctr>            <list>   <list>
+#> 1                 Albania    Europe <tibble [12 × 4]> <S3: lm>
+#> 2                 Austria    Europe <tibble [12 × 4]> <S3: lm>
+#> 3                 Belgium    Europe <tibble [12 × 4]> <S3: lm>
+#> 4  Bosnia and Herzegovina    Europe <tibble [12 × 4]> <S3: lm>
+#> 5                Bulgaria    Europe <tibble [12 × 4]> <S3: lm>
+#> 6                 Croatia    Europe <tibble [12 × 4]> <S3: lm>
+#> 7          Czech Republic    Europe <tibble [12 × 4]> <S3: lm>
+#> 8                 Denmark    Europe <tibble [12 × 4]> <S3: lm>
+#> 9                 Finland    Europe <tibble [12 × 4]> <S3: lm>
+#> 10                 France    Europe <tibble [12 × 4]> <S3: lm>
+#> # ... with 20 more rows
+by_country %>% 
+  arrange(continent, country)
+#> # A tibble: 142 × 4
+#>                     country continent              data    model
+#>                      <fctr>    <fctr>            <list>   <list>
+#> 1                   Algeria    Africa <tibble [12 × 4]> <S3: lm>
+#> 2                    Angola    Africa <tibble [12 × 4]> <S3: lm>
+#> 3                     Benin    Africa <tibble [12 × 4]> <S3: lm>
+#> 4                  Botswana    Africa <tibble [12 × 4]> <S3: lm>
+#> 5              Burkina Faso    Africa <tibble [12 × 4]> <S3: lm>
+#> 6                   Burundi    Africa <tibble [12 × 4]> <S3: lm>
+#> 7                  Cameroon    Africa <tibble [12 × 4]> <S3: lm>
+#> 8  Central African Republic    Africa <tibble [12 × 4]> <S3: lm>
+#> 9                      Chad    Africa <tibble [12 × 4]> <S3: lm>
+#> 10                  Comoros    Africa <tibble [12 × 4]> <S3: lm>
+#> # ... with 132 more rows
+```
+
+
+```r
+library(broom)
+by_country$model[[1]]
+#> 
+#> Call:
+#> lm(formula = lifeExp ~ year, data = df)
+#> 
+#> Coefficients:
+#> (Intercept)         year  
+#>   -507.5343       0.2753
+tidy(by_country$model[[1]])
+#>          term     estimate   std.error statistic      p.value
+#> 1 (Intercept) -507.5342716 40.48416195 -12.53661 1.934055e-07
+#> 2        year    0.2753287  0.02045093  13.46289 9.835213e-08
+glance(by_country$model[[1]])
+#>   r.squared adj.r.squared    sigma statistic      p.value df    logLik
+#> 1 0.9477123     0.9424835 1.222788  181.2494 9.835213e-08  2 -18.34693
+#>        AIC      BIC deviance df.residual
+#> 1 42.69387 44.14859  14.9521          10
+augment(by_country$model[[1]])
+#>    lifeExp year  .fitted   .se.fit      .resid       .hat   .sigma
+#> 1   28.801 1952 29.90729 0.6639995 -1.10629487 0.29487179 1.211813
+#> 2   30.332 1957 31.28394 0.5799442 -0.95193823 0.22494172 1.237512
+#> 3   31.997 1962 32.66058 0.5026799 -0.66358159 0.16899767 1.265886
+#> 4   34.020 1967 34.03722 0.4358337 -0.01722494 0.12703963 1.288917
+#> 5   36.088 1972 35.41387 0.3848726  0.67413170 0.09906760 1.267003
+#> 6   38.438 1977 36.79051 0.3566719  1.64748834 0.08508159 1.154002
+#> 7   39.854 1982 38.16716 0.3566719  1.68684499 0.08508159 1.147076
+#> 8   40.822 1987 39.54380 0.3848726  1.27820163 0.09906760 1.208243
+#> 9   41.674 1992 40.92044 0.4358337  0.75355828 0.12703963 1.260583
+#> 10  41.763 1997 42.29709 0.5026799 -0.53408508 0.16899767 1.274051
+#> 11  42.129 2002 43.67373 0.5799442 -1.54472844 0.22494172 1.148593
+#> 12  43.828 2007 45.05037 0.6639995 -1.22237179 0.29487179 1.194109
+#>         .cooksd  .std.resid
+#> 1  2.427205e-01 -1.07742164
+#> 2  1.134714e-01 -0.88428127
+#> 3  3.603567e-02 -0.59530844
+#> 4  1.653992e-05 -0.01507681
+#> 5  1.854831e-02  0.58082792
+#> 6  9.225358e-02  1.40857509
+#> 7  9.671389e-02  1.44222437
+#> 8  6.668277e-02  1.10129103
+#> 9  3.165567e-02  0.65958143
+#> 10 2.334344e-02 -0.47913530
+#> 11 2.987950e-01 -1.43494020
+#> 12 2.963271e-01 -1.19046907
+```
+
+-->
+</div>
+
+<p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
