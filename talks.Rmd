@@ -13,7 +13,8 @@ Scripts
   * Trump tweet preparation: [trump-tweets-setup.R](talks/trump-tweets-setup.R)
   * Trump tweet list-column example: [trump-tweets.R](talks/trump-tweets.R)
   * Game of Thrones POV character list-column example: [got-pov.R](talks/got-pov.R)
-  * Gapminder nested data frame example *not here yet*
+  * Gapminder nested data frame example *no separate script*
+  * All 3 are now incorporated into [List-columns](ls13_list-columns.html).
 
 ### Data Rectangling
 
