@@ -195,7 +195,6 @@ allegiances
 
 ```{r}
 library(tidyverse)
-## install_github("jennybc/repurrrsive")
 library(repurrrsive)
 library(stringr)
 ```

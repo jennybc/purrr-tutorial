@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -326,7 +326,6 @@ div.tocify {
 </ul>
 <p>We load purrr now. Below we also use example lists from <a href="https://github.com/jennybc/repurrrsive">repurrrsive</a> which are <a href="ls00_inspect-explore.html">introduced and explored elsewhere</a>.</p>
 <pre class="r"><code>library(purrr)
-## install_github(&quot;jennybc/repurrrsive&quot;)
 library(repurrrsive)</code></pre>
 </div>
 <div id="why-not-plyr" class="section level2">
@@ -447,7 +446,7 @@ mat &lt;- do.call(rbind, l)
 <p><strong>purrr</strong></p>
 <pre class="r"><code>map_df(got_chars[23:25],
        `[`, c(&quot;name&quot;, &quot;playedBy&quot;))
-#&gt; # A tibble: 3 × 2
+#&gt; # A tibble: 3 x 2
 #&gt;              name      playedBy
 #&gt;             &lt;chr&gt;         &lt;chr&gt;
 #&gt; 1        Jon Snow Kit Harington
@@ -477,7 +476,7 @@ mat &lt;- do.call(rbind, l)
   name = map_chr(got_chars[23:25], &quot;name&quot;),
   id = map_int(got_chars[23:25], &quot;id&quot;)
 )
-#&gt; # A tibble: 3 × 2
+#&gt; # A tibble: 3 x 2
 #&gt;              name    id
 #&gt;             &lt;chr&gt; &lt;int&gt;
 #&gt; 1        Jon Snow   583
@@ -500,7 +499,7 @@ birth &lt;- vapply(got_chars[16:18],
 mapply(function(x, y) paste(x, &quot;was born&quot;, y),
        nms, birth)
 #&gt;                                     Brandon Stark 
-#&gt; &quot;Brandon Stark was born In 290 AC, at Winterfell&quot; 
+#&gt; &quot;Brandon Stark was born In 290 AC, at Winterfell&quot; 
 #&gt;                                  Brienne of Tarth 
 #&gt;             &quot;Brienne of Tarth was born In 280 AC&quot; 
 #&gt;                                     Catelyn Stark 
@@ -513,7 +512,7 @@ mapply(function(x, y) paste(x, &quot;was born&quot;, y),
 birth &lt;- got_chars[16:18] %&gt;% 
   map_chr(&quot;born&quot;)
 map2_chr(nms, birth, ~ paste(.x, &quot;was born&quot;, .y))
-#&gt; [1] &quot;Brandon Stark was born In 290 AC, at Winterfell&quot;
+#&gt; [1] &quot;Brandon Stark was born In 290 AC, at Winterfell&quot;
 #&gt; [2] &quot;Brienne of Tarth was born In 280 AC&quot;            
 #&gt; [3] &quot;Catelyn Stark was born In 264 AC, at Riverrun&quot;
 
@@ -524,7 +523,7 @@ df &lt;- tibble::tibble(
   birth
 )
 pmap_chr(df, paste)
-#&gt; [1] &quot;Brandon Stark was born In 290 AC, at Winterfell&quot;
+#&gt; [1] &quot;Brandon Stark was born In 290 AC, at Winterfell&quot;
 #&gt; [2] &quot;Brienne of Tarth was born In 280 AC&quot;            
 #&gt; [3] &quot;Catelyn Stark was born In 264 AC, at Riverrun&quot;</code></pre>
 </div>
@@ -539,7 +538,7 @@ library(gapminder)
 (mini_gap &lt;- gapminder %&gt;%
     filter(country %in% c(&quot;Canada&quot;, &quot;Germany&quot;), year &gt; 2000) %&gt;% 
     droplevels())
-#&gt; # A tibble: 4 × 6
+#&gt; # A tibble: 4 x 6
 #&gt;   country continent  year lifeExp      pop gdpPercap
 #&gt;    &lt;fctr&gt;    &lt;fctr&gt; &lt;int&gt;   &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;
 #&gt; 1  Canada  Americas  2002  79.770 31902268  33328.97
@@ -560,7 +559,7 @@ library(gapminder)
 <pre class="r"><code>mini_gap %&gt;% 
   group_by(country) %&gt;% 
   summarize(lifeExp = mean(lifeExp))
-#&gt; # A tibble: 2 × 2
+#&gt; # A tibble: 2 x 2
 #&gt;   country lifeExp
 #&gt;    &lt;fctr&gt;   &lt;dbl&gt;
 #&gt; 1  Canada 80.2115
@@ -603,7 +602,7 @@ tapply(mini_gap$lifeExp, mini_gap$country, mean, simplify = FALSE)
 <pre class="r"><code>mini_gap %&gt;% 
   group_by(country) %&gt;% 
   summarize_at(vars(lifeExp, gdpPercap), mean)
-#&gt; # A tibble: 2 × 3
+#&gt; # A tibble: 2 x 3
 #&gt;   country lifeExp gdpPercap
 #&gt;    &lt;fctr&gt;   &lt;dbl&gt;     &lt;dbl&gt;
 #&gt; 1  Canada 80.2115  34824.10
@@ -648,18 +647,18 @@ head(by_obj)
 <pre class="r"><code>gapminder %&gt;% 
   group_by(country) %&gt;% 
   summarize(cor = cor(lifeExp, year))
-#&gt; # A tibble: 142 × 2
+#&gt; # A tibble: 142 x 2
 #&gt;        country       cor
 #&gt;         &lt;fctr&gt;     &lt;dbl&gt;
-#&gt; 1  Afghanistan 0.9735051
-#&gt; 2      Albania 0.9542420
-#&gt; 3      Algeria 0.9925307
-#&gt; 4       Angola 0.9422392
-#&gt; 5    Argentina 0.9977816
-#&gt; 6    Australia 0.9897716
-#&gt; 7      Austria 0.9960592
-#&gt; 8      Bahrain 0.9832293
-#&gt; 9   Bangladesh 0.9946662
+#&gt;  1 Afghanistan 0.9735051
+#&gt;  2     Albania 0.9542420
+#&gt;  3     Algeria 0.9925307
+#&gt;  4      Angola 0.9422392
+#&gt;  5   Argentina 0.9977816
+#&gt;  6   Australia 0.9897716
+#&gt;  7     Austria 0.9960592
+#&gt;  8     Bahrain 0.9832293
+#&gt;  9  Bangladesh 0.9946662
 #&gt; 10     Belgium 0.9972665
 #&gt; # ... with 132 more rows</code></pre>
 </div>
@@ -794,18 +793,18 @@ head(coefs)
          intercept = map_dbl(coefs, 1),
          slope = map_dbl(coefs, 2)) %&gt;% 
   select(country, continent, intercept, slope)
-#&gt; # A tibble: 142 × 4
+#&gt; # A tibble: 142 x 4
 #&gt;        country continent  intercept     slope
 #&gt;         &lt;fctr&gt;    &lt;fctr&gt;      &lt;dbl&gt;     &lt;dbl&gt;
-#&gt; 1  Afghanistan      Asia  -507.5343 0.2753287
-#&gt; 2      Albania    Europe  -594.0725 0.3346832
-#&gt; 3      Algeria    Africa -1067.8590 0.5692797
-#&gt; 4       Angola    Africa  -376.5048 0.2093399
-#&gt; 5    Argentina  Americas  -389.6063 0.2317084
-#&gt; 6    Australia   Oceania  -376.1163 0.2277238
-#&gt; 7      Austria    Europe  -405.9205 0.2419923
-#&gt; 8      Bahrain      Asia  -859.8258 0.4675077
-#&gt; 9   Bangladesh      Asia  -936.2158 0.4981308
+#&gt;  1 Afghanistan      Asia  -507.5343 0.2753287
+#&gt;  2     Albania    Europe  -594.0725 0.3346832
+#&gt;  3     Algeria    Africa -1067.8590 0.5692797
+#&gt;  4      Angola    Africa  -376.5048 0.2093399
+#&gt;  5   Argentina  Americas  -389.6063 0.2317084
+#&gt;  6   Australia   Oceania  -376.1163 0.2277238
+#&gt;  7     Austria    Europe  -405.9205 0.2419923
+#&gt;  8     Bahrain      Asia  -859.8258 0.4675077
+#&gt;  9  Bangladesh      Asia  -936.2158 0.4981308
 #&gt; 10     Belgium    Europe  -340.2412 0.2090846
 #&gt; # ... with 132 more rows</code></pre>
 </div>
@@ -839,7 +838,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

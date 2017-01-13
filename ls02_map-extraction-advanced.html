@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -25,7 +25,7 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-1.1/highlight.js"></script>
-<script src="site_libs/htmlwidgets-0.8/htmlwidgets.js"></script>
+<script src="site_libs/htmlwidgets-0.9/htmlwidgets.js"></script>
 <link href="site_libs/jsoneditor-5.5.5/jsoneditor.min.css" rel="stylesheet" />
 <script src="site_libs/jsoneditor-5.5.5/jsoneditor.min.js"></script>
 <script src="site_libs/jsonedit-binding-1.4.0/jsonedit.js"></script>
@@ -308,9 +308,7 @@ div.tocify {
 <p>A great use of purrr’s <code>map()</code> functions is to dig information out of a non-rectangular data structure and create a neat data frame. Where do these awkward objects come from? Often as JSON or XML from an API. JSON and XML are two plain text formats for non-rectangular data, i.e. for scenarios where CSV is not an option. If you are lucky it’s JSON, which is less aggravating, and readily converts to a list you can work with in R.</p>
 <p>Here we explore some lists obtained from the <a href="https://developer.github.com/v3/">GitHub API</a>. Interactive exploration of these lists is made possible by the <a href="https://github.com/timelyportfolio/listviewer"><code>listviewer</code> package</a>.</p>
 <p>Load the packages.</p>
-<pre class="r"><code># install.packages(&quot;devtools&quot;)
-# devtools::install_github(&quot;jennybc/repurrrsive&quot;)
-library(repurrrsive)
+<pre class="r"><code>library(repurrrsive)
 library(listviewer)
 library(jsonlite)
 library(dplyr)
@@ -519,7 +517,7 @@ str(x[3:4])
 <p>How can we “stack up” these results row-wise, i.e. one row per user and variables for “login”, “name”, etc.? A data frame would be the perfect data structure for this information.</p>
 <p>This is what <code>map_df()</code> is for.</p>
 <pre class="r"><code>map_df(gh_users, `[`, c(&quot;login&quot;, &quot;name&quot;, &quot;id&quot;, &quot;location&quot;))
-#&gt; # A tibble: 6 × 4
+#&gt; # A tibble: 6 x 4
 #&gt;         login                   name       id               location
 #&gt;         &lt;chr&gt;                  &lt;chr&gt;    &lt;int&gt;                  &lt;chr&gt;
 #&gt; 1 gaborcsardi           Gábor Csárdi   660288         Chippenham, UK
@@ -538,7 +536,7 @@ str(x[3:4])
     location = map_chr(., &quot;location&quot;)
   )
 }
-#&gt; # A tibble: 6 × 4
+#&gt; # A tibble: 6 x 4
 #&gt;         login                   name       id               location
 #&gt;         &lt;chr&gt;                  &lt;chr&gt;    &lt;int&gt;                  &lt;chr&gt;
 #&gt; 1 gaborcsardi           Gábor Csárdi   660288         Chippenham, UK
@@ -619,7 +617,7 @@ str(x[3:4])
 (udf &lt;- gh_repos %&gt;%
     set_names(unames) %&gt;% 
     enframe(&quot;username&quot;, &quot;gh_repos&quot;))
-#&gt; # A tibble: 6 × 2
+#&gt; # A tibble: 6 x 2
 #&gt;      username    gh_repos
 #&gt;         &lt;chr&gt;      &lt;list&gt;
 #&gt; 1 gaborcsardi &lt;list [30]&gt;
@@ -631,7 +629,7 @@ str(x[3:4])
 <p>Build confidence by doing something modest on the list-column of repos. This is your introduction to another powerful, general technique: <code>map()</code> inside <code>mutate()</code>. Note we are now bringing the data frame wrangling tools from dplyr and tidyr to bear.</p>
 <pre class="r"><code>udf %&gt;% 
   mutate(n_repos = map_int(gh_repos, length))
-#&gt; # A tibble: 6 × 3
+#&gt; # A tibble: 6 x 3
 #&gt;      username    gh_repos n_repos
 #&gt;         &lt;chr&gt;      &lt;list&gt;   &lt;int&gt;
 #&gt; 1 gaborcsardi &lt;list [30]&gt;      30
@@ -653,7 +651,6 @@ str(one_repo, max.level = 1, list.len = 5)
 #&gt;  $ name             : chr &quot;after&quot;
 #&gt;  $ full_name        : chr &quot;gaborcsardi/after&quot;
 #&gt;  $ owner            :List of 17
-#&gt;   .. [list output truncated]
 #&gt;  $ private          : logi FALSE
 #&gt;   [list output truncated]
 ## a highly selective list of tibble-worthy info for one repo
@@ -668,18 +665,18 @@ one_repo[c(&quot;name&quot;, &quot;fork&quot;, &quot;open_issues&quot;)]
 #&gt; [1] 0
 ## make a data frame of that info for all a user&#39;s repos
 map_df(one_user, `[`, c(&quot;name&quot;, &quot;fork&quot;, &quot;open_issues&quot;))
-#&gt; # A tibble: 30 × 3
+#&gt; # A tibble: 30 x 3
 #&gt;           name  fork open_issues
 #&gt;          &lt;chr&gt; &lt;lgl&gt;       &lt;int&gt;
-#&gt; 1        after FALSE           0
-#&gt; 2       argufy FALSE           6
-#&gt; 3          ask FALSE           4
-#&gt; 4  baseimports FALSE           0
-#&gt; 5       citest  TRUE           0
-#&gt; 6   clisymbols FALSE           0
-#&gt; 7       cmaker  TRUE           0
-#&gt; 8        cmark  TRUE           0
-#&gt; 9   conditions  TRUE           0
+#&gt;  1       after FALSE           0
+#&gt;  2      argufy FALSE           6
+#&gt;  3         ask FALSE           4
+#&gt;  4 baseimports FALSE           0
+#&gt;  5      citest  TRUE           0
+#&gt;  6  clisymbols FALSE           0
+#&gt;  7      cmaker  TRUE           0
+#&gt;  8       cmark  TRUE           0
+#&gt;  9  conditions  TRUE           0
 #&gt; 10      crayon FALSE           7
 #&gt; # ... with 20 more rows
 ## YYAAAASSSSSSS</code></pre>
@@ -687,15 +684,15 @@ map_df(one_user, `[`, c(&quot;name&quot;, &quot;fork&quot;, &quot;open_issues&qu
 <pre class="r"><code>udf %&gt;% 
   mutate(repo_info = gh_repos %&gt;%
            map(. %&gt;% map_df(`[`, c(&quot;name&quot;, &quot;fork&quot;, &quot;open_issues&quot;))))
-#&gt; # A tibble: 6 × 3
+#&gt; # A tibble: 6 x 3
 #&gt;      username    gh_repos         repo_info
 #&gt;         &lt;chr&gt;      &lt;list&gt;            &lt;list&gt;
-#&gt; 1 gaborcsardi &lt;list [30]&gt; &lt;tibble [30 × 3]&gt;
-#&gt; 2     jennybc &lt;list [30]&gt; &lt;tibble [30 × 3]&gt;
-#&gt; 3      jtleek &lt;list [30]&gt; &lt;tibble [30 × 3]&gt;
-#&gt; 4  juliasilge &lt;list [26]&gt; &lt;tibble [26 × 3]&gt;
-#&gt; 5      leeper &lt;list [30]&gt; &lt;tibble [30 × 3]&gt;
-#&gt; 6    masalmon &lt;list [30]&gt; &lt;tibble [30 × 3]&gt;</code></pre>
+#&gt; 1 gaborcsardi &lt;list [30]&gt; &lt;tibble [30 x 3]&gt;
+#&gt; 2     jennybc &lt;list [30]&gt; &lt;tibble [30 x 3]&gt;
+#&gt; 3      jtleek &lt;list [30]&gt; &lt;tibble [30 x 3]&gt;
+#&gt; 4  juliasilge &lt;list [26]&gt; &lt;tibble [26 x 3]&gt;
+#&gt; 5      leeper &lt;list [30]&gt; &lt;tibble [30 x 3]&gt;
+#&gt; 6    masalmon &lt;list [30]&gt; &lt;tibble [30 x 3]&gt;</code></pre>
 <p>The user-specific tibbles about each user’s repos are now sitting in the <code>repo_info</code>. How do we simplify this to a normal data frame that is free of list-columns? Remove the <code>gh_repos</code> variable, which has served its purpose and use <code>tidyr::unnest()</code>.</p>
 <pre class="r"><code>(rdf &lt;- udf %&gt;% 
    mutate(
@@ -704,18 +701,18 @@ map_df(one_user, `[`, c(&quot;name&quot;, &quot;fork&quot;, &quot;open_issues&qu
    ) %&gt;% 
    select(-gh_repos) %&gt;% 
    tidyr::unnest())
-#&gt; # A tibble: 176 × 4
+#&gt; # A tibble: 176 x 4
 #&gt;       username        name  fork open_issues
 #&gt;          &lt;chr&gt;       &lt;chr&gt; &lt;lgl&gt;       &lt;int&gt;
-#&gt; 1  gaborcsardi       after FALSE           0
-#&gt; 2  gaborcsardi      argufy FALSE           6
-#&gt; 3  gaborcsardi         ask FALSE           4
-#&gt; 4  gaborcsardi baseimports FALSE           0
-#&gt; 5  gaborcsardi      citest  TRUE           0
-#&gt; 6  gaborcsardi  clisymbols FALSE           0
-#&gt; 7  gaborcsardi      cmaker  TRUE           0
-#&gt; 8  gaborcsardi       cmark  TRUE           0
-#&gt; 9  gaborcsardi  conditions  TRUE           0
+#&gt;  1 gaborcsardi       after FALSE           0
+#&gt;  2 gaborcsardi      argufy FALSE           6
+#&gt;  3 gaborcsardi         ask FALSE           4
+#&gt;  4 gaborcsardi baseimports FALSE           0
+#&gt;  5 gaborcsardi      citest  TRUE           0
+#&gt;  6 gaborcsardi  clisymbols FALSE           0
+#&gt;  7 gaborcsardi      cmaker  TRUE           0
+#&gt;  8 gaborcsardi       cmark  TRUE           0
+#&gt;  9 gaborcsardi  conditions  TRUE           0
 #&gt; 10 gaborcsardi      crayon FALSE           7
 #&gt; # ... with 166 more rows</code></pre>
 <p>Let’s do a little manipulation with dplyr to find some of the more interesting repos and get repos from each user in front of our eyeballs. I get rid of forks and show the 3 repos for each user that have the most open issues. (Remember we are only working with the first 30 repos for each user – I had to remember my open issue situation is much more grim than this table suggests.)</p>
@@ -725,20 +722,19 @@ map_df(one_user, `[`, c(&quot;name&quot;, &quot;fork&quot;, &quot;open_issues&qu
   group_by(username) %&gt;%
   arrange(username, desc(open_issues)) %&gt;%
   slice(1:3)
-#&gt; Source: local data frame [18 x 3]
-#&gt; Groups: username [6]
-#&gt; 
+#&gt; # A tibble: 18 x 3
+#&gt; # Groups:   username [6]
 #&gt;       username                     name open_issues
 #&gt;          &lt;chr&gt;                    &lt;chr&gt;       &lt;int&gt;
-#&gt; 1  gaborcsardi                       gh           8
-#&gt; 2  gaborcsardi                   crayon           7
-#&gt; 3  gaborcsardi                   argufy           6
-#&gt; 4      jennybc         2014-01-27-miami           4
-#&gt; 5      jennybc                    bingo           3
-#&gt; 6      jennybc                    candy           2
-#&gt; 7       jtleek              datasharing         399
-#&gt; 8       jtleek             dataanalysis           5
-#&gt; 9       jtleek                 genstats           3
+#&gt;  1 gaborcsardi                       gh           8
+#&gt;  2 gaborcsardi                   crayon           7
+#&gt;  3 gaborcsardi                   argufy           6
+#&gt;  4     jennybc         2014-01-27-miami           4
+#&gt;  5     jennybc                    bingo           3
+#&gt;  6     jennybc                    candy           2
+#&gt;  7      jtleek              datasharing         399
+#&gt;  8      jtleek             dataanalysis           5
+#&gt;  9      jtleek                 genstats           3
 #&gt; 10  juliasilge                 tidytext           5
 #&gt; 11  juliasilge choroplethrUTCensusTract           0
 #&gt; 12  juliasilge          CountyHealthApp           0
@@ -780,7 +776,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -258,7 +258,7 @@ x %&gt;% {
   tibble(id = map_int(., &quot;int&quot;),
          chr = map_chr(., &quot;chr&quot;))
 }
-#&gt; # A tibble: 2 × 2
+#&gt; # A tibble: 2 x 2
 #&gt;      id   chr
 #&gt;   &lt;int&gt; &lt;chr&gt;
 #&gt; 1     1     a
@@ -269,8 +269,7 @@ x %&gt;% {
   tibble(id = . %&gt;% map_int(&quot;int&quot;),
          chr = . %&gt;% map_chr(&quot;chr&quot;))
 }
-#&gt; Error: Each variable must be a 1d atomic vector or list.
-#&gt; Problem variables: &#39;id&#39;, &#39;chr&#39;</code></pre>
+#&gt; Error: Columns `id`, `chr` must be 1d atomic vectors or lists</code></pre>
 <p>What went wrong?</p>
 <p><code>. %&gt;% map_int(&quot;int&quot;)</code> built a unary function, instead of passing <code>x</code> into <code>map_int()</code>. Do not start a pipeline with <code>.</code> unless you want a unary function.</p>
 <p>What does this have to do with <code>purrr</code>?</p>
@@ -333,7 +332,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

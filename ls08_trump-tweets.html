@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -476,7 +476,7 @@ Tweak your existing approach to return an integer vector, with length equal to t
   naive_length = lengths(matches),
   n_words = map_int(matches, ~ sum(.x &gt; 0))
 )
-#&gt; # A tibble: 7 × 2
+#&gt; # A tibble: 7 x 2
 #&gt;   naive_length n_words
 #&gt;          &lt;int&gt;   &lt;int&gt;
 #&gt; 1            1       0
@@ -855,7 +855,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

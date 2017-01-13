@@ -4,7 +4,7 @@
 
 <head>
 
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
@@ -305,7 +305,6 @@ div.tocify {
 <h2>Load packages</h2>
 <p>Load purrr and repurrrsive, which contains recursive list examples. If you’re just jumping here, the example datasets are introduced <a href="https://jennybc.github.io/purrr-tutorial/ls00_inspect-explore.html">elsewhere</a>, including via interactive listviewer widgets.</p>
 <pre class="r"><code>library(purrr)
-## install_github(&quot;jennybc/repurrrsive&quot;)
 library(repurrrsive)</code></pre>
 </div>
 <div id="map-overview" class="section level2">
@@ -397,8 +396,8 @@ map(aliases, my_fun)
 <h3>Workflow advice</h3>
 <p>It’s rare to write these calls perfect and whole the first time. You should probably pilot your idea on a single element. Then drop your <strong>proven, working logic</strong> into one of the above templates. When things aren’t working as expected, consider: have you tried to skip too many steps? Pull out an example, get everything to work there, check it on another example, then scale back up again.</p>
 <p>A development process for the above might look like this:</p>
-<pre class="r"><code>(a &lt;- map(got_chars, &quot;aliases&quot;)[[19]]) ## OOPS! empty --&gt; a useless example
-#&gt; list()
+<pre class="r"><code>(a &lt;- map(got_chars, &quot;aliases&quot;)[[19]]) ## OOPS! NULL --&gt; a useless example
+#&gt; NULL
 (a &lt;- map(got_chars, &quot;aliases&quot;)[[16]]) ## ok good
 #&gt; [1] &quot;Bran&quot;            &quot;Bran the Broken&quot; &quot;The Winged Wolf&quot;
 paste(a, sep = &quot; | &quot;)                  ## OOPS! not what I want
@@ -420,7 +419,7 @@ got_chars[15:17] %&gt;%                   ## I am a programming god
 <pre class="r"><code>aliases &lt;- set_names(map(got_chars, &quot;aliases&quot;), map_chr(got_chars, &quot;name&quot;))
 map_chr(aliases[c(3, 10, 20, 24)], ~ paste(.x, collapse = &quot; | &quot;)) %&gt;% 
   tibble::enframe(value = &quot;aliases&quot;)
-#&gt; # A tibble: 4 × 2
+#&gt; # A tibble: 4 x 2
 #&gt;                name
 #&gt;               &lt;chr&gt;
 #&gt; 1 Victarion Greyjoy
@@ -436,7 +435,7 @@ map_chr(aliases[c(3, 10, 20, 24)], ~ paste(.x, collapse = &quot; | &quot;)) %&gt
     map_chr(~ paste(.x, collapse = &quot; | &quot;))
 ) %&gt;% 
   dplyr::slice(c(3, 10, 20, 24))
-#&gt; # A tibble: 4 × 2
+#&gt; # A tibble: 4 x 2
 #&gt;                name
 #&gt;               &lt;chr&gt;
 #&gt; 1 Victarion Greyjoy
@@ -499,7 +498,7 @@ map2_chr(nms, birth, my_fun) %&gt;% head()
 #&gt; [6] &quot;Chett was born At Hag&#39;s Mire&quot;</code></pre>
 <p>Anonymous function via formula. Use <code>.x</code> and <code>.y</code> to refer to the individual elements of the two primary inputs.</p>
 <pre class="r"><code>map2_chr(nms[16:18], birth[16:18], ~ paste(.x, &quot;was born&quot;, .y)) %&gt;% tail()
-#&gt; [1] &quot;Brandon Stark was born In 290 AC, at Winterfell&quot;
+#&gt; [1] &quot;Brandon Stark was born In 290 AC, at Winterfell&quot;
 #&gt; [2] &quot;Brienne of Tarth was born In 280 AC&quot;            
 #&gt; [3] &quot;Catelyn Stark was born In 264 AC, at Riverrun&quot;</code></pre>
 </div>
@@ -524,11 +523,11 @@ my_fun &lt;- function(name, aliases, allegiances) {
 df %&gt;% 
   pmap_chr(my_fun) %&gt;% 
   tail()
-#&gt; [1] &quot;Aeron Greyjoy has 2 aliases and 1 allegiances&quot;  
-#&gt; [2] &quot;Kevan Lannister has 0 aliases and 1 allegiances&quot;
-#&gt; [3] &quot;Melisandre has 5 aliases and 0 allegiances&quot;     
-#&gt; [4] &quot;Merrett Frey has 1 aliases and 1 allegiances&quot;   
-#&gt; [5] &quot;Quentyn Martell has 4 aliases and 1 allegiances&quot;
+#&gt; [1] &quot;Kevan Lannister has 1 aliases and 1 allegiances&quot;
+#&gt; [2] &quot;Melisandre has 5 aliases and 0 allegiances&quot;     
+#&gt; [3] &quot;Merrett Frey has 1 aliases and 1 allegiances&quot;   
+#&gt; [4] &quot;Quentyn Martell has 4 aliases and 1 allegiances&quot;
+#&gt; [5] &quot;Samwell Tarly has 7 aliases and 1 allegiances&quot;  
 #&gt; [6] &quot;Sansa Stark has 3 aliases and 2 allegiances&quot;</code></pre>
 </div>
 </div>
@@ -559,7 +558,7 @@ $(document).ready(function () {
   (function () {
     var script = document.createElement("script");
     script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
     document.getElementsByTagName("head")[0].appendChild(script);
   })();
 </script>

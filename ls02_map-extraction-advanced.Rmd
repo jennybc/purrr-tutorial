@@ -18,8 +18,6 @@ Here we explore some lists obtained from the [GitHub API](https://developer.gith
 Load the packages.
 
 ```{r message = FALSE}
-# install.packages("devtools")
-# devtools::install_github("jennybc/repurrrsive")
 library(repurrrsive)
 library(listviewer)
 library(jsonlite)

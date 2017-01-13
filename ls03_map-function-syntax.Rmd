@@ -5,6 +5,8 @@ output:
   html_document:
     toc: true
     toc_float: true
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r, echo = FALSE}
@@ -17,7 +19,6 @@ Load purrr and repurrrsive, which contains recursive list examples. If you're ju
 
 ```{r}
 library(purrr)
-## install_github("jennybc/repurrrsive")
 library(repurrrsive)
 ```
 
@@ -101,7 +102,7 @@ It's rare to write these calls perfect and whole the first time. You should prob
 A development process for the above might look like this:
 
 ```{r}
-(a <- map(got_chars, "aliases")[[19]]) ## OOPS! empty --> a useless example
+(a <- map(got_chars, "aliases")[[19]]) ## OOPS! NULL --> a useless example
 (a <- map(got_chars, "aliases")[[16]]) ## ok good
 paste(a, sep = " | ")                  ## OOPS! not what I want
 paste(a, collapse = " | ")             ## ok good
