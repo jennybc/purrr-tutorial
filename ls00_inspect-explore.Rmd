@@ -17,7 +17,8 @@ Load purrr and repurrrsive, which contains recursive list examples.
 
 ```{r}
 library(purrr)
-## install_github("jennybc/repurrrsive")
+# install.packages("devtools")
+# devtools::install_github("jennybc/repurrrsive")
 library(repurrrsive)
 ```
 
