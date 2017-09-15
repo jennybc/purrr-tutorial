@@ -174,7 +174,7 @@ map(INPUT_ONE, INPUT_TWO, FUNCTION_TO_APPLY, OPTIONAL_OTHER_STUFF)
 
 How will we specify the function to apply? All the usual options are open.
 
-What shall out example be? Each character has a free text field, giving the date and possibly location of his or her birth. Let's paste that together with the character's name to get a sentence.
+What shall our example be? Each character has a free text field, giving the date and possibly location of his or her birth. Let's paste that together with the character's name to get a sentence.
 
 First, obtain the two inputs.
 

@@ -38,7 +38,7 @@ You need to develop a toolkit for list inspection. Be on the look out for:
   
 > I have no idea what's in this list or what it's structure is! Please send help.
 
-Understand this is **situation normal**, especially when your list comes from querying a poorly documented APIs. This is often true even when your list has been created completely within R. How many of us perfectly understand the structure of a fitted linear model object? You just have to embark on a voyage of discovery and figure out what's in there.  Happy trails.
+Understand this is **situation normal**, especially when your list comes from querying a poorly documented API. This is often true even when your list has been created completely within R. How many of us perfectly understand the structure of a fitted linear model object? You just have to embark on a voyage of discovery and figure out what's in there. Happy trails.
 
 ### `str()`
 
