@@ -45,9 +45,9 @@ library(repurrrsive)
 
 ## Why not plyr?
 
-If you have never heard of the [plyr package](https://CRAN.R-project.org/package=plyr), you can skip this section! Personally, I'm a bit sad that it's time to move on from plyr. But it probably is.
+If you have never heard of the [plyr package](https://CRAN.R-project.org/package=plyr), you can skip this section! Personally, I'm a bit sad that it's time to move on from plyr. But it is time.
 
-Why? It's no longer under active development. The innovation is happening elsewhere, in purrr and the other packages in the tidyverse. Also, even I must admit that plyr can be rather slow. I wouldn't recommend writing new code that requires plyr.
+Why? plyr is no longer under active development. The innovation is happening elsewhere, in purrr and the other packages in the tidyverse. Also, even I must admit that plyr can be rather slow. I wouldn't recommend writing new code that requires plyr.
 
 In terms of understanding or translating plyr code, here's the minimum you need to know: The key feature of the main 3 * 4 = 12 functions in plyr is their explicit, memorable form.
 
@@ -62,7 +62,7 @@ where `X` and `Y` specify the type of input and output, respectively. `X` and `Y
   * `l` = "list"
   * `_` = "nothing" (not eligible as `X` re: input, for obvious reasons)
   
-The most useful function proved to be `ddply()`: data frame in, data frame out. This is now handled by dplyr and tidyr. Most tasks suitable for `a*ply()` and, especially `l*ply()` are now handled by purrr's `map()` family. The functions called for their side effects, as opposed to return value, are those named `*_ply()`; this is handled by purrr's `walk()` functions. Marching through a data frame row by row is now a job for purrr's `pmap()`.
+The most useful function proved to be `ddply()`: data frame in, data frame out. This inspired the creation of the [dplyr package](http://dplyr.tidyverse.org). Most tasks suitable for `a*ply()` and, especially `l*ply()` are now handled by purrr's `map()` family. The functions called for their side effects, as opposed to return value, are those named `*_ply()`; this is handled by purrr's `walk()` functions. Marching through a data frame row by row is now a job for purrr's `pmap()`.
 
 ## `lapply()` vs. `purrr::map()`
 
@@ -144,9 +144,9 @@ n <- 1
 vapply(c("a", "b"), f, character(n), n = n)
 ```
 
-## ¯\\\_(ツ)\_/¯ vs. `map_df()`
+## ¯\\\_(ツ)\_/¯ vs. `map_dfr()`
 
-The `purrr::map_df()` function is "list in, data frame out" and there is no true base equivalent. Given the centrality of data frames for analysis, it is handy to have a function to produce them, without resorting to `do.call()`.
+The `purrr::map_dfr()` function is "list in, data frame out" and there is no true base equivalent. Given the centrality of data frames for analysis, it is handy to have a function to produce them, without resorting to `do.call()`.
 
 <div class = "row">
 <div class = "col-md-6">
@@ -161,13 +161,13 @@ mat <- do.call(rbind, l)
 <div class = "col-md-6">
 **purrr**
 ```{r}
-map_df(got_chars[23:25],
-       `[`, c("name", "playedBy"))
+map_dfr(got_chars[23:25],
+        `[`, c("name", "playedBy"))
 ```
 </div>
 </div>
 
-The base workflow above gets trickier if you're extracting elements of disparate type. At that point, it may make more sense to use `vapply()` repeatedly. For comparability, we'll show similar using purrr's type-specific mapping, which is also safer than relying on automatic type conversion from `map_df()`.
+The base workflow above gets trickier if you're extracting elements of disparate type. At that point, it may make more sense to use `vapply()` repeatedly. For comparability, we'll show similar using purrr's type-specific mapping, which is also safer than relying on automatic type conversion from `map_dfr()`.
 
 <div class = "row">
 <div class = "col-md-6">
