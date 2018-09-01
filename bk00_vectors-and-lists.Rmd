@@ -28,10 +28,10 @@ Atomic vectors are homogeneous. Each **atom** has the same flavor, by which I ro
 
 #### Exercises
 
-1. Define the vectors above or similar. Use the family of `is.*()` functions to confirm vector type, e.g. `is.logical()`. You will need to guess or look some of them up. *Long-term, you may wish to explore the `purrr::is_*()` family of functions.*
+1. Define the vectors above or similar. Use the family of `is.*()` functions to confirm vector type, e.g. `is.logical()`. You will need to guess or look some of them up. *Long-term, you may wish to explore the `rlang::is_*()` family of functions.*
 1. What do `is.numeric()`, `is.integer()`, and `is.double()` return for the vectors that hold floating point number versus integers? 
 
-Construct a vector by hand with the `c()` function. We used it above to construct the logical vector. All the other vectors came about through other means and this is indicative of real life: most vectors aren't made explicitly with `c()`. They tend to be created with some generator, like the `1:n` shortcut, or via transformation of an existing object.
+You can construct a vector "by hand" with the `c()` function. We used it above to construct the logical vector. All the other vectors came about through other means and this is indicative of real life: most vectors aren't made explicitly with `c()`. They tend to be created with some generator, like the `1:n` shortcut, or via transformation of an existing object.
 
 To "index a vector" means to address specific elements or atoms, either for reading or writing. We index a vector using square brackets, like so: `x[something]`. There are several ways to express which elements you want, i.e. there are several valid forms for `something`:
 
@@ -147,7 +147,7 @@ We have explicit proof above that list components can
   
 #### Exercises
 
-1. Make the lists `x`, `y`, and `z` as shown above. Use `is.*()` functions to get to know these objects. Try to get some positive and negative results, i.e. establish a few things that `x` is and is NOT. Make sure to try `is.list()`, `is.vector()`, `is.atomic()`, and `is.recursive()`. *Long-term, you may wish to explore the `purrr::is_*()` family of functions.*
+1. Make the lists `x`, `y`, and `z` as shown above. Use `is.*()` functions to get to know these objects. Try to get some positive and negative results, i.e. establish a few things that `x` is and is NOT. Make sure to try `is.list()`, `is.vector()`, `is.atomic()`, and `is.recursive()`. *Long-term, you may wish to explore the `rlang::is_*()` family of functions.*
 
 It should be clear that lists are much more general than atomic vectors. But they also share many properties: for example, they have length and they can be indexed.
 
@@ -156,32 +156,32 @@ It should be clear that lists are much more general than atomic vectors. But the
 There is a new wrinkle when you index a list vs an atomic vector. There are 3 ways to index a list and the differences are very important:
 
   1. With single square brackets, i.e. just like we indexed atomic vectors. Note this **always returns a list**, even if we request a single component.
-    ```{r}
-    x[c(FALSE, TRUE)]
-    y[2:3]
-    z["transcendental"]
-    ```
+        ```{r}
+        x[c(FALSE, TRUE)]
+        y[2:3]
+        z["transcendental"]
+        ```
   1. With double square brackets, which is new to us. This can only be used to access a single component and it returns the "naked" component. You can request a component with a positive integer or by name.
-    ```{r}
-    x[[2]]
-    y[["double"]]
-    ```
+        ```{r}
+        x[[2]]
+        y[["double"]]
+        ```
   1. With the `$`, which you may already use to extract a single variable from a data frame (which is a special kind of list!). Like `[[`, this can only be used to access a single component, but it is even more limited: You must specify the component by name.
-    ```{r}
-    z$transcendental
-    ```
+        ```{r}
+        z$transcendental
+        ```
 
-My favorite explanation of the difference between the list-preserving indexing provided by `[` and the object-extracting indexing provided by `[[` is given by the ["pepper shaker photos" in R for Data Science](http://r4ds.had.co.nz/vectors.html#lists-of-condiments). Highly recommended!
+My favorite explanation of the difference between the list-preserving indexing provided by `[` and the always-simplifying behaviour of `[[` is given by the ["pepper shaker photos" in R for Data Science](http://r4ds.had.co.nz/vectors.html#lists-of-condiments). Highly recommended!
 
 #### Exercises
 
   1. Use `[`, `[[`, and `$` to access the second component of the list `z`, which bears the name "transcendental". Use the `length()` and the `is.*()` functions explored elsewhere to study the result. Which methods of indexing yield the same result vs. different?
   2. Put the same data into an atomic vector and a list:
-    ```{r}
-    my_vec <- c(a = 1, b = 2, c = 3)
-    my_list <- list(a = 1, b = 2, c = 3)
-    ```
-    Use `[` and `[[` to attempt to retrieve elements 2 and 3 from `my_vec` and `my_list`. What succeeds vs. fails? What if you try to retrieve element 2 alone? Does `[[` even work on atomic vectors? Compare and contrast the results from the various combinations of indexing method and input object.
+        ```{r}
+        my_vec <- c(a = 1, b = 2, c = 3)
+        my_list <- list(a = 1, b = 2, c = 3)
+        ```
+        Use `[` and `[[` to attempt to retrieve elements 2 and 3 from `my_vec` and `my_list`. What succeeds vs. fails? What if you try to retrieve element 2 alone? Does `[[` even work on atomic vectors? Compare and contrast the results from the various combinations of indexing method and input object.
 
 ### Vectorized operations
 
