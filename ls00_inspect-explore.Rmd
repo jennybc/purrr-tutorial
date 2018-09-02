@@ -20,15 +20,9 @@ library(purrr)
 library(repurrrsive)
 ```
 
-List inspection is very important and also fairly miserable. Below I offer interactive widgets for our example lists. If you wish to do the same locally, install the [listviewer](https://CRAN.R-project.org/package=listviewer) package.
-
-```{r}
-library(listviewer)
-```
-
 ## Inspect and explore
 
-Before you can apply a function to every element of a list, you'd better understand the list!
+List inspection is very important and also fairly miserable. Before you can apply a function to every element of a list, you'd better understand the list!
 
 You need to develop a toolkit for list inspection. Be on the look out for:
 
@@ -40,6 +34,34 @@ You need to develop a toolkit for list inspection. Be on the look out for:
 
 Understand this is **situation normal**, especially when your list comes from querying a poorly documented API. This is often true even when your list has been created completely within R. How many of us perfectly understand the structure of a fitted linear model object? You just have to embark on a voyage of discovery and figure out what's in there. Happy trails.
 
+### Indexing, review
+
+Rembmer, there are 3 ways to pull elements out of a list:
+
+  * The `$` operator. Extracts a single element by name. Name can be unquoted, if syntactic.
+    ```{r}
+    x <- list(a = "a", b = 2)
+    x$a
+    x$b
+    ```
+  * `[[` a.k.a. double square bracket. Extracts a single element by name or position. Name must be quoted, if provided directly. Name or position can also be stored in a variable.
+    ```{r}
+    x <- list(a = "a", b = 2)
+    x[["a"]]
+    x[[2]]
+    nm <- "a"
+    x[[nm]]
+    i <- 2
+    x[[i]]
+    ```
+  * `[` a.k.a. single square bracket. Regular vector indexing. For a list input, this always returns a list!
+    ```{r}
+    x <- list(a = "a", b = 2)
+    x["a"]
+    x[c("a", "b")]
+    x[c(FALSE, TRUE)]
+    ```
+
 ### `str()`
 
 `str()` can help with basic list inspection, although it's still rather frustrating. Learn to love the `max.level` and `list.len` arguments. You can use them to keep the output of `str()` down to a manageable volume.
@@ -48,9 +70,17 @@ Once you begin to suspect or trust that your list is homogeneous, i.e. consists 
 
 The repurrrsive package provides examples of lists. We explore them below, to lay the groundwork for other lessons, and to demonstrate list inspection strategies.
 
-### listviewer
+### listviewer and RStudio's Object Explorer
 
-It's often more helpful to explore such lists with an interactive widget, which we include below for all examples. If you installed the listviewer package, replicate this experience locally via `listviewer::jsonedit(got_chars, mode = "view")`.
+ The RStudio IDE (v1.1 and higher) offers an [Object Explorer](https://blog.rstudio.com/2017/08/22/rstudio-v1-1-preview-object-explorer/) that provides interactive inspection and code generation tools for hierarchical objects, such as lists. You can invoke it via the GUI or in code as `View(YOUR_UGLY_LIST)`.
+ 
+However, that won't help you expose list exploration in something like this website. I am using the [listviewer](https://CRAN.R-project.org/package=listviewer) package to do this below. It allows you to expose list exploration in a rendered `.Rmd` document.
+To replicate this experience locally, call, e.g., `listviewer::jsonedit(got_chars, mode = "view")`.
+
+
+```{r}
+library(listviewer)
+```
 
 ## Wes Anderson color palettes
 
@@ -60,11 +90,13 @@ It's often more helpful to explore such lists with an interactive widget, which 
 str(wesanderson)
 ```
 
-### listview `wesanderson`
+### Explore `wesanderson`
 
 ```{r echo = FALSE}
 jsonedit(wesanderson, mode = "view", elementId = "wesanderson")
 ```
+
+You can get a similar experience in RStudio via `View(wesanderson)`.
 
 ## Game of Thrones POV characters
 
@@ -75,11 +107,13 @@ str(got_chars, list.len = 3)
 str(got_chars[[1]], list.len = 8)
 ```
 
-### listview `got_chars`
+### Explore `got_chars`
 
 ```{r echo = FALSE}
 jsonedit(number_unnamed(got_chars), mode = "view", elementId = "got_chars")
 ```
+
+You can get a similar experience in RStudio via `View(got_chars)`.
 
 ## GitHub users and repositories
 
@@ -89,17 +123,21 @@ jsonedit(number_unnamed(got_chars), mode = "view", elementId = "got_chars")
 str(gh_users, max.level = 1)
 ```
 
-### listview `gh_users`
+### Explore `gh_users`
 
 ```{r echo = FALSE}
 jsonedit(number_unnamed(gh_users), mode = "view", elementId = "gh_users")
 ```
 
-### listview `gh_repos`
+You can get a similar experience in RStudio via `View(gh_users)`.
+
+### Explore `gh_repos`
 
 ```{r echo = FALSE}
 jsonedit(number_unnamed(gh_repos), mode = "view", elementId = "gh_repos")
 ```
+
+You can get a similar experience in RStudio via `View(gh_repos)`.
 
 #### Exercises
 
