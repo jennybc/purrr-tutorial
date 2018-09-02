@@ -62,7 +62,7 @@ where `X` and `Y` specify the type of input and output, respectively. `X` and `Y
   * `l` = "list"
   * `_` = "nothing" (not eligible as `X` re: input, for obvious reasons)
   
-The most useful function proved to be `ddply()`: data frame in, data frame out. This inspired the creation of the [dplyr package](http://dplyr.tidyverse.org). Most tasks suitable for `a*ply()` and, especially `l*ply()` are now handled by purrr's `map()` family. The functions called for their side effects, as opposed to return value, are those named `*_ply()`; this is handled by purrr's `walk()` functions. Marching through a data frame row by row is now a job for purrr's `pmap()`.
+The most useful function proved to be `ddply()`: data frame in, data frame out. This inspired the creation of the [dplyr package](https://dplyr.tidyverse.org). Most tasks suitable for `a*ply()` and, especially `l*ply()` are now handled by purrr's `map()` family. The functions called for their side effects, as opposed to return value, are those named `*_ply()`; this is handled by purrr's `walk()` functions. Marching through a data frame row by row is now a job for purrr's `pmap()`.
 
 ## `lapply()` vs. `purrr::map()`
 
