@@ -11,6 +11,7 @@ Who am I?
   * Jenny Bryan
   * <https://github.com/jennybc/>
   * <https://twitter.com/JennyBryan>
+  * <https://jennybryan.org>
 
 Materials initially created to support:
 

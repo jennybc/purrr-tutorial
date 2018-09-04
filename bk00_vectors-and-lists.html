@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -33,10 +33,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -90,6 +92,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -317,10 +322,10 @@ div.tocify {
 <div id="exercises" class="section level4">
 <h4>Exercises</h4>
 <ol style="list-style-type: decimal">
-<li>Define the vectors above or similar. Use the family of <code>is.*()</code> functions to confirm vector type, e.g. <code>is.logical()</code>. You will need to guess or look some of them up. <em>Long-term, you may wish to explore the <code>purrr::is_*()</code> family of functions.</em></li>
+<li>Define the vectors above or similar. Use the family of <code>is.*()</code> functions to confirm vector type, e.g. <code>is.logical()</code>. You will need to guess or look some of them up. <em>Long-term, you may wish to explore the <code>rlang::is_*()</code> family of functions.</em></li>
 <li>What do <code>is.numeric()</code>, <code>is.integer()</code>, and <code>is.double()</code> return for the vectors that hold floating point number versus integers?</li>
 </ol>
-<p>Construct a vector by hand with the <code>c()</code> function. We used it above to construct the logical vector. All the other vectors came about through other means and this is indicative of real life: most vectors aren’t made explicitly with <code>c()</code>. They tend to be created with some generator, like the <code>1:n</code> shortcut, or via transformation of an existing object.</p>
+<p>You can construct a vector “by hand” with the <code>c()</code> function. We used it above to construct the logical vector. All the other vectors came about through other means and this is indicative of real life: most vectors aren’t made explicitly with <code>c()</code>. They tend to be created with some generator, like the <code>1:n</code> shortcut, or via transformation of an existing object.</p>
 <p>To “index a vector” means to address specific elements or atoms, either for reading or writing. We index a vector using square brackets, like so: <code>x[something]</code>. There are several ways to express which elements you want, i.e. there are several valid forms for <code>something</code>:</p>
 <ul>
 <li><p>logical vector: keep elements of <code>x</code> for which <code>something</code> is <code>TRUE</code> and drop those for which it’s <code>FALSE</code></p>
@@ -461,7 +466,7 @@ str(big_plans)
 <div id="exercises-3" class="section level4">
 <h4>Exercises</h4>
 <ol style="list-style-type: decimal">
-<li>Make the lists <code>x</code>, <code>y</code>, and <code>z</code> as shown above. Use <code>is.*()</code> functions to get to know these objects. Try to get some positive and negative results, i.e. establish a few things that <code>x</code> is and is NOT. Make sure to try <code>is.list()</code>, <code>is.vector()</code>, <code>is.atomic()</code>, and <code>is.recursive()</code>. <em>Long-term, you may wish to explore the <code>purrr::is_*()</code> family of functions.</em></li>
+<li>Make the lists <code>x</code>, <code>y</code>, and <code>z</code> as shown above. Use <code>is.*()</code> functions to get to know these objects. Try to get some positive and negative results, i.e. establish a few things that <code>x</code> is and is NOT. Make sure to try <code>is.list()</code>, <code>is.vector()</code>, <code>is.atomic()</code>, and <code>is.recursive()</code>. <em>Long-term, you may wish to explore the <code>rlang::is_*()</code> family of functions.</em></li>
 </ol>
 <p>It should be clear that lists are much more general than atomic vectors. But they also share many properties: for example, they have length and they can be indexed.</p>
 </div>
@@ -492,7 +497,7 @@ y[[&quot;double&quot;]]
 <pre class="r"><code>z$transcendental
 #&gt; [1] 3.141593 2.718282</code></pre></li>
 </ol>
-<p>My favorite explanation of the difference between the list-preserving indexing provided by <code>[</code> and the object-extracting indexing provided by <code>[[</code> is given by the <a href="http://r4ds.had.co.nz/vectors.html#lists-of-condiments">“pepper shaker photos” in R for Data Science</a>. Highly recommended!</p>
+<p>My favorite explanation of the difference between the list-preserving indexing provided by <code>[</code> and the always-simplifying behaviour of <code>[[</code> is given by the <a href="http://r4ds.had.co.nz/vectors.html#lists-of-condiments">“pepper shaker photos” in R for Data Science</a>. Highly recommended!</p>
 <div id="exercises-4" class="section level4">
 <h4>Exercises</h4>
 <ol style="list-style-type: decimal">

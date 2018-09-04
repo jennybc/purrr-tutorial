@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -33,10 +33,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -90,6 +92,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -366,21 +371,17 @@ tb &lt;- tb_raw %&gt;%
          between(n, 1, 2),
          between(map_int(start, min), 0, 30))
 #&gt; # A tibble: 1 x 7
-#&gt;                                                                         tweet
-#&gt;                                                                         &lt;chr&gt;
-#&gt; 1 Bernie Sanders started off strong, but with the selection of Kaine for V.P.
-#&gt; # ... with 6 more variables: source &lt;chr&gt;, created &lt;dttm&gt;, twords &lt;list&gt;,
-#&gt; #   n &lt;int&gt;, hour &lt;int&gt;, start &lt;list&gt;</code></pre>
+#&gt;   tweet               source  created             twords     n  hour start
+#&gt;   &lt;chr&gt;               &lt;chr&gt;   &lt;dttm&gt;              &lt;list&gt; &lt;int&gt; &lt;int&gt; &lt;lis&gt;
+#&gt; 1 Bernie Sanders sta… android 2016-07-24 11:25:06 &lt;chr …     2    11 &lt;int…</code></pre>
 <p>Let’s isolate tweets that contain both the twords “strong” and “weak”.</p>
 <pre class="r"><code>tb %&gt;%
   filter(map_lgl(twords, ~ all(c(&quot;strong&quot;, &quot;weak&quot;) %in% .x)))
 #&gt; # A tibble: 2 x 7
-#&gt;                                                                         tweet
-#&gt;                                                                         &lt;chr&gt;
-#&gt; 1 Bernie Sanders started off strong, but with the selection of Kaine for V.P.
-#&gt; 2 Crooked Hillary Clinton is unfit to serve as President of the U.S. Her temp
-#&gt; # ... with 6 more variables: source &lt;chr&gt;, created &lt;dttm&gt;, twords &lt;list&gt;,
-#&gt; #   n &lt;int&gt;, hour &lt;int&gt;, start &lt;list&gt;</code></pre>
+#&gt;   tweet               source  created             twords     n  hour start
+#&gt;   &lt;chr&gt;               &lt;chr&gt;   &lt;dttm&gt;              &lt;list&gt; &lt;int&gt; &lt;int&gt; &lt;lis&gt;
+#&gt; 1 Bernie Sanders sta… android 2016-07-24 11:25:06 &lt;chr …     2    11 &lt;int…
+#&gt; 2 Crooked Hillary Cl… android 2016-07-06 04:36:31 &lt;chr …     2     4 &lt;int…</code></pre>
 </div>
 </div>
 <div id="json-from-an-api-and-game-of-thrones" class="section level2">
@@ -411,19 +412,19 @@ ice &lt;- pov %&gt;%
   enframe(value = &quot;id&quot;)
 ice
 #&gt; # A tibble: 30 x 2
-#&gt;                  name    id
-#&gt;                 &lt;chr&gt; &lt;int&gt;
-#&gt;  1      Theon Greyjoy  1022
-#&gt;  2   Tyrion Lannister  1052
-#&gt;  3  Victarion Greyjoy  1074
-#&gt;  4               Will  1109
-#&gt;  5         Areo Hotah  1166
-#&gt;  6              Chett  1267
-#&gt;  7            Cressen  1295
-#&gt;  8    Arianne Martell   130
+#&gt;    name                  id
+#&gt;    &lt;chr&gt;              &lt;int&gt;
+#&gt;  1 Theon Greyjoy       1022
+#&gt;  2 Tyrion Lannister    1052
+#&gt;  3 Victarion Greyjoy   1074
+#&gt;  4 Will                1109
+#&gt;  5 Areo Hotah          1166
+#&gt;  6 Chett               1267
+#&gt;  7 Cressen             1295
+#&gt;  8 Arianne Martell      130
 #&gt;  9 Daenerys Targaryen  1303
-#&gt; 10     Davos Seaworth  1319
-#&gt; # ... with 20 more rows</code></pre>
+#&gt; 10 Davos Seaworth      1319
+#&gt; # … with 20 more rows</code></pre>
 <p>Request info for each character and store what comes back – whatever that may be – in the list-column <code>stuff</code>.</p>
 <pre class="r"><code>ice_and_fire_url &lt;- &quot;https://anapioficeandfire.com/&quot;
 if (file.exists(here(&quot;talks&quot;, &quot;ice.rds&quot;))) {
@@ -442,19 +443,19 @@ if (file.exists(here(&quot;talks&quot;, &quot;ice.rds&quot;))) {
 }
 ice
 #&gt; # A tibble: 29 x 2
-#&gt;                  name       stuff
-#&gt;                 &lt;chr&gt;      &lt;list&gt;
-#&gt;  1      Theon Greyjoy &lt;list [16]&gt;
-#&gt;  2   Tyrion Lannister &lt;list [16]&gt;
-#&gt;  3  Victarion Greyjoy &lt;list [16]&gt;
-#&gt;  4               Will &lt;list [16]&gt;
-#&gt;  5         Areo Hotah &lt;list [16]&gt;
-#&gt;  6              Chett &lt;list [16]&gt;
-#&gt;  7            Cressen &lt;list [16]&gt;
-#&gt;  8    Arianne Martell &lt;list [16]&gt;
+#&gt;    name               stuff      
+#&gt;    &lt;chr&gt;              &lt;list&gt;     
+#&gt;  1 Theon Greyjoy      &lt;list [16]&gt;
+#&gt;  2 Tyrion Lannister   &lt;list [16]&gt;
+#&gt;  3 Victarion Greyjoy  &lt;list [16]&gt;
+#&gt;  4 Will               &lt;list [16]&gt;
+#&gt;  5 Areo Hotah         &lt;list [16]&gt;
+#&gt;  6 Chett              &lt;list [16]&gt;
+#&gt;  7 Cressen            &lt;list [16]&gt;
+#&gt;  8 Arianne Martell    &lt;list [16]&gt;
 #&gt;  9 Daenerys Targaryen &lt;list [16]&gt;
-#&gt; 10     Davos Seaworth &lt;list [16]&gt;
-#&gt; # ... with 19 more rows</code></pre>
+#&gt; 10 Davos Seaworth     &lt;list [16]&gt;
+#&gt; # … with 19 more rows</code></pre>
 <p>Let’s switch to a nicer version of <code>ice</code>, based on the list in repurrrsive, because it already has books and houses replaced with names instead of URLs.</p>
 <pre class="r"><code>ice2 &lt;- tibble(
   name = map_chr(got_chars, &quot;name&quot;),
@@ -462,19 +463,19 @@ ice
 )
 ice2
 #&gt; # A tibble: 30 x 2
-#&gt;                  name       stuff
-#&gt;                 &lt;chr&gt;      &lt;list&gt;
-#&gt;  1      Theon Greyjoy &lt;list [18]&gt;
-#&gt;  2   Tyrion Lannister &lt;list [18]&gt;
-#&gt;  3  Victarion Greyjoy &lt;list [18]&gt;
-#&gt;  4               Will &lt;list [18]&gt;
-#&gt;  5         Areo Hotah &lt;list [18]&gt;
-#&gt;  6              Chett &lt;list [18]&gt;
-#&gt;  7            Cressen &lt;list [18]&gt;
-#&gt;  8    Arianne Martell &lt;list [18]&gt;
+#&gt;    name               stuff      
+#&gt;    &lt;chr&gt;              &lt;list&gt;     
+#&gt;  1 Theon Greyjoy      &lt;list [18]&gt;
+#&gt;  2 Tyrion Lannister   &lt;list [18]&gt;
+#&gt;  3 Victarion Greyjoy  &lt;list [18]&gt;
+#&gt;  4 Will               &lt;list [18]&gt;
+#&gt;  5 Areo Hotah         &lt;list [18]&gt;
+#&gt;  6 Chett              &lt;list [18]&gt;
+#&gt;  7 Cressen            &lt;list [18]&gt;
+#&gt;  8 Arianne Martell    &lt;list [18]&gt;
 #&gt;  9 Daenerys Targaryen &lt;list [18]&gt;
-#&gt; 10     Davos Seaworth &lt;list [18]&gt;
-#&gt; # ... with 20 more rows</code></pre>
+#&gt; 10 Davos Seaworth     &lt;list [18]&gt;
+#&gt; # … with 20 more rows</code></pre>
 <p>Inspect the list-column.</p>
 <pre class="r"><code>str(ice2$stuff[[9]], max.level = 1)
 #&gt; List of 18
@@ -509,19 +510,19 @@ birth_announcements &lt;- ice2 %&gt;%
   select(-stuff)
 birth_announcements
 #&gt; # A tibble: 30 x 2
-#&gt;                  name
-#&gt;                 &lt;chr&gt;
-#&gt;  1      Theon Greyjoy
-#&gt;  2   Tyrion Lannister
-#&gt;  3  Victarion Greyjoy
-#&gt;  4               Will
-#&gt;  5         Areo Hotah
-#&gt;  6              Chett
-#&gt;  7            Cressen
-#&gt;  8    Arianne Martell
-#&gt;  9 Daenerys Targaryen
-#&gt; 10     Davos Seaworth
-#&gt; # ... with 20 more rows, and 1 more variables: birth &lt;chr&gt;</code></pre>
+#&gt;    name             birth                                                 
+#&gt;    &lt;chr&gt;            &lt;chr&gt;                                                 
+#&gt;  1 Theon Greyjoy    Theon Greyjoy was born In 278 AC or 279 AC, at Pyke.  
+#&gt;  2 Tyrion Lannister Tyrion Lannister was born In 273 AC, at Casterly Rock.
+#&gt;  3 Victarion Greyj… Victarion Greyjoy was born In 268 AC or before, at Py…
+#&gt;  4 Will             Will was born .                                       
+#&gt;  5 Areo Hotah       Areo Hotah was born In 257 AC or before, at Norvos.   
+#&gt;  6 Chett            Chett was born At Hag&#39;s Mire.                         
+#&gt;  7 Cressen          Cressen was born In 219 AC or 220 AC.                 
+#&gt;  8 Arianne Martell  Arianne Martell was born In 276 AC, at Sunspear.      
+#&gt;  9 Daenerys Targar… Daenerys Targaryen was born In 284 AC, at Dragonstone.
+#&gt; 10 Davos Seaworth   Davos Seaworth was born In 260 AC or before, at King&#39;…
+#&gt; # … with 20 more rows</code></pre>
 <p>Extract each character’s house allegiances. Keep only those with more than one allegiance. Then unnest to explode the <code>houses</code> list-column and get a tibble with one row per character * house combination. No list-columns left!</p>
 <pre class="r"><code>allegiances &lt;- ice2 %&gt;%
   transmute(name,
@@ -530,23 +531,23 @@ birth_announcements
   unnest()
 allegiances
 #&gt; # A tibble: 15 x 2
-#&gt;                name                              houses
-#&gt;               &lt;chr&gt;                               &lt;chr&gt;
-#&gt;  1   Davos Seaworth      House Baratheon of Dragonstone
-#&gt;  2   Davos Seaworth        House Seaworth of Cape Wrath
-#&gt;  3     Asha Greyjoy               House Greyjoy of Pyke
-#&gt;  4     Asha Greyjoy                     House Ironmaker
-#&gt;  5  Barristan Selmy         House Selmy of Harvest Hall
-#&gt;  6  Barristan Selmy   House Targaryen of King&#39;s Landing
-#&gt;  7 Brienne of Tarth      House Baratheon of Storm&#39;s End
-#&gt;  8 Brienne of Tarth           House Stark of Winterfell
-#&gt;  9 Brienne of Tarth        House Tarth of Evenfall Hall
-#&gt; 10    Catelyn Stark           House Stark of Winterfell
-#&gt; 11    Catelyn Stark             House Tully of Riverrun
-#&gt; 12   Jon Connington House Connington of Griffin&#39;s Roost
-#&gt; 13   Jon Connington   House Targaryen of King&#39;s Landing
-#&gt; 14      Sansa Stark          House Baelish of Harrenhal
-#&gt; 15      Sansa Stark           House Stark of Winterfell</code></pre>
+#&gt;    name             houses                             
+#&gt;    &lt;chr&gt;            &lt;chr&gt;                              
+#&gt;  1 Davos Seaworth   House Baratheon of Dragonstone     
+#&gt;  2 Davos Seaworth   House Seaworth of Cape Wrath       
+#&gt;  3 Asha Greyjoy     House Greyjoy of Pyke              
+#&gt;  4 Asha Greyjoy     House Ironmaker                    
+#&gt;  5 Barristan Selmy  House Selmy of Harvest Hall        
+#&gt;  6 Barristan Selmy  House Targaryen of King&#39;s Landing  
+#&gt;  7 Brienne of Tarth House Baratheon of Storm&#39;s End     
+#&gt;  8 Brienne of Tarth House Stark of Winterfell          
+#&gt;  9 Brienne of Tarth House Tarth of Evenfall Hall       
+#&gt; 10 Catelyn Stark    House Stark of Winterfell          
+#&gt; 11 Catelyn Stark    House Tully of Riverrun            
+#&gt; 12 Jon Connington   House Connington of Griffin&#39;s Roost
+#&gt; 13 Jon Connington   House Targaryen of King&#39;s Landing  
+#&gt; 14 Sansa Stark      House Baelish of Harrenhal         
+#&gt; 15 Sansa Stark      House Stark of Winterfell</code></pre>
 </div>
 </div>
 <div id="aliases-and-allegiances-of-game-of-thrones-characters" class="section level2">
@@ -568,38 +569,38 @@ library(stringr)</code></pre>
 )
 x
 #&gt; # A tibble: 30 x 3
-#&gt;                  name    aliases allegiances
-#&gt;                 &lt;chr&gt;     &lt;list&gt;      &lt;list&gt;
-#&gt;  1      Theon Greyjoy  &lt;chr [4]&gt;   &lt;chr [1]&gt;
-#&gt;  2   Tyrion Lannister &lt;chr [11]&gt;   &lt;chr [1]&gt;
-#&gt;  3  Victarion Greyjoy  &lt;chr [1]&gt;   &lt;chr [1]&gt;
-#&gt;  4               Will  &lt;chr [1]&gt;      &lt;NULL&gt;
-#&gt;  5         Areo Hotah  &lt;chr [1]&gt;   &lt;chr [1]&gt;
-#&gt;  6              Chett  &lt;chr [1]&gt;      &lt;NULL&gt;
-#&gt;  7            Cressen  &lt;chr [1]&gt;      &lt;NULL&gt;
-#&gt;  8    Arianne Martell  &lt;chr [1]&gt;   &lt;chr [1]&gt;
-#&gt;  9 Daenerys Targaryen &lt;chr [11]&gt;   &lt;chr [1]&gt;
-#&gt; 10     Davos Seaworth  &lt;chr [5]&gt;   &lt;chr [2]&gt;
-#&gt; # ... with 20 more rows
+#&gt;    name               aliases    allegiances
+#&gt;    &lt;chr&gt;              &lt;list&gt;     &lt;list&gt;     
+#&gt;  1 Theon Greyjoy      &lt;chr [4]&gt;  &lt;chr [1]&gt;  
+#&gt;  2 Tyrion Lannister   &lt;chr [11]&gt; &lt;chr [1]&gt;  
+#&gt;  3 Victarion Greyjoy  &lt;chr [1]&gt;  &lt;chr [1]&gt;  
+#&gt;  4 Will               &lt;chr [1]&gt;  &lt;NULL&gt;     
+#&gt;  5 Areo Hotah         &lt;chr [1]&gt;  &lt;chr [1]&gt;  
+#&gt;  6 Chett              &lt;chr [1]&gt;  &lt;NULL&gt;     
+#&gt;  7 Cressen            &lt;chr [1]&gt;  &lt;NULL&gt;     
+#&gt;  8 Arianne Martell    &lt;chr [1]&gt;  &lt;chr [1]&gt;  
+#&gt;  9 Daenerys Targaryen &lt;chr [11]&gt; &lt;chr [1]&gt;  
+#&gt; 10 Davos Seaworth     &lt;chr [5]&gt;  &lt;chr [2]&gt;  
+#&gt; # … with 20 more rows
 #View(x)</code></pre>
 <p>What if we only care about characters with a “Lannister” alliance? Practice operating on a list-column.</p>
 <pre class="r"><code>x %&gt;%
   mutate(lannister = map(allegiances, str_detect, pattern = &quot;Lannister&quot;),
          lannister = map_lgl(lannister, any))
 #&gt; # A tibble: 30 x 4
-#&gt;                  name    aliases allegiances lannister
-#&gt;                 &lt;chr&gt;     &lt;list&gt;      &lt;list&gt;     &lt;lgl&gt;
-#&gt;  1      Theon Greyjoy  &lt;chr [4]&gt;   &lt;chr [1]&gt;     FALSE
-#&gt;  2   Tyrion Lannister &lt;chr [11]&gt;   &lt;chr [1]&gt;      TRUE
-#&gt;  3  Victarion Greyjoy  &lt;chr [1]&gt;   &lt;chr [1]&gt;     FALSE
-#&gt;  4               Will  &lt;chr [1]&gt;      &lt;NULL&gt;     FALSE
-#&gt;  5         Areo Hotah  &lt;chr [1]&gt;   &lt;chr [1]&gt;     FALSE
-#&gt;  6              Chett  &lt;chr [1]&gt;      &lt;NULL&gt;     FALSE
-#&gt;  7            Cressen  &lt;chr [1]&gt;      &lt;NULL&gt;     FALSE
-#&gt;  8    Arianne Martell  &lt;chr [1]&gt;   &lt;chr [1]&gt;     FALSE
-#&gt;  9 Daenerys Targaryen &lt;chr [11]&gt;   &lt;chr [1]&gt;     FALSE
-#&gt; 10     Davos Seaworth  &lt;chr [5]&gt;   &lt;chr [2]&gt;     FALSE
-#&gt; # ... with 20 more rows</code></pre>
+#&gt;    name               aliases    allegiances lannister
+#&gt;    &lt;chr&gt;              &lt;list&gt;     &lt;list&gt;      &lt;lgl&gt;    
+#&gt;  1 Theon Greyjoy      &lt;chr [4]&gt;  &lt;chr [1]&gt;   FALSE    
+#&gt;  2 Tyrion Lannister   &lt;chr [11]&gt; &lt;chr [1]&gt;   TRUE     
+#&gt;  3 Victarion Greyjoy  &lt;chr [1]&gt;  &lt;chr [1]&gt;   FALSE    
+#&gt;  4 Will               &lt;chr [1]&gt;  &lt;NULL&gt;      FALSE    
+#&gt;  5 Areo Hotah         &lt;chr [1]&gt;  &lt;chr [1]&gt;   FALSE    
+#&gt;  6 Chett              &lt;chr [1]&gt;  &lt;NULL&gt;      FALSE    
+#&gt;  7 Cressen            &lt;chr [1]&gt;  &lt;NULL&gt;      FALSE    
+#&gt;  8 Arianne Martell    &lt;chr [1]&gt;  &lt;chr [1]&gt;   FALSE    
+#&gt;  9 Daenerys Targaryen &lt;chr [11]&gt; &lt;chr [1]&gt;   FALSE    
+#&gt; 10 Davos Seaworth     &lt;chr [5]&gt;  &lt;chr [2]&gt;   FALSE    
+#&gt; # … with 20 more rows</code></pre>
 <p>Keep only the Lannisters and Starks allegiances. You can use <code>filter()</code> with list-columns, but you will need to <code>map()</code> to list-ize your operation. Once I’ve got the characters I want, I drop <code>allegiances</code> and use <code>unnest()</code> to get back to a simple data frame with no list columns.</p>
 <pre class="r"><code>x %&gt;%
   filter(allegiances %&gt;%
@@ -610,65 +611,65 @@ x
   unnest() %&gt;% 
   print(n = Inf)
 #&gt; # A tibble: 57 x 2
-#&gt;                name                                       aliases
-#&gt;               &lt;chr&gt;                                         &lt;chr&gt;
-#&gt;  1 Tyrion Lannister                                       The Imp
-#&gt;  2 Tyrion Lannister                                       Halfman
-#&gt;  3 Tyrion Lannister                                    The boyman
-#&gt;  4 Tyrion Lannister                            Giant of Lannister
-#&gt;  5 Tyrion Lannister                             Lord Tywin&#39;s Doom
-#&gt;  6 Tyrion Lannister                             Lord Tywin&#39;s Bane
-#&gt;  7 Tyrion Lannister                                         Yollo
-#&gt;  8 Tyrion Lannister                                    Hugor Hill
-#&gt;  9 Tyrion Lannister                                       No-Nose
-#&gt; 10 Tyrion Lannister                                         Freak
-#&gt; 11 Tyrion Lannister                                         Dwarf
-#&gt; 12       Arya Stark                                Arya Horseface
-#&gt; 13       Arya Stark                                Arya Underfoot
-#&gt; 14       Arya Stark                                          Arry
-#&gt; 15       Arya Stark                                     Lumpyface
-#&gt; 16       Arya Stark                                     Lumpyhead
-#&gt; 17       Arya Stark                                      Stickboy
-#&gt; 18       Arya Stark                                        Weasel
-#&gt; 19       Arya Stark                                       Nymeria
-#&gt; 20       Arya Stark                                         Squan
-#&gt; 21       Arya Stark                                         Saltb
-#&gt; 22       Arya Stark                             Cat of the Canaly
-#&gt; 23       Arya Stark                                          Bets
-#&gt; 24       Arya Stark                                The Blind Girh
-#&gt; 25       Arya Stark                          The Ugly Little Girl
-#&gt; 26       Arya Stark                                     Mercedenl
-#&gt; 27       Arya Stark                                        Mercye
-#&gt; 28    Brandon Stark                                          Bran
-#&gt; 29    Brandon Stark                               Bran the Broken
-#&gt; 30    Brandon Stark                               The Winged Wolf
-#&gt; 31 Brienne of Tarth                             The Maid of Tarth
-#&gt; 32 Brienne of Tarth                            Brienne the Beauty
-#&gt; 33 Brienne of Tarth                              Brienne the Blue
-#&gt; 34    Catelyn Stark                                 Catelyn Tully
-#&gt; 35    Catelyn Stark                               Lady Stoneheart
-#&gt; 36    Catelyn Stark                             The Silent Sistet
-#&gt; 37    Catelyn Stark                              Mother Mercilesr
-#&gt; 38    Catelyn Stark                                The Hangwomans
-#&gt; 39     Eddard Stark                                           Ned
-#&gt; 40     Eddard Stark                                       The Ned
-#&gt; 41     Eddard Stark                                The Quiet Wolf
-#&gt; 42  Jaime Lannister                                The Kingslayer
-#&gt; 43  Jaime Lannister                         The Lion of Lannister
-#&gt; 44  Jaime Lannister                                The Young Lion
-#&gt; 45  Jaime Lannister                                       Cripple
-#&gt; 46         Jon Snow                                     Lord Snow
-#&gt; 47         Jon Snow                           Ned Stark&#39;s Bastard
-#&gt; 48         Jon Snow                        The Snow of Winterfell
-#&gt; 49         Jon Snow                            The Crow-Come-Over
-#&gt; 50         Jon Snow The 998th Lord Commander of the Night&#39;s Watch
-#&gt; 51         Jon Snow                     The Bastard of Winterfell
-#&gt; 52         Jon Snow                 The Black Bastard of the Wall
-#&gt; 53         Jon Snow                                     Lord Crow
-#&gt; 54  Kevan Lannister                                              
-#&gt; 55      Sansa Stark                                   Little bird
-#&gt; 56      Sansa Stark                                  Alayne Stone
-#&gt; 57      Sansa Stark                                       Jonquil</code></pre>
+#&gt;    name             aliases                                      
+#&gt;    &lt;chr&gt;            &lt;chr&gt;                                        
+#&gt;  1 Tyrion Lannister The Imp                                      
+#&gt;  2 Tyrion Lannister Halfman                                      
+#&gt;  3 Tyrion Lannister The boyman                                   
+#&gt;  4 Tyrion Lannister Giant of Lannister                           
+#&gt;  5 Tyrion Lannister Lord Tywin&#39;s Doom                            
+#&gt;  6 Tyrion Lannister Lord Tywin&#39;s Bane                            
+#&gt;  7 Tyrion Lannister Yollo                                        
+#&gt;  8 Tyrion Lannister Hugor Hill                                   
+#&gt;  9 Tyrion Lannister No-Nose                                      
+#&gt; 10 Tyrion Lannister Freak                                        
+#&gt; 11 Tyrion Lannister Dwarf                                        
+#&gt; 12 Arya Stark       Arya Horseface                               
+#&gt; 13 Arya Stark       Arya Underfoot                               
+#&gt; 14 Arya Stark       Arry                                         
+#&gt; 15 Arya Stark       Lumpyface                                    
+#&gt; 16 Arya Stark       Lumpyhead                                    
+#&gt; 17 Arya Stark       Stickboy                                     
+#&gt; 18 Arya Stark       Weasel                                       
+#&gt; 19 Arya Stark       Nymeria                                      
+#&gt; 20 Arya Stark       Squan                                        
+#&gt; 21 Arya Stark       Saltb                                        
+#&gt; 22 Arya Stark       Cat of the Canaly                            
+#&gt; 23 Arya Stark       Bets                                         
+#&gt; 24 Arya Stark       The Blind Girh                               
+#&gt; 25 Arya Stark       The Ugly Little Girl                         
+#&gt; 26 Arya Stark       Mercedenl                                    
+#&gt; 27 Arya Stark       Mercye                                       
+#&gt; 28 Brandon Stark    Bran                                         
+#&gt; 29 Brandon Stark    Bran the Broken                              
+#&gt; 30 Brandon Stark    The Winged Wolf                              
+#&gt; 31 Brienne of Tarth The Maid of Tarth                            
+#&gt; 32 Brienne of Tarth Brienne the Beauty                           
+#&gt; 33 Brienne of Tarth Brienne the Blue                             
+#&gt; 34 Catelyn Stark    Catelyn Tully                                
+#&gt; 35 Catelyn Stark    Lady Stoneheart                              
+#&gt; 36 Catelyn Stark    The Silent Sistet                            
+#&gt; 37 Catelyn Stark    Mother Mercilesr                             
+#&gt; 38 Catelyn Stark    The Hangwomans                               
+#&gt; 39 Eddard Stark     Ned                                          
+#&gt; 40 Eddard Stark     The Ned                                      
+#&gt; 41 Eddard Stark     The Quiet Wolf                               
+#&gt; 42 Jaime Lannister  The Kingslayer                               
+#&gt; 43 Jaime Lannister  The Lion of Lannister                        
+#&gt; 44 Jaime Lannister  The Young Lion                               
+#&gt; 45 Jaime Lannister  Cripple                                      
+#&gt; 46 Jon Snow         Lord Snow                                    
+#&gt; 47 Jon Snow         Ned Stark&#39;s Bastard                          
+#&gt; 48 Jon Snow         The Snow of Winterfell                       
+#&gt; 49 Jon Snow         The Crow-Come-Over                           
+#&gt; 50 Jon Snow         The 998th Lord Commander of the Night&#39;s Watch
+#&gt; 51 Jon Snow         The Bastard of Winterfell                    
+#&gt; 52 Jon Snow         The Black Bastard of the Wall                
+#&gt; 53 Jon Snow         Lord Crow                                    
+#&gt; 54 Kevan Lannister  &quot;&quot;                                           
+#&gt; 55 Sansa Stark      Little bird                                  
+#&gt; 56 Sansa Stark      Alayne Stone                                 
+#&gt; 57 Sansa Stark      Jonquil</code></pre>
 </div>
 <div id="nested-data-frame-modelling-and-gapminder" class="section level2">
 <h2>Nested data frame, modelling, and Gapminder</h2>
@@ -707,35 +708,35 @@ library(broom)</code></pre>
   nest()
 gap_nested
 #&gt; # A tibble: 142 x 2
-#&gt;        country              data
-#&gt;         &lt;fctr&gt;            &lt;list&gt;
-#&gt;  1 Afghanistan &lt;tibble [12 x 5]&gt;
-#&gt;  2     Albania &lt;tibble [12 x 5]&gt;
-#&gt;  3     Algeria &lt;tibble [12 x 5]&gt;
-#&gt;  4      Angola &lt;tibble [12 x 5]&gt;
-#&gt;  5   Argentina &lt;tibble [12 x 5]&gt;
-#&gt;  6   Australia &lt;tibble [12 x 5]&gt;
-#&gt;  7     Austria &lt;tibble [12 x 5]&gt;
-#&gt;  8     Bahrain &lt;tibble [12 x 5]&gt;
-#&gt;  9  Bangladesh &lt;tibble [12 x 5]&gt;
-#&gt; 10     Belgium &lt;tibble [12 x 5]&gt;
-#&gt; # ... with 132 more rows
+#&gt;    country     data             
+#&gt;    &lt;fct&gt;       &lt;list&gt;           
+#&gt;  1 Afghanistan &lt;tibble [12 × 5]&gt;
+#&gt;  2 Albania     &lt;tibble [12 × 5]&gt;
+#&gt;  3 Algeria     &lt;tibble [12 × 5]&gt;
+#&gt;  4 Angola      &lt;tibble [12 × 5]&gt;
+#&gt;  5 Argentina   &lt;tibble [12 × 5]&gt;
+#&gt;  6 Australia   &lt;tibble [12 × 5]&gt;
+#&gt;  7 Austria     &lt;tibble [12 × 5]&gt;
+#&gt;  8 Bahrain     &lt;tibble [12 × 5]&gt;
+#&gt;  9 Bangladesh  &lt;tibble [12 × 5]&gt;
+#&gt; 10 Belgium     &lt;tibble [12 × 5]&gt;
+#&gt; # … with 132 more rows
 gap_nested$data[[1]]
 #&gt; # A tibble: 12 x 5
 #&gt;    continent  year lifeExp      pop gdpPercap
-#&gt;       &lt;fctr&gt; &lt;int&gt;   &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;
-#&gt;  1      Asia  1952  28.801  8425333  779.4453
-#&gt;  2      Asia  1957  30.332  9240934  820.8530
-#&gt;  3      Asia  1962  31.997 10267083  853.1007
-#&gt;  4      Asia  1967  34.020 11537966  836.1971
-#&gt;  5      Asia  1972  36.088 13079460  739.9811
-#&gt;  6      Asia  1977  38.438 14880372  786.1134
-#&gt;  7      Asia  1982  39.854 12881816  978.0114
-#&gt;  8      Asia  1987  40.822 13867957  852.3959
-#&gt;  9      Asia  1992  41.674 16317921  649.3414
-#&gt; 10      Asia  1997  41.763 22227415  635.3414
-#&gt; 11      Asia  2002  42.129 25268405  726.7341
-#&gt; 12      Asia  2007  43.828 31889923  974.5803</code></pre>
+#&gt;    &lt;fct&gt;     &lt;int&gt;   &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;
+#&gt;  1 Asia       1952    28.8  8425333      779.
+#&gt;  2 Asia       1957    30.3  9240934      821.
+#&gt;  3 Asia       1962    32.0 10267083      853.
+#&gt;  4 Asia       1967    34.0 11537966      836.
+#&gt;  5 Asia       1972    36.1 13079460      740.
+#&gt;  6 Asia       1977    38.4 14880372      786.
+#&gt;  7 Asia       1982    39.9 12881816      978.
+#&gt;  8 Asia       1987    40.8 13867957      852.
+#&gt;  9 Asia       1992    41.7 16317921      649.
+#&gt; 10 Asia       1997    41.8 22227415      635.
+#&gt; 11 Asia       2002    42.1 25268405      727.
+#&gt; 12 Asia       2007    43.8 31889923      975.</code></pre>
 <p><em>Compare/contrast to a data frame grouped by country (dplyr-style) or split on country (base)</em>.</p>
 </div>
 <div id="fit-models-extract-results" class="section level3">
@@ -746,11 +747,11 @@ gap_nested$data[[1]]
 <p>Look at one fitted model, for concreteness.</p>
 <pre class="r"><code>gap_fits %&gt;% tail(3)
 #&gt; # A tibble: 3 x 3
-#&gt;       country              data      fit
-#&gt;        &lt;fctr&gt;            &lt;list&gt;   &lt;list&gt;
-#&gt; 1 Yemen, Rep. &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt;
-#&gt; 2      Zambia &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt;
-#&gt; 3    Zimbabwe &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt;
+#&gt;   country     data              fit     
+#&gt;   &lt;fct&gt;       &lt;list&gt;            &lt;list&gt;  
+#&gt; 1 Yemen, Rep. &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt;
+#&gt; 2 Zambia      &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt;
+#&gt; 3 Zimbabwe    &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt;
 canada &lt;- which(gap_fits$country == &quot;Canada&quot;)
 summary(gap_fits$fit[[canada]])
 #&gt; 
@@ -776,38 +777,38 @@ summary(gap_fits$fit[[canada]])
   mutate(rsq = map_dbl(fit, ~ summary(.x)[[&quot;r.squared&quot;]])) %&gt;%
   arrange(rsq)
 #&gt; # A tibble: 142 x 4
-#&gt;             country              data      fit        rsq
-#&gt;              &lt;fctr&gt;            &lt;list&gt;   &lt;list&gt;      &lt;dbl&gt;
-#&gt;  1           Rwanda &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt; 0.01715964
-#&gt;  2         Botswana &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt; 0.03402340
-#&gt;  3         Zimbabwe &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt; 0.05623196
-#&gt;  4           Zambia &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt; 0.05983644
-#&gt;  5        Swaziland &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt; 0.06821087
-#&gt;  6          Lesotho &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt; 0.08485635
-#&gt;  7    Cote d&#39;Ivoire &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt; 0.28337240
-#&gt;  8     South Africa &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt; 0.31246865
-#&gt;  9           Uganda &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt; 0.34215382
-#&gt; 10 Congo, Dem. Rep. &lt;tibble [12 x 5]&gt; &lt;S3: lm&gt; 0.34820278
-#&gt; # ... with 132 more rows</code></pre>
+#&gt;    country          data              fit         rsq
+#&gt;    &lt;fct&gt;            &lt;list&gt;            &lt;list&gt;    &lt;dbl&gt;
+#&gt;  1 Rwanda           &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.0172
+#&gt;  2 Botswana         &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.0340
+#&gt;  3 Zimbabwe         &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.0562
+#&gt;  4 Zambia           &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.0598
+#&gt;  5 Swaziland        &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.0682
+#&gt;  6 Lesotho          &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.0849
+#&gt;  7 Cote d&#39;Ivoire    &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.283 
+#&gt;  8 South Africa     &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.312 
+#&gt;  9 Uganda           &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.342 
+#&gt; 10 Congo, Dem. Rep. &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.348 
+#&gt; # … with 132 more rows</code></pre>
 <p>Let’s use a function from broom to get the usual coefficient table from <code>summary.lm()</code> but in a friendlier form for downstream work.</p>
 <pre class="r"><code>library(broom)
 gap_fits %&gt;%
   mutate(coef = map(fit, tidy)) %&gt;%
   unnest(coef)
 #&gt; # A tibble: 284 x 6
-#&gt;        country        term      estimate    std.error  statistic
-#&gt;         &lt;fctr&gt;       &lt;chr&gt;         &lt;dbl&gt;        &lt;dbl&gt;      &lt;dbl&gt;
-#&gt;  1 Afghanistan (Intercept)  -507.5342716 40.484161954 -12.536613
-#&gt;  2 Afghanistan        year     0.2753287  0.020450934  13.462890
-#&gt;  3     Albania (Intercept)  -594.0725110 65.655359062  -9.048348
-#&gt;  4     Albania        year     0.3346832  0.033166387  10.091036
-#&gt;  5     Algeria (Intercept) -1067.8590396 43.802200843 -24.379118
-#&gt;  6     Algeria        year     0.5692797  0.022127070  25.727749
-#&gt;  7      Angola (Intercept)  -376.5047531 46.583370599  -8.082385
-#&gt;  8      Angola        year     0.2093399  0.023532003   8.895964
-#&gt;  9   Argentina (Intercept)  -389.6063445  9.677729641 -40.258031
-#&gt; 10   Argentina        year     0.2317084  0.004888791  47.395847
-#&gt; # ... with 274 more rows, and 1 more variables: p.value &lt;dbl&gt;</code></pre>
+#&gt;    country     term         estimate std.error statistic  p.value
+#&gt;    &lt;fct&gt;       &lt;chr&gt;           &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+#&gt;  1 Afghanistan (Intercept)  -508.     40.5        -12.5  1.93e- 7
+#&gt;  2 Afghanistan year            0.275   0.0205      13.5  9.84e- 8
+#&gt;  3 Albania     (Intercept)  -594.     65.7         -9.05 3.94e- 6
+#&gt;  4 Albania     year            0.335   0.0332      10.1  1.46e- 6
+#&gt;  5 Algeria     (Intercept) -1068.     43.8        -24.4  3.07e-10
+#&gt;  6 Algeria     year            0.569   0.0221      25.7  1.81e-10
+#&gt;  7 Angola      (Intercept)  -377.     46.6         -8.08 1.08e- 5
+#&gt;  8 Angola      year            0.209   0.0235       8.90 4.59e- 6
+#&gt;  9 Argentina   (Intercept)  -390.      9.68       -40.3  2.14e-12
+#&gt; 10 Argentina   year            0.232   0.00489     47.4  4.22e-13
+#&gt; # … with 274 more rows</code></pre>
 </div>
 </div>
 

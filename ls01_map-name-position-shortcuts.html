@@ -23,8 +23,8 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -33,10 +33,12 @@
   }
 </style>
 <script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
 }
 </script>
 
@@ -90,6 +92,9 @@ img {
 }
 .tabbed-pane {
   padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
 }
 button.code-folding-btn:focus {
   outline: none;
@@ -452,6 +457,14 @@ str(x[16:17])
 #&gt;   ..$ born   : chr &quot;In 280 AC&quot;</code></pre>
 <p>Some people find this ugly and might prefer the <code>extract()</code> function from magrittr.</p>
 <pre class="r"><code>library(magrittr)
+#&gt; 
+#&gt; Attaching package: &#39;magrittr&#39;
+#&gt; The following object is masked from &#39;package:tidyr&#39;:
+#&gt; 
+#&gt;     extract
+#&gt; The following object is masked from &#39;package:purrr&#39;:
+#&gt; 
+#&gt;     set_names
 x &lt;- map(got_chars, extract, c(&quot;name&quot;, &quot;culture&quot;, &quot;gender&quot;, &quot;born&quot;))
 str(x[18:19])
 #&gt; List of 2
@@ -479,19 +492,19 @@ str(x[18:19])
 <p>This is what <code>map_df()</code> is for.</p>
 <pre class="r"><code>map_df(got_chars, extract, c(&quot;name&quot;, &quot;culture&quot;, &quot;gender&quot;, &quot;id&quot;, &quot;born&quot;, &quot;alive&quot;))
 #&gt; # A tibble: 30 x 6
-#&gt;                  name  culture gender    id
-#&gt;                 &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt; &lt;int&gt;
-#&gt;  1      Theon Greyjoy Ironborn   Male  1022
-#&gt;  2   Tyrion Lannister            Male  1052
-#&gt;  3  Victarion Greyjoy Ironborn   Male  1074
-#&gt;  4               Will            Male  1109
-#&gt;  5         Areo Hotah Norvoshi   Male  1166
-#&gt;  6              Chett            Male  1267
-#&gt;  7            Cressen            Male  1295
-#&gt;  8    Arianne Martell  Dornish Female   130
-#&gt;  9 Daenerys Targaryen Valyrian Female  1303
-#&gt; 10     Davos Seaworth Westeros   Male  1319
-#&gt; # ... with 20 more rows, and 2 more variables: born &lt;chr&gt;, alive &lt;lgl&gt;</code></pre>
+#&gt;    name            culture gender    id born                         alive
+#&gt;    &lt;chr&gt;           &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;                        &lt;lgl&gt;
+#&gt;  1 Theon Greyjoy   Ironbo… Male    1022 In 278 AC or 279 AC, at Pyke TRUE 
+#&gt;  2 Tyrion Lannist… &quot;&quot;      Male    1052 In 273 AC, at Casterly Rock  TRUE 
+#&gt;  3 Victarion Grey… Ironbo… Male    1074 In 268 AC or before, at Pyke TRUE 
+#&gt;  4 Will            &quot;&quot;      Male    1109 &quot;&quot;                           FALSE
+#&gt;  5 Areo Hotah      Norvos… Male    1166 In 257 AC or before, at Nor… TRUE 
+#&gt;  6 Chett           &quot;&quot;      Male    1267 At Hag&#39;s Mire                FALSE
+#&gt;  7 Cressen         &quot;&quot;      Male    1295 In 219 AC or 220 AC          FALSE
+#&gt;  8 Arianne Martell Dornish Female   130 In 276 AC, at Sunspear       TRUE 
+#&gt;  9 Daenerys Targa… Valyri… Female  1303 In 284 AC, at Dragonstone    TRUE 
+#&gt; 10 Davos Seaworth  Wester… Male    1319 In 260 AC or before, at Kin… TRUE 
+#&gt; # … with 20 more rows</code></pre>
 <p>Finally! A data frame! Hallelujah!</p>
 <p>Notice how the variables have been automatically type converted. It’s a beautiful thing. Until it’s not. When programming, it is safer, but more cumbersome, to explicitly specify type and build your data frame the usual way.</p>
 <pre class="r"><code>library(tibble)
@@ -506,19 +519,19 @@ got_chars %&gt;% {
   )
 }
 #&gt; # A tibble: 30 x 6
-#&gt;                  name  culture gender    id
-#&gt;                 &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt; &lt;int&gt;
-#&gt;  1      Theon Greyjoy Ironborn   Male  1022
-#&gt;  2   Tyrion Lannister            Male  1052
-#&gt;  3  Victarion Greyjoy Ironborn   Male  1074
-#&gt;  4               Will            Male  1109
-#&gt;  5         Areo Hotah Norvoshi   Male  1166
-#&gt;  6              Chett            Male  1267
-#&gt;  7            Cressen            Male  1295
-#&gt;  8    Arianne Martell  Dornish Female   130
-#&gt;  9 Daenerys Targaryen Valyrian Female  1303
-#&gt; 10     Davos Seaworth Westeros   Male  1319
-#&gt; # ... with 20 more rows, and 2 more variables: born &lt;chr&gt;, alive &lt;lgl&gt;</code></pre>
+#&gt;    name            culture gender    id born                         alive
+#&gt;    &lt;chr&gt;           &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;                        &lt;lgl&gt;
+#&gt;  1 Theon Greyjoy   Ironbo… Male    1022 In 278 AC or 279 AC, at Pyke TRUE 
+#&gt;  2 Tyrion Lannist… &quot;&quot;      Male    1052 In 273 AC, at Casterly Rock  TRUE 
+#&gt;  3 Victarion Grey… Ironbo… Male    1074 In 268 AC or before, at Pyke TRUE 
+#&gt;  4 Will            &quot;&quot;      Male    1109 &quot;&quot;                           FALSE
+#&gt;  5 Areo Hotah      Norvos… Male    1166 In 257 AC or before, at Nor… TRUE 
+#&gt;  6 Chett           &quot;&quot;      Male    1267 At Hag&#39;s Mire                FALSE
+#&gt;  7 Cressen         &quot;&quot;      Male    1295 In 219 AC or 220 AC          FALSE
+#&gt;  8 Arianne Martell Dornish Female   130 In 276 AC, at Sunspear       TRUE 
+#&gt;  9 Daenerys Targa… Valyri… Female  1303 In 284 AC, at Dragonstone    TRUE 
+#&gt; 10 Davos Seaworth  Wester… Male    1319 In 260 AC or before, at Kin… TRUE 
+#&gt; # … with 20 more rows</code></pre>
 <p><em>Syntax notes: The dot <code>.</code> above is the placeholder for the primary input: <code>got_chars</code> in this case. The curly braces <code>{}</code> surrounding the <code>tibble()</code> call prevent <code>got_chars</code> from being passed in as the first argument of <code>tibble()</code>.</em></p>
 <div id="exercises-3" class="section level4">
 <h4>Exercises</h4>
