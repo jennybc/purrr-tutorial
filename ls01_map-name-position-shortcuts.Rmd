@@ -11,19 +11,23 @@ output:
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", error = TRUE)
 ```
 
+```{r}
+search()
+```
+
+
 ## Load packages
 
-Load purrr and repurrrsive, which contains recursive list examples. listviewer provides the interactive list viewing widgets.
+Load purrr and repurrrsive, which contains recursive list examples.
 
 ```{r}
 library(purrr)
 library(repurrrsive)
-library(listviewer)
 ```
 
 ## Vectorized and "list-ized" operations
 
-This lesson picks up where [the primer on vectors and lists](https://jennybc.github.io/purrr-tutorial/bk00_vectors-and-lists.html#vectorized_operations) left off. Recall that many operations "just work" in a vectorized fashion in R:
+This lesson picks up where [the primer on vectors and lists](bk00_vectors-and-lists.html#vectorized_operations) left off. Recall that many operations "just work" in a vectorized fashion in R:
 
 ```{r}
 (3:5) ^ 2
@@ -32,13 +36,13 @@ sqrt(c(9, 16, 25))
 
 Through the magic of R, the operations "raise to the power of 2" and "take the square root" were applied to each individual element of the numeric vector input. Someone -- but not you! -- has written a `for()` loop:
 
-```
+```{r eval = FALSE}
 for (i in 1:n) {
   output[[i]] <- f(input[[i]])
 }
 ```
 
-Automatic vectorization is possible because our input is an atomic vector: always of length one, always of uniform type.
+Automatic vectorization is possible because our input is an atomic vector: the individual atoms are always of length one, always of uniform type.
 
 What if the input is a list? You have to be more intentional to apply a function `f()` to each element of a list, i.e. to "list-ize" computation. This makes sense because the data structure itself does not guarantee that it makes any sense at all to apply a common function `f()` to each element of the list. You must guarantee that.
 
@@ -58,6 +62,8 @@ Below we explore these useful features of `purrr::map()` and friends:
 
   * Shortcuts for `YOUR_FUNCTION` when you want to extract list elements by name or position
   * Simplify and specify the type of output via `map_chr()`, `map_lgl()`, etc.
+  
+This is where you begin to see the differences between `purrr::map()` and `base::lapply()`.
 
 ### Name and position shortcuts
 
@@ -166,10 +172,10 @@ We just learned how to extract multiple elements per user by mapping `[`. But, s
 
 How can we "stack up" these results row-wise, i.e. one row per user and variables for "name", "gender", etc.? A data frame would be the perfect data structure for this information.
 
-This is what `map_df()` is for.
+This is what `map_dfr()` is for.
 
 ```{r}
-map_df(got_chars, extract, c("name", "culture", "gender", "id", "born", "alive"))
+map_dfr(got_chars, extract, c("name", "culture", "gender", "id", "born", "alive"))
 ```
 
 Finally! A data frame! Hallelujah!
@@ -194,4 +200,4 @@ got_chars %>% {
 
 #### Exercises
 
-1. Use `map_df()` to create the same data frame as above, but indexing with a vector of positive integers instead of names.
+1. Use `map_dfr()` to create the same data frame as above, but indexing with a vector of positive integers instead of names.

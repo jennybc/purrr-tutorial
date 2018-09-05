@@ -306,25 +306,28 @@ div.tocify {
 </div>
 
 
+<pre class="r"><code>search()
+#&gt; [1] &quot;.GlobalEnv&quot;        &quot;package:stats&quot;     &quot;package:graphics&quot; 
+#&gt; [4] &quot;package:grDevices&quot; &quot;package:utils&quot;     &quot;package:datasets&quot; 
+#&gt; [7] &quot;package:methods&quot;   &quot;Autoloads&quot;         &quot;package:base&quot;</code></pre>
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
-<p>Load purrr and repurrrsive, which contains recursive list examples. listviewer provides the interactive list viewing widgets.</p>
+<p>Load purrr and repurrrsive, which contains recursive list examples.</p>
 <pre class="r"><code>library(purrr)
-library(repurrrsive)
-library(listviewer)</code></pre>
+library(repurrrsive)</code></pre>
 </div>
 <div id="vectorized-and-list-ized-operations" class="section level2">
 <h2>Vectorized and “list-ized” operations</h2>
-<p>This lesson picks up where <a href="https://jennybc.github.io/purrr-tutorial/bk00_vectors-and-lists.html#vectorized_operations">the primer on vectors and lists</a> left off. Recall that many operations “just work” in a vectorized fashion in R:</p>
+<p>This lesson picks up where <a href="bk00_vectors-and-lists.html#vectorized_operations">the primer on vectors and lists</a> left off. Recall that many operations “just work” in a vectorized fashion in R:</p>
 <pre class="r"><code>(3:5) ^ 2
 #&gt; [1]  9 16 25
 sqrt(c(9, 16, 25))
 #&gt; [1] 3 4 5</code></pre>
 <p>Through the magic of R, the operations “raise to the power of 2” and “take the square root” were applied to each individual element of the numeric vector input. Someone – but not you! – has written a <code>for()</code> loop:</p>
-<pre><code>for (i in 1:n) {
+<pre class="r"><code>for (i in 1:n) {
   output[[i]] &lt;- f(input[[i]])
 }</code></pre>
-<p>Automatic vectorization is possible because our input is an atomic vector: always of length one, always of uniform type.</p>
+<p>Automatic vectorization is possible because our input is an atomic vector: the individual atoms are always of length one, always of uniform type.</p>
 <p>What if the input is a list? You have to be more intentional to apply a function <code>f()</code> to each element of a list, i.e. to “list-ize” computation. This makes sense because the data structure itself does not guarantee that it makes any sense at all to apply a common function <code>f()</code> to each element of the list. You must guarantee that.</p>
 <p><code>purrr::map()</code> is a function for applying a function to each element of a list. The <a href="bk01_base-functions.html">closest base R function</a> is <code>lapply()</code>. Here’s how the square root example of the above would look if the input was in a list.</p>
 <pre class="r"><code>map(c(9, 16, 25), sqrt)
@@ -343,6 +346,7 @@ sqrt(c(9, 16, 25))
 <li>Shortcuts for <code>YOUR_FUNCTION</code> when you want to extract list elements by name or position</li>
 <li>Simplify and specify the type of output via <code>map_chr()</code>, <code>map_lgl()</code>, etc.</li>
 </ul>
+<p>This is where you begin to see the differences between <code>purrr::map()</code> and <code>base::lapply()</code>.</p>
 <div id="name-and-position-shortcuts" class="section level3">
 <h3>Name and position shortcuts</h3>
 <p>Who are these Game of Thrones characters?</p>
@@ -459,9 +463,6 @@ str(x[16:17])
 <pre class="r"><code>library(magrittr)
 #&gt; 
 #&gt; Attaching package: &#39;magrittr&#39;
-#&gt; The following object is masked from &#39;package:tidyr&#39;:
-#&gt; 
-#&gt;     extract
 #&gt; The following object is masked from &#39;package:purrr&#39;:
 #&gt; 
 #&gt;     set_names
@@ -489,8 +490,8 @@ str(x[18:19])
 <h3>Data frame output</h3>
 <p>We just learned how to extract multiple elements per user by mapping <code>[</code>. But, since <code>[</code> is non-simplifying, each user’s elements are returned in a list. And, as it must, <code>map()</code> itself returns list. We’ve traded one recursive list for another recursive list, albeit a slightly less complicated one.</p>
 <p>How can we “stack up” these results row-wise, i.e. one row per user and variables for “name”, “gender”, etc.? A data frame would be the perfect data structure for this information.</p>
-<p>This is what <code>map_df()</code> is for.</p>
-<pre class="r"><code>map_df(got_chars, extract, c(&quot;name&quot;, &quot;culture&quot;, &quot;gender&quot;, &quot;id&quot;, &quot;born&quot;, &quot;alive&quot;))
+<p>This is what <code>map_dfr()</code> is for.</p>
+<pre class="r"><code>map_dfr(got_chars, extract, c(&quot;name&quot;, &quot;culture&quot;, &quot;gender&quot;, &quot;id&quot;, &quot;born&quot;, &quot;alive&quot;))
 #&gt; # A tibble: 30 x 6
 #&gt;    name            culture gender    id born                         alive
 #&gt;    &lt;chr&gt;           &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;                        &lt;lgl&gt;
@@ -504,7 +505,7 @@ str(x[18:19])
 #&gt;  8 Arianne Martell Dornish Female   130 In 276 AC, at Sunspear       TRUE 
 #&gt;  9 Daenerys Targa… Valyri… Female  1303 In 284 AC, at Dragonstone    TRUE 
 #&gt; 10 Davos Seaworth  Wester… Male    1319 In 260 AC or before, at Kin… TRUE 
-#&gt; # … with 20 more rows</code></pre>
+#&gt; # ... with 20 more rows</code></pre>
 <p>Finally! A data frame! Hallelujah!</p>
 <p>Notice how the variables have been automatically type converted. It’s a beautiful thing. Until it’s not. When programming, it is safer, but more cumbersome, to explicitly specify type and build your data frame the usual way.</p>
 <pre class="r"><code>library(tibble)
@@ -531,12 +532,12 @@ got_chars %&gt;% {
 #&gt;  8 Arianne Martell Dornish Female   130 In 276 AC, at Sunspear       TRUE 
 #&gt;  9 Daenerys Targa… Valyri… Female  1303 In 284 AC, at Dragonstone    TRUE 
 #&gt; 10 Davos Seaworth  Wester… Male    1319 In 260 AC or before, at Kin… TRUE 
-#&gt; # … with 20 more rows</code></pre>
+#&gt; # ... with 20 more rows</code></pre>
 <p><em>Syntax notes: The dot <code>.</code> above is the placeholder for the primary input: <code>got_chars</code> in this case. The curly braces <code>{}</code> surrounding the <code>tibble()</code> call prevent <code>got_chars</code> from being passed in as the first argument of <code>tibble()</code>.</em></p>
 <div id="exercises-3" class="section level4">
 <h4>Exercises</h4>
 <ol style="list-style-type: decimal">
-<li>Use <code>map_df()</code> to create the same data frame as above, but indexing with a vector of positive integers instead of names.</li>
+<li>Use <code>map_dfr()</code> to create the same data frame as above, but indexing with a vector of positive integers instead of names.</li>
 </ol>
 </div>
 </div>
