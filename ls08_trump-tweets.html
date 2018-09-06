@@ -337,7 +337,7 @@ tweets %&gt;% strtrim(70)
 #&gt; [5] &quot;Bernie Sanders started off strong, but with the selection of Kaine for&quot;
 #&gt; [6] &quot;Crooked Hillary Clinton is unfit to serve as President of the U.S. Her&quot;
 #&gt; [7] &quot;The Cruz-Kasich pact is under great strain. This joke of a deal is fal&quot;</code></pre>
-<p>FYI I preselected tweets with 0, 1, 2, and 3 occurences of Trump Android words.</p>
+<p>FYI I preselected tweets with 0, 1, 2, and 3 occurrences of Trump Android words.</p>
 </div>
 <div id="are-you-ready-for-gregexpr" class="section level3">
 <h3>Are you ready for <code>gregexpr()</code>?</h3>
@@ -435,7 +435,7 @@ map_int(matches, length)              # purrr way
 <li>Get the attribute named <code>match.length</code>. Hint: <code>attr()</code>.</li>
 <li>Drop that approach into <code>purrr::map()</code> to scale up to the full <code>matches</code> list.</li>
 </ul>
-<p>Here’s how to do for the last element of <code>matches</code>:</p>
+<p>Here’s how to do that for the last element of <code>matches</code>:</p>
 <pre class="r"><code>m &lt;- matches[[7]]
 attr(m, which = &quot;match.length&quot;)
 #&gt; [1] 4 4 4</code></pre>
