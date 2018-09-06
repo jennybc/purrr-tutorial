@@ -4,6 +4,12 @@ title: "Talks"
 
 Talks related to purrr.
 
+### Hands-on workshop
+
+I've given 2 - 4 hour hands-on workshops on purrr, e.g., at Latin-R in Buenos Aires, September 2018. I use these slides to complement the live coding.
+
+<script async class="speakerdeck-embed" data-id="be53cc331a0b4246b343802a4eca037b" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script> <div style="margin-bottom:5px"> <strong> <a href="https://speakerdeck.com/jennybc/purrr-workshop" title="How to repeat yourself with purrr" target="_blank">How to repeat yourself with purrr</a> </strong> from <strong><a href="https://speakerdeck.com/jennybc" target="_blank">Jennifer Bryan</a></strong> </div>
+
 ### rstudio::conf 2017
 
 <script async class="speakerdeck-embed" data-id="8d8ba68c2ba14d42954fa2c96cf8bd5d" data-ratio="1.33333333333333" src="//speakerdeck.com/assets/embed.js"></script> <div style="margin-bottom:5px"> <strong> <a href="https://speakerdeck.com/jennybc/putting-square-pegs-in-round-holes-using-list-cols-in-your-dataframe" title="Using list-cols in your dataframe" target="_blank">Using list-cols in your dataframe</a> </strong> from <strong><a href="https://speakerdeck.com/jennybc" target="_blank">Jennifer Bryan</a></strong> </div>

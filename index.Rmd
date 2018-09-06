@@ -40,8 +40,6 @@ x <- x %>%
   )
 ```
 
-*more coming in the subsections below*
-
 ### Background basics
 
 ```{r results = 'asis', echo = FALSE}
