@@ -110,7 +110,6 @@ body {
   padding-top: 65px;
   margin-top: -65px;
 }
-
 .section h2 {
   padding-top: 65px;
   margin-top: -65px;
@@ -130,6 +129,43 @@ body {
 .section h6 {
   padding-top: 65px;
   margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
 }
 </style>
 
@@ -151,18 +187,77 @@ $(document).ready(function () {
 });
 </script>
 
-
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
 });
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
 </script>
 
 <!-- code folding -->
-
 
 
 
@@ -767,16 +862,14 @@ pmap(mdf, substring)
 #&gt;         stop(gettextf(&quot;%s and %s must have the same length&quot;, 
 #&gt;             sQuote(&quot;x&quot;), sQuote(&quot;m&quot;)), domain = NA)
 #&gt;     ili &lt;- is.list(m)
+#&gt;     itype &lt;- &quot;chars&quot;
 #&gt;     useBytes &lt;- if (ili) 
-#&gt;         any(unlist(lapply(m, attr, &quot;useBytes&quot;)))
-#&gt;     else any(attr(m, &quot;useBytes&quot;))
+#&gt;         any(unlist(lapply(m, attr, &quot;index.type&quot;)) == &quot;bytes&quot;)
+#&gt;     else any(attr(m, &quot;index.type&quot;) == &quot;bytes&quot;)
 #&gt;     if (useBytes) {
-#&gt;         asc &lt;- iconv(x, &quot;latin1&quot;, &quot;ASCII&quot;)
-#&gt;         ind &lt;- is.na(asc) | (asc != x)
-#&gt;         if (any(ind)) 
-#&gt;             Encoding(x[ind]) &lt;- &quot;bytes&quot;
+#&gt;         itype &lt;- Encoding(x) &lt;- &quot;bytes&quot;
 #&gt;     }
-#&gt;     if (!ili &amp;&amp; identical(invert, FALSE)) {
+#&gt;     if (!ili &amp;&amp; isFALSE(invert)) {
 #&gt;         so &lt;- m[ind &lt;- (!is.na(m) &amp; (m &gt; -1L))]
 #&gt;         eo &lt;- so + attr(m, &quot;match.length&quot;)[ind] - 1L
 #&gt;         return(substring(x[ind], so, eo))
@@ -796,7 +889,7 @@ pmap(mdf, substring)
 #&gt;                     sQuote(&quot;invert = NA&quot;)), domain = NA)
 #&gt;             }
 #&gt;             beg &lt;- c(1L, c(rbind(so, eo + 1L)))
-#&gt;             end &lt;- c(c(rbind(so - 1L, eo)), nchar(u))
+#&gt;             end &lt;- c(c(rbind(so - 1L, eo)), nchar(u, itype))
 #&gt;             substring(u, beg, end)
 #&gt;         }, x, m, if (ili) 
 #&gt;             lapply(m, attr, &quot;match.length&quot;)
@@ -820,7 +913,7 @@ pmap(mdf, substring)
 #&gt;             else {
 #&gt;                 c(1L, so + ml)
 #&gt;             }
-#&gt;             end &lt;- c(so - 1L, nchar(u))
+#&gt;             end &lt;- c(so - 1L, nchar(u, itype))
 #&gt;             substring(u, beg, end)
 #&gt;         }, x, m, if (ili) 
 #&gt;             lapply(m, attr, &quot;match.length&quot;)
@@ -838,7 +931,7 @@ pmap(mdf, substring)
 #&gt;     names(y) &lt;- names(x)
 #&gt;     y
 #&gt; }
-#&gt; &lt;bytecode: 0x7f8d9ad4c720&gt;
+#&gt; &lt;bytecode: 0x7f8977f3a3b8&gt;
 #&gt; &lt;environment: namespace:base&gt;</code></pre>
 </div>
 

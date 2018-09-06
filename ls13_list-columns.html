@@ -113,7 +113,6 @@ body {
   padding-top: 65px;
   margin-top: -65px;
 }
-
 .section h2 {
   padding-top: 65px;
   margin-top: -65px;
@@ -133,6 +132,43 @@ body {
 .section h6 {
   padding-top: 65px;
   margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
 }
 </style>
 
@@ -154,18 +190,77 @@ $(document).ready(function () {
 });
 </script>
 
-
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
 });
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
 </script>
 
 <!-- code folding -->
-
 
 
 
@@ -321,6 +416,8 @@ div.tocify {
 <div id="load-packages" class="section level3">
 <h3>Load packages</h3>
 <pre class="r"><code>library(tidyverse)
+#&gt; [1] &quot;ggplot2&quot; &quot;tibble&quot;  &quot;tidyr&quot;   &quot;readr&quot;   &quot;purrr&quot;   &quot;dplyr&quot;   &quot;stringr&quot;
+#&gt; [8] &quot;forcats&quot;
 library(stringr)
 library(lubridate)
 library(here) ## install.packages(&quot;krlmlr/here&quot;)</code></pre>
@@ -424,7 +521,7 @@ ice
 #&gt;  8 Arianne Martell      130
 #&gt;  9 Daenerys Targaryen  1303
 #&gt; 10 Davos Seaworth      1319
-#&gt; # … with 20 more rows</code></pre>
+#&gt; # ... with 20 more rows</code></pre>
 <p>Request info for each character and store what comes back – whatever that may be – in the list-column <code>stuff</code>.</p>
 <pre class="r"><code>ice_and_fire_url &lt;- &quot;https://anapioficeandfire.com/&quot;
 if (file.exists(here(&quot;talks&quot;, &quot;ice.rds&quot;))) {
@@ -455,7 +552,7 @@ ice
 #&gt;  8 Arianne Martell    &lt;list [16]&gt;
 #&gt;  9 Daenerys Targaryen &lt;list [16]&gt;
 #&gt; 10 Davos Seaworth     &lt;list [16]&gt;
-#&gt; # … with 19 more rows</code></pre>
+#&gt; # ... with 19 more rows</code></pre>
 <p>Let’s switch to a nicer version of <code>ice</code>, based on the list in repurrrsive, because it already has books and houses replaced with names instead of URLs.</p>
 <pre class="r"><code>ice2 &lt;- tibble(
   name = map_chr(got_chars, &quot;name&quot;),
@@ -475,7 +572,7 @@ ice2
 #&gt;  8 Arianne Martell    &lt;list [18]&gt;
 #&gt;  9 Daenerys Targaryen &lt;list [18]&gt;
 #&gt; 10 Davos Seaworth     &lt;list [18]&gt;
-#&gt; # … with 20 more rows</code></pre>
+#&gt; # ... with 20 more rows</code></pre>
 <p>Inspect the list-column.</p>
 <pre class="r"><code>str(ice2$stuff[[9]], max.level = 1)
 #&gt; List of 18
@@ -522,7 +619,7 @@ birth_announcements
 #&gt;  8 Arianne Martell  Arianne Martell was born In 276 AC, at Sunspear.      
 #&gt;  9 Daenerys Targar… Daenerys Targaryen was born In 284 AC, at Dragonstone.
 #&gt; 10 Davos Seaworth   Davos Seaworth was born In 260 AC or before, at King&#39;…
-#&gt; # … with 20 more rows</code></pre>
+#&gt; # ... with 20 more rows</code></pre>
 <p>Extract each character’s house allegiances. Keep only those with more than one allegiance. Then unnest to explode the <code>houses</code> list-column and get a tibble with one row per character * house combination. No list-columns left!</p>
 <pre class="r"><code>allegiances &lt;- ice2 %&gt;%
   transmute(name,
@@ -581,7 +678,7 @@ x
 #&gt;  8 Arianne Martell    &lt;chr [1]&gt;  &lt;chr [1]&gt;  
 #&gt;  9 Daenerys Targaryen &lt;chr [11]&gt; &lt;chr [1]&gt;  
 #&gt; 10 Davos Seaworth     &lt;chr [5]&gt;  &lt;chr [2]&gt;  
-#&gt; # … with 20 more rows
+#&gt; # ... with 20 more rows
 #View(x)</code></pre>
 <p>What if we only care about characters with a “Lannister” alliance? Practice operating on a list-column.</p>
 <pre class="r"><code>x %&gt;%
@@ -600,7 +697,7 @@ x
 #&gt;  8 Arianne Martell    &lt;chr [1]&gt;  &lt;chr [1]&gt;   FALSE    
 #&gt;  9 Daenerys Targaryen &lt;chr [11]&gt; &lt;chr [1]&gt;   FALSE    
 #&gt; 10 Davos Seaworth     &lt;chr [5]&gt;  &lt;chr [2]&gt;   FALSE    
-#&gt; # … with 20 more rows</code></pre>
+#&gt; # ... with 20 more rows</code></pre>
 <p>Keep only the Lannisters and Starks allegiances. You can use <code>filter()</code> with list-columns, but you will need to <code>map()</code> to list-ize your operation. Once I’ve got the characters I want, I drop <code>allegiances</code> and use <code>unnest()</code> to get back to a simple data frame with no list columns.</p>
 <pre class="r"><code>x %&gt;%
   filter(allegiances %&gt;%
@@ -720,7 +817,7 @@ gap_nested
 #&gt;  8 Bahrain     &lt;tibble [12 × 5]&gt;
 #&gt;  9 Bangladesh  &lt;tibble [12 × 5]&gt;
 #&gt; 10 Belgium     &lt;tibble [12 × 5]&gt;
-#&gt; # … with 132 more rows
+#&gt; # ... with 132 more rows
 gap_nested$data[[1]]
 #&gt; # A tibble: 12 x 5
 #&gt;    continent  year lifeExp      pop gdpPercap
@@ -789,7 +886,7 @@ summary(gap_fits$fit[[canada]])
 #&gt;  8 South Africa     &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.312 
 #&gt;  9 Uganda           &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.342 
 #&gt; 10 Congo, Dem. Rep. &lt;tibble [12 × 5]&gt; &lt;S3: lm&gt; 0.348 
-#&gt; # … with 132 more rows</code></pre>
+#&gt; # ... with 132 more rows</code></pre>
 <p>Let’s use a function from broom to get the usual coefficient table from <code>summary.lm()</code> but in a friendlier form for downstream work.</p>
 <pre class="r"><code>library(broom)
 gap_fits %&gt;%
@@ -808,7 +905,7 @@ gap_fits %&gt;%
 #&gt;  8 Angola      year            0.209   0.0235       8.90 4.59e- 6
 #&gt;  9 Argentina   (Intercept)  -390.      9.68       -40.3  2.14e-12
 #&gt; 10 Argentina   year            0.232   0.00489     47.4  4.22e-13
-#&gt; # … with 274 more rows</code></pre>
+#&gt; # ... with 274 more rows</code></pre>
 </div>
 </div>
 

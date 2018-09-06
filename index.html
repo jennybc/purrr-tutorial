@@ -110,7 +110,6 @@ body {
   padding-top: 65px;
   margin-top: -65px;
 }
-
 .section h2 {
   padding-top: 65px;
   margin-top: -65px;
@@ -130,6 +129,43 @@ body {
 .section h6 {
   padding-top: 65px;
   margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
 }
 </style>
 
@@ -151,18 +187,77 @@ $(document).ready(function () {
 });
 </script>
 
-
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
 });
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
 </script>
 
 <!-- code folding -->
-
 
 
 
@@ -218,16 +313,6 @@ $(document).ready(function () {
 </div>
 <div id="core-purrr-lessons" class="section level3">
 <h3>Core purrr lessons</h3>
-<ul>
-<li><a href="ls00_inspect-explore.html">Explore the example lists: Wes Anderson, Game of Thrones, GitHub</a> <em>how to get to know a list</em></li>
-<li><a href="ls01_map-name-position-shortcuts.html">Introduction to <code>map()</code>: extract elements</a> <em>name and position shortcuts, type-specific and simplifying map</em></li>
-<li><a href="ls02_map-extraction-advanced.html">Simplifying data from a list of GitHub users</a> <em>end to end: inspection, extraction and simplification, more advanced</em></li>
-<li><a href="ls03_map-function-syntax.html">Specifying the function in map() + parallel mapping</a> <em>all the purrr shortcuts and mapping over multiple lists</em></li>
-<li><a href="ls08_trump-tweets.html">Trump Android words</a> <em>suitable for live-coding</em></li>
-<li><a href="ls12_different-sized-samples.html">Sample from groups, n varies by group</a><br />
-</li>
-<li><a href="ls13_list-columns.html">List columns</a> <em>creating, managing, and eliminating list-columns</em></li>
-</ul>
 </div>
 <div id="worked-examples" class="section level3">
 <h3>Worked examples</h3>
@@ -243,9 +328,6 @@ $(document).ready(function () {
 </div>
 <div id="patterns-and-anti-patterns" class="section level3">
 <h3>Patterns and anti-patterns</h3>
-<ul>
-<li><a href="pt00_gotchas.html">Gotchas</a></li>
-</ul>
 </div>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>

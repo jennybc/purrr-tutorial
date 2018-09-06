@@ -110,7 +110,6 @@ body {
   padding-top: 65px;
   margin-top: -65px;
 }
-
 .section h2 {
   padding-top: 65px;
   margin-top: -65px;
@@ -130,6 +129,43 @@ body {
 .section h6 {
   padding-top: 65px;
   margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
 }
 </style>
 
@@ -151,18 +187,77 @@ $(document).ready(function () {
 });
 </script>
 
-
 <div class="container-fluid main-container">
 
 <!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
 <script>
 $(document).ready(function () {
   window.buildTabsets("TOC");
 });
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
 </script>
 
 <!-- code folding -->
-
 
 
 
@@ -215,6 +310,7 @@ $(document).ready(function () {
 <li>Jenny Bryan</li>
 <li><a href="https://github.com/jennybc/" class="uri">https://github.com/jennybc/</a></li>
 <li><a href="https://twitter.com/JennyBryan" class="uri">https://twitter.com/JennyBryan</a></li>
+<li><a href="https://jennybryan.org" class="uri">https://jennybryan.org</a></li>
 </ul>
 <p>Materials initially created to support:</p>
 <ul>
@@ -230,38 +326,38 @@ $(document).ready(function () {
 ##  version  R version 3.5.1 (2018-07-02)  
 ##  os       macOS Sierra 10.12.6          
 ##  system   x86_64, darwin15.6.0          
-##  ui       RStudio                       
+##  ui       X11                           
 ##  language (EN)                          
 ##  collate  en_CA.UTF-8                   
 ##  ctype    en_CA.UTF-8                   
 ##  tz       America/Argentina/Buenos_Aires
-##  date     2018-09-02                    
+##  date     2018-09-06                    
 ## 
 ## ─ Packages ──────────────────────────────────────────────────────────────
-##  package     * version     date       source                         
-##  assertthat    0.2.0       2017-04-11 CRAN (R 3.5.0)                 
-##  cli           1.0.0.9002  2018-06-30 Github (r-lib/cli@1ce5145)     
-##  crayon        1.3.4       2017-09-16 CRAN (R 3.5.0)                 
-##  fansi         0.3.0       2018-08-13 CRAN (R 3.5.0)                 
-##  glue          1.3.0       2018-08-23 Github (tidyverse/glue@4e74901)
-##  hms           0.4.2.9001  2018-08-12 github (tidyverse/hms)         
-##  magrittr      1.5         2014-11-22 CRAN (R 3.5.0)                 
-##  pillar        1.3.0.9000  2018-08-20 Github (r-lib/pillar@3fabb4e)  
-##  pkgconfig     2.0.2       2018-08-16 CRAN (R 3.5.0)                 
-##  prettyunits   1.0.2       2015-07-13 CRAN (R 3.5.0)                 
-##  progress      1.2.0       2018-08-12 github (gaborcsardi/progress)  
-##  purrr       * 0.2.5       2018-05-29 CRAN (R 3.5.0)                 
-##  R6            2.2.2       2017-06-17 CRAN (R 3.5.0)                 
-##  Rcpp          0.12.18     2018-07-23 CRAN (R 3.5.1)                 
-##  repurrrsive * 0.1.0       2017-09-08 CRAN (R 3.5.0)                 
-##  rlang         0.2.2       2018-08-16 CRAN (R 3.5.0)                 
-##  selectr       0.4-1       2018-04-06 CRAN (R 3.5.0)                 
-##  stringi       1.2.4       2018-07-20 CRAN (R 3.5.1)                 
-##  stringr       1.3.1       2018-05-10 CRAN (R 3.5.0)                 
-##  tibble        1.4.99.9003 2018-08-30 local                          
-##  utf8          1.1.4       2018-05-24 CRAN (R 3.5.0)                 
-##  withr         2.1.2       2018-07-03 local                          
-##  xml2          1.2.0       2018-01-24 CRAN (R 3.5.0)</code></pre>
+##  package     * version    date       source                         
+##  assertthat    0.2.0      2017-04-11 CRAN (R 3.5.0)                 
+##  cli           1.0.0.9002 2018-06-30 Github (r-lib/cli@1ce5145)     
+##  crayon        1.3.4      2017-09-16 CRAN (R 3.5.0)                 
+##  fansi         0.3.0      2018-08-13 CRAN (R 3.5.0)                 
+##  glue          1.3.0      2018-08-23 Github (tidyverse/glue@4e74901)
+##  hms           0.4.2.9001 2018-08-12 github (tidyverse/hms)         
+##  magrittr      1.5        2014-11-22 CRAN (R 3.5.0)                 
+##  pillar        1.3.0.9000 2018-08-20 Github (r-lib/pillar@3fabb4e)  
+##  pkgconfig     2.0.2      2018-08-16 CRAN (R 3.5.0)                 
+##  prettyunits   1.0.2      2015-07-13 CRAN (R 3.5.0)                 
+##  progress      1.2.0      2018-08-12 github (gaborcsardi/progress)  
+##  purrr         0.2.5      2018-05-29 CRAN (R 3.5.0)                 
+##  R6            2.2.2      2017-06-17 CRAN (R 3.5.0)                 
+##  Rcpp          0.12.18    2018-07-23 CRAN (R 3.5.1)                 
+##  repurrrsive   0.1.0      2017-09-08 CRAN (R 3.5.0)                 
+##  rlang         0.2.2      2018-08-16 CRAN (R 3.5.0)                 
+##  selectr       0.4-1      2018-04-06 CRAN (R 3.5.0)                 
+##  stringi       1.2.4      2018-07-20 CRAN (R 3.5.1)                 
+##  stringr       1.3.1      2018-05-10 CRAN (R 3.5.0)                 
+##  tibble        1.4.2      2018-01-22 CRAN (R 3.5.0)                 
+##  utf8          1.1.4      2018-05-24 CRAN (R 3.5.0)                 
+##  withr         2.1.2      2018-07-03 local                          
+##  xml2          1.2.0      2018-01-24 CRAN (R 3.5.0)</code></pre>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
 
