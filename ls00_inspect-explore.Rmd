@@ -36,7 +36,7 @@ Understand this is **situation normal**, especially when your list comes from qu
 
 ### Indexing, review
 
-Rembmer, there are 3 ways to pull elements out of a list:
+Remember, there are 3 ways to pull elements out of a list:
 
   * The `$` operator. Extracts a single element by name. Name can be unquoted, if syntactic.
     ```{r}
