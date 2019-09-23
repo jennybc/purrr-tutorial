@@ -30,9 +30,8 @@ The purrr package and all the techniques depicted in the other lessons come into
 
 ```{r message = FALSE}
 library(tidyverse)
-library(stringr)
 library(lubridate)
-library(here) ## install.packages("krlmlr/here")
+library(here)
 ```
 
 ### Bring tweets in
@@ -107,7 +106,6 @@ tb %>%
 library(repurrrsive)
 library(tidyverse)
 library(httr)
-library(stringr)
 library(here)
 ```
 
@@ -196,7 +194,6 @@ allegiances
 ```{r}
 library(tidyverse)
 library(repurrrsive)
-library(stringr)
 ```
 
 ## Lists as variables in a data frame
