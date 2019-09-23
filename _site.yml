@@ -17,3 +17,4 @@ output:
     theme: flatly
     includes:
       after_body: footer.html
+new_session: true
