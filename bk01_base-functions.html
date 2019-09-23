@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -72,9 +73,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -88,7 +87,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -98,6 +96,9 @@ img {
 }
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
@@ -190,8 +191,6 @@ $(document).ready(function () {
 });
 </script>
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
 
 <style type="text/css">
@@ -248,48 +247,9 @@ $(document).ready(function () {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -338,8 +298,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -348,6 +306,16 @@ div.tocify {
 
 
 </style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row-fluid">
@@ -491,7 +459,7 @@ str(aliases2)
 #&gt;  chr [1:3] &quot;The Iron Captain&quot; &quot;Griffthe Mad King&#39;s Hand&quot; ...</code></pre>
 <p>With purrr, you would use <code>map()</code> to get a list back or <code>map_chr()</code> to get atomic character vector. If you use <code>map_chr()</code> when you should not, you’ll get an informative error right away (shown below) and can adjust your approach accordingly.</p>
 <pre class="r"><code>map_chr(got_chars[2:4], &quot;aliases&quot;)
-#&gt; Error: Result 1 is not a length 1 atomic vector</code></pre>
+#&gt; Result 1 must be a single string, not a character vector of length 11</code></pre>
 </div>
 <div id="vapply-vs.-map_" class="section level2">
 <h2><code>vapply()</code> vs. <code>map_*()</code></h2>
@@ -760,7 +728,7 @@ head(by_obj)
 #&gt;  8 Bahrain     0.983
 #&gt;  9 Bangladesh  0.995
 #&gt; 10 Belgium     0.997
-#&gt; # ... with 132 more rows</code></pre>
+#&gt; # … with 132 more rows</code></pre>
 </div>
 </div>
 <p>This is a good place to pause and glance back over the base vs tidyverse calls and results in this section. It shows that you can absolutely do these tasks either way, but the consistency of the code and return values is higher in the tidyverse.</p>
@@ -894,6 +862,7 @@ head(coefs)
          slope = map_dbl(coefs, 2)) %&gt;% 
   select(country, continent, intercept, slope)
 #&gt; # A tibble: 142 x 4
+#&gt; # Groups:   country, continent [710]
 #&gt;    country     continent intercept slope
 #&gt;    &lt;fct&gt;       &lt;fct&gt;         &lt;dbl&gt; &lt;dbl&gt;
 #&gt;  1 Afghanistan Asia          -508. 0.275
@@ -906,7 +875,7 @@ head(coefs)
 #&gt;  8 Bahrain     Asia          -860. 0.468
 #&gt;  9 Bangladesh  Asia          -936. 0.498
 #&gt; 10 Belgium     Europe        -340. 0.209
-#&gt; # ... with 132 more rows</code></pre>
+#&gt; # … with 132 more rows</code></pre>
 </div>
 </div>
 <p>This illustrates the post-processing that is often necessary in a base workflow. We need to restore the country info from the names of <code>by_obj</code>, use them to look up the continents in gapminder, and then restore the original factor levels for both country and continent. It illustrates the payoff for temporarily tolerating the <code>data</code> and <code>fit</code> list-columns in the nested data frame used in the tidyverse workflow. The country and continent factors remain intact and directly associated with the data and fits.</p>
@@ -931,6 +900,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

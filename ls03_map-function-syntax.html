@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -72,9 +73,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -88,7 +87,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -98,6 +96,9 @@ img {
 }
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
@@ -190,8 +191,6 @@ $(document).ready(function () {
 });
 </script>
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
 
 <style type="text/css">
@@ -248,48 +247,9 @@ $(document).ready(function () {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -338,8 +298,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -348,6 +306,16 @@ div.tocify {
 
 
 </style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row-fluid">
@@ -520,11 +488,11 @@ got_chars[15:17] %&gt;%                   ## I am a programming god
 map_chr(aliases[c(3, 10, 20, 24)], ~ paste(.x, collapse = &quot; | &quot;)) %&gt;% 
   tibble::enframe(value = &quot;aliases&quot;)
 #&gt; # A tibble: 4 x 2
-#&gt;   name            aliases                                                 
-#&gt;   &lt;chr&gt;           &lt;chr&gt;                                                   
-#&gt; 1 Victarion Grey… The Iron Captain                                        
-#&gt; 2 Davos Seaworth  Onion Knight | Davos Shorthand | Ser Onions | Onion Lor…
-#&gt; 3 Eddard Stark    Ned | The Ned | The Quiet Wolf                          
+#&gt;   name            aliases                                                  
+#&gt;   &lt;chr&gt;           &lt;chr&gt;                                                    
+#&gt; 1 Victarion Grey… The Iron Captain                                         
+#&gt; 2 Davos Seaworth  Onion Knight | Davos Shorthand | Ser Onions | Onion Lord…
+#&gt; 3 Eddard Stark    Ned | The Ned | The Quiet Wolf                           
 #&gt; 4 Aeron Greyjoy   The Damphair | Aeron Damphair</code></pre>
 <p>Alternative way to get same data frame</p>
 <pre class="r"><code>tibble::tibble(
@@ -535,11 +503,11 @@ map_chr(aliases[c(3, 10, 20, 24)], ~ paste(.x, collapse = &quot; | &quot;)) %&gt
 ) %&gt;% 
   dplyr::slice(c(3, 10, 20, 24))
 #&gt; # A tibble: 4 x 2
-#&gt;   name            aliases                                                 
-#&gt;   &lt;chr&gt;           &lt;chr&gt;                                                   
-#&gt; 1 Victarion Grey… The Iron Captain                                        
-#&gt; 2 Davos Seaworth  Onion Knight | Davos Shorthand | Ser Onions | Onion Lor…
-#&gt; 3 Eddard Stark    Ned | The Ned | The Quiet Wolf                          
+#&gt;   name            aliases                                                  
+#&gt;   &lt;chr&gt;           &lt;chr&gt;                                                    
+#&gt; 1 Victarion Grey… The Iron Captain                                         
+#&gt; 2 Davos Seaworth  Onion Knight | Davos Shorthand | Ser Onions | Onion Lord…
+#&gt; 3 Eddard Stark    Ned | The Ned | The Quiet Wolf                           
 #&gt; 4 Aeron Greyjoy   The Damphair | Aeron Damphair</code></pre>
 <p>This is a very typical workflow: take an unwieldy nested list and, via extraction and/or simplification, produce a more approachable data frame.</p>
 </div>
@@ -649,6 +617,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -72,9 +73,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -88,7 +87,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -98,6 +96,9 @@ img {
 }
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
@@ -190,8 +191,6 @@ $(document).ready(function () {
 });
 </script>
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
 
 <style type="text/css">
@@ -248,48 +247,9 @@ $(document).ready(function () {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -338,8 +298,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -348,6 +306,16 @@ div.tocify {
 
 
 </style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row-fluid">
@@ -402,9 +370,10 @@ div.tocify {
 
 
 <pre class="r"><code>search()
-#&gt; [1] &quot;.GlobalEnv&quot;        &quot;package:stats&quot;     &quot;package:graphics&quot; 
-#&gt; [4] &quot;package:grDevices&quot; &quot;package:utils&quot;     &quot;package:datasets&quot; 
-#&gt; [7] &quot;package:methods&quot;   &quot;Autoloads&quot;         &quot;package:base&quot;</code></pre>
+#&gt;  [1] &quot;.GlobalEnv&quot;        &quot;package:stats&quot;     &quot;package:graphics&quot; 
+#&gt;  [4] &quot;package:grDevices&quot; &quot;package:utils&quot;     &quot;package:datasets&quot; 
+#&gt;  [7] &quot;package:methods&quot;   &quot;Autoloads&quot;         &quot;tools:callr&quot;      
+#&gt; [10] &quot;package:base&quot;</code></pre>
 <div id="load-packages" class="section level2">
 <h2>Load packages</h2>
 <p>Load purrr and repurrrsive, which contains recursive list examples.</p>
@@ -588,19 +557,19 @@ str(x[18:19])
 <p>This is what <code>map_dfr()</code> is for.</p>
 <pre class="r"><code>map_dfr(got_chars, extract, c(&quot;name&quot;, &quot;culture&quot;, &quot;gender&quot;, &quot;id&quot;, &quot;born&quot;, &quot;alive&quot;))
 #&gt; # A tibble: 30 x 6
-#&gt;    name            culture gender    id born                         alive
-#&gt;    &lt;chr&gt;           &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;                        &lt;lgl&gt;
-#&gt;  1 Theon Greyjoy   Ironbo… Male    1022 In 278 AC or 279 AC, at Pyke TRUE 
-#&gt;  2 Tyrion Lannist… &quot;&quot;      Male    1052 In 273 AC, at Casterly Rock  TRUE 
-#&gt;  3 Victarion Grey… Ironbo… Male    1074 In 268 AC or before, at Pyke TRUE 
-#&gt;  4 Will            &quot;&quot;      Male    1109 &quot;&quot;                           FALSE
-#&gt;  5 Areo Hotah      Norvos… Male    1166 In 257 AC or before, at Nor… TRUE 
-#&gt;  6 Chett           &quot;&quot;      Male    1267 At Hag&#39;s Mire                FALSE
-#&gt;  7 Cressen         &quot;&quot;      Male    1295 In 219 AC or 220 AC          FALSE
-#&gt;  8 Arianne Martell Dornish Female   130 In 276 AC, at Sunspear       TRUE 
-#&gt;  9 Daenerys Targa… Valyri… Female  1303 In 284 AC, at Dragonstone    TRUE 
-#&gt; 10 Davos Seaworth  Wester… Male    1319 In 260 AC or before, at Kin… TRUE 
-#&gt; # ... with 20 more rows</code></pre>
+#&gt;    name            culture  gender    id born                         alive
+#&gt;    &lt;chr&gt;           &lt;chr&gt;    &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;                        &lt;lgl&gt;
+#&gt;  1 Theon Greyjoy   Ironborn Male    1022 In 278 AC or 279 AC, at Pyke TRUE 
+#&gt;  2 Tyrion Lannist… &quot;&quot;       Male    1052 In 273 AC, at Casterly Rock  TRUE 
+#&gt;  3 Victarion Grey… Ironborn Male    1074 In 268 AC or before, at Pyke TRUE 
+#&gt;  4 Will            &quot;&quot;       Male    1109 &quot;&quot;                           FALSE
+#&gt;  5 Areo Hotah      Norvoshi Male    1166 In 257 AC or before, at Nor… TRUE 
+#&gt;  6 Chett           &quot;&quot;       Male    1267 At Hag&#39;s Mire                FALSE
+#&gt;  7 Cressen         &quot;&quot;       Male    1295 In 219 AC or 220 AC          FALSE
+#&gt;  8 Arianne Martell Dornish  Female   130 In 276 AC, at Sunspear       TRUE 
+#&gt;  9 Daenerys Targa… Valyrian Female  1303 In 284 AC, at Dragonstone    TRUE 
+#&gt; 10 Davos Seaworth  Westeros Male    1319 In 260 AC or before, at Kin… TRUE 
+#&gt; # … with 20 more rows</code></pre>
 <p>Finally! A data frame! Hallelujah!</p>
 <p>Notice how the variables have been automatically type converted. It’s a beautiful thing. Until it’s not. When programming, it is safer, but more cumbersome, to explicitly specify type and build your data frame the usual way.</p>
 <pre class="r"><code>library(tibble)
@@ -615,19 +584,19 @@ got_chars %&gt;% {
   )
 }
 #&gt; # A tibble: 30 x 6
-#&gt;    name            culture gender    id born                         alive
-#&gt;    &lt;chr&gt;           &lt;chr&gt;   &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;                        &lt;lgl&gt;
-#&gt;  1 Theon Greyjoy   Ironbo… Male    1022 In 278 AC or 279 AC, at Pyke TRUE 
-#&gt;  2 Tyrion Lannist… &quot;&quot;      Male    1052 In 273 AC, at Casterly Rock  TRUE 
-#&gt;  3 Victarion Grey… Ironbo… Male    1074 In 268 AC or before, at Pyke TRUE 
-#&gt;  4 Will            &quot;&quot;      Male    1109 &quot;&quot;                           FALSE
-#&gt;  5 Areo Hotah      Norvos… Male    1166 In 257 AC or before, at Nor… TRUE 
-#&gt;  6 Chett           &quot;&quot;      Male    1267 At Hag&#39;s Mire                FALSE
-#&gt;  7 Cressen         &quot;&quot;      Male    1295 In 219 AC or 220 AC          FALSE
-#&gt;  8 Arianne Martell Dornish Female   130 In 276 AC, at Sunspear       TRUE 
-#&gt;  9 Daenerys Targa… Valyri… Female  1303 In 284 AC, at Dragonstone    TRUE 
-#&gt; 10 Davos Seaworth  Wester… Male    1319 In 260 AC or before, at Kin… TRUE 
-#&gt; # ... with 20 more rows</code></pre>
+#&gt;    name            culture  gender    id born                         alive
+#&gt;    &lt;chr&gt;           &lt;chr&gt;    &lt;chr&gt;  &lt;int&gt; &lt;chr&gt;                        &lt;lgl&gt;
+#&gt;  1 Theon Greyjoy   Ironborn Male    1022 In 278 AC or 279 AC, at Pyke TRUE 
+#&gt;  2 Tyrion Lannist… &quot;&quot;       Male    1052 In 273 AC, at Casterly Rock  TRUE 
+#&gt;  3 Victarion Grey… Ironborn Male    1074 In 268 AC or before, at Pyke TRUE 
+#&gt;  4 Will            &quot;&quot;       Male    1109 &quot;&quot;                           FALSE
+#&gt;  5 Areo Hotah      Norvoshi Male    1166 In 257 AC or before, at Nor… TRUE 
+#&gt;  6 Chett           &quot;&quot;       Male    1267 At Hag&#39;s Mire                FALSE
+#&gt;  7 Cressen         &quot;&quot;       Male    1295 In 219 AC or 220 AC          FALSE
+#&gt;  8 Arianne Martell Dornish  Female   130 In 276 AC, at Sunspear       TRUE 
+#&gt;  9 Daenerys Targa… Valyrian Female  1303 In 284 AC, at Dragonstone    TRUE 
+#&gt; 10 Davos Seaworth  Westeros Male    1319 In 260 AC or before, at Kin… TRUE 
+#&gt; # … with 20 more rows</code></pre>
 <p><em>Syntax notes: The dot <code>.</code> above is the placeholder for the primary input: <code>got_chars</code> in this case. The curly braces <code>{}</code> surrounding the <code>tibble()</code> call prevent <code>got_chars</code> from being passed in as the first argument of <code>tibble()</code>.</em></p>
 <div id="exercises-3" class="section level4">
 <h4>Exercises</h4>
@@ -657,6 +626,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
