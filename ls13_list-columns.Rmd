@@ -113,7 +113,7 @@ library(here)
 
 ### Call the API of Ice and Fire
 
-Here's a simplified version of how we obtained the data on the Game of Thrones POV characters. This data appears as a more processed list in the [repurrrsive](https://github.com/jennybc/repurrrsive#readme) package.
+Here's a simplified version of how we obtained the data on the Game of Thrones POV characters. This data appears as a more processed list in the [repurrrsive](https://cran.r-project.org/package=repurrrsive) package.
 
   * Get character IDs from repurrrsive. *cheating a little, humor me*
   * Put IDs and character names in a tibble.

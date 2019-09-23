@@ -28,7 +28,7 @@ library(purrr)
 
 ### Get several GitHub users
 
-The [repurrrsive package](https://github.com/jennybc/repurrrsive#readme) provides information on 6 GitHub users in an R list named `gh_users`.
+The [repurrrsive package](https://cran.r-project.org/package=repurrrsive) provides information on 6 GitHub users in an R list named `gh_users`.
 
 `gh_users` is *a recursive list*:
 
@@ -216,7 +216,7 @@ Meet `gh_repos`. It is a list with:
   * each component is another list of that user's repositories (or just the first 30, if user has more than 30)
   * several of those list components are, again, a list
 
-The [repurrrsive package](https://github.com/jennybc/repurrrsive#readme) provides this in an R list named `gh_repos`.
+The [repurrrsive package](https://cran.r-project.org/package=repurrrsive) provides this in an R list named `gh_repos`.
 
 
 ```{r}

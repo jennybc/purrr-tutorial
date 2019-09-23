@@ -11,6 +11,6 @@ title: "More resources"
     - [Handling hierarchy](http://r4ds.had.co.nz/hierarchy.html)
     - [Many models](http://r4ds.had.co.nz/many-models.html)
   * Example lists are in the repurrrsive package:
-    - [https://github.com/jennybc/repurrrsive](https://github.com/jennybc/repurrrsive#readme)
+    - <https://cran.r-project.org/package=repurrrsive>
   * Depicting R data structures and operations via lego:
-      - [https://github.com/jennybc/lego-rstats](https://github.com/jennybc/lego-rstats#readme)
+    - [https://github.com/jennybc/lego-rstats](https://github.com/jennybc/lego-rstats#readme)
