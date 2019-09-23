@@ -185,7 +185,7 @@ allegiances <- ice2 %>%
   transmute(name,
             houses = map(stuff, "allegiances")) %>%
   filter(lengths(houses) > 1) %>%
-  unnest()
+  unnest(houses)
 allegiances
 ```
 
@@ -230,7 +230,7 @@ x %>%
            map_lgl(any)) %>%
   select(-allegiances) %>%
   filter(lengths(aliases) > 0) %>%
-  unnest() %>% 
+  unnest(aliases) %>% 
   print(n = Inf)
 ```
 

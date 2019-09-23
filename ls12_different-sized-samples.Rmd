@@ -66,7 +66,7 @@ We are in that uncomfortable intermediate state, with two list-columns: the orig
 ```{r}
 sampled_iris %>% 
   select(Species, samp) %>%
-  unnest()
+  unnest(samp)
 ```
 
 Again, from the top, with no exposition:
@@ -78,7 +78,7 @@ iris %>%
   mutate(n = c(2, 5, 3)) %>% 
   mutate(samp = map2(data, n, sample_n)) %>% 
   select(Species, samp) %>%
-  unnest()
+  unnest(samp)
 ```
 
 A base R solution, with some marginal comments:

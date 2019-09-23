@@ -321,7 +321,7 @@ The user-specific tibbles about each user's repos are now sitting in the `repo_i
        map(. %>% map_df(`[`, c("name", "fork", "open_issues")))
    ) %>% 
    select(-gh_repos) %>% 
-   tidyr::unnest())
+   tidyr::unnest(repo_info))
 ```
 
 Let's do a little manipulation with dplyr to find some of the more interesting repos and get repos from each user in front of our eyeballs. I get rid of forks and show the 3 repos for each user that have the most open issues. (Remember we are only working with the first 30 repos for each user -- I had to remember my open issue situation is much more grim than this table suggests.)
