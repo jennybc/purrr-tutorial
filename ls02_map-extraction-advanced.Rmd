@@ -181,10 +181,10 @@ We just learned how to extract multiple elements per user by mapping `[`. But, s
 
 How can we "stack up" these results row-wise, i.e. one row per user and variables for "login", "name", etc.? A data frame would be the perfect data structure for this information.
 
-This is what `map_df()` is for.
+This is what `map_dfr()` is for.
 
 ```{r}
-map_df(gh_users, `[`, c("login", "name", "id", "location"))
+map_dfr(gh_users, `[`, c("login", "name", "id", "location"))
 ```
 
 Finally! A data frame! Hallelujah!
@@ -204,7 +204,7 @@ gh_users %>% {
 
 #### Exercises
 
-1. Use `map_df()` to create a data frame with one row per user and variables for "name", "following", and "created_at". What type are the variables?
+1. Use `map_dfr()` to create a data frame with one row per user and variables for "name", "following", and "created_at". What type are the variables?
 
 ### Repositories for each user
 
