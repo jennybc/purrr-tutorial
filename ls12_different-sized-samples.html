@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -69,9 +70,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -85,7 +84,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -95,6 +93,9 @@ img {
 }
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
@@ -187,8 +188,6 @@ $(document).ready(function () {
 });
 </script>
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
 
 <style type="text/css">
@@ -245,20 +244,17 @@ $(document).ready(function () {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
 
 
 
@@ -325,20 +321,21 @@ $(document).ready(function () {
 </ul>
 <p>We need a <em>nested data frame</em>.</p>
 <pre class="r"><code>suppressMessages(library(dplyr))
-suppressMessages(library(purrr))
+library(purrr)
 library(tidyr)
 set.seed(4561)
 
 (nested_iris &lt;- iris %&gt;%
     group_by(Species) %&gt;%   # prep for work by Species
     nest() %&gt;%              # --&gt; one row per Species
+    ungroup() %&gt;% 
     mutate(n = c(2, 5, 3))) # add sample sizes
 #&gt; # A tibble: 3 x 3
-#&gt;   Species    data                  n
-#&gt;   &lt;fct&gt;      &lt;list&gt;            &lt;dbl&gt;
-#&gt; 1 setosa     &lt;tibble [50 × 4]&gt;     2
-#&gt; 2 versicolor &lt;tibble [50 × 4]&gt;     5
-#&gt; 3 virginica  &lt;tibble [50 × 4]&gt;     3</code></pre>
+#&gt;   Species              data     n
+#&gt;   &lt;fct&gt;      &lt;list&lt;df[,4]&gt;&gt; &lt;dbl&gt;
+#&gt; 1 setosa           [50 × 4]     2
+#&gt; 2 versicolor       [50 × 4]     5
+#&gt; 3 virginica        [50 × 4]     3</code></pre>
 <p>Draw the samples.</p>
 <ul>
 <li><code>purrr::map2()</code> is good since we want to operate on 2 things <code>(data = DATA FOR ONE SPECIES, n = SAMPLE SIZE)</code>.</li>
@@ -349,11 +346,11 @@ set.seed(4561)
 <pre class="r"><code>(sampled_iris &lt;- nested_iris %&gt;%
   mutate(samp = map2(data, n, sample_n)))
 #&gt; # A tibble: 3 x 4
-#&gt;   Species    data                  n samp            
-#&gt;   &lt;fct&gt;      &lt;list&gt;            &lt;dbl&gt; &lt;list&gt;          
-#&gt; 1 setosa     &lt;tibble [50 × 4]&gt;     2 &lt;tibble [2 × 4]&gt;
-#&gt; 2 versicolor &lt;tibble [50 × 4]&gt;     5 &lt;tibble [5 × 4]&gt;
-#&gt; 3 virginica  &lt;tibble [50 × 4]&gt;     3 &lt;tibble [3 × 4]&gt;</code></pre>
+#&gt;   Species              data     n samp            
+#&gt;   &lt;fct&gt;      &lt;list&lt;df[,4]&gt;&gt; &lt;dbl&gt; &lt;list&gt;          
+#&gt; 1 setosa           [50 × 4]     2 &lt;tibble [2 × 4]&gt;
+#&gt; 2 versicolor       [50 × 4]     5 &lt;tibble [5 × 4]&gt;
+#&gt; 3 virginica        [50 × 4]     3 &lt;tibble [3 × 4]&gt;</code></pre>
 <p>What came back? More <code>Species</code>-specific data frames.</p>
 <p>We are in that uncomfortable intermediate state, with two list-columns: the original <code>data</code> and the sampled data, <code>samp</code>. Let’s get back to a normal data frame!</p>
 <ul>
@@ -361,42 +358,43 @@ set.seed(4561)
 <li>Unnest, which essentially rowbinds the data frames in <code>samp</code> and replicates <code>Species</code> as necessary.</li>
 </ul>
 <pre class="r"><code>sampled_iris %&gt;% 
-  select(Species, samp) %&gt;%
-  unnest()
-#&gt; # A tibble: 10 x 5
-#&gt;    Species    Sepal.Length Sepal.Width Petal.Length Petal.Width
-#&gt;    &lt;fct&gt;             &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
-#&gt;  1 setosa              4.6         3.1          1.5         0.2
-#&gt;  2 setosa              4.5         2.3          1.3         0.3
-#&gt;  3 versicolor          5.6         2.5          3.9         1.1
-#&gt;  4 versicolor          6.1         2.9          4.7         1.4
-#&gt;  5 versicolor          6.1         2.8          4.7         1.2
-#&gt;  6 versicolor          6.6         2.9          4.6         1.3
-#&gt;  7 versicolor          5.7         2.6          3.5         1  
-#&gt;  8 virginica           6.3         2.7          4.9         1.8
-#&gt;  9 virginica           6.9         3.1          5.1         2.3
-#&gt; 10 virginica           6.7         3.1          5.6         2.4</code></pre>
+  select(-data) %&gt;%
+  unnest(samp)
+#&gt; # A tibble: 10 x 6
+#&gt;    Species        n Sepal.Length Sepal.Width Petal.Length Petal.Width
+#&gt;    &lt;fct&gt;      &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
+#&gt;  1 setosa         2          4.6         3.2          1.4         0.2
+#&gt;  2 setosa         2          5.1         3.8          1.5         0.3
+#&gt;  3 versicolor     5          6           3.4          4.5         1.6
+#&gt;  4 versicolor     5          6           2.2          4           1  
+#&gt;  5 versicolor     5          5.7         2.8          4.5         1.3
+#&gt;  6 versicolor     5          6.9         3.1          4.9         1.5
+#&gt;  7 versicolor     5          7           3.2          4.7         1.4
+#&gt;  8 virginica      3          5.8         2.7          5.1         1.9
+#&gt;  9 virginica      3          5.8         2.7          5.1         1.9
+#&gt; 10 virginica      3          6.3         2.9          5.6         1.8</code></pre>
 <p>Again, from the top, with no exposition:</p>
 <pre class="r"><code>iris %&gt;%
   group_by(Species) %&gt;% 
   nest() %&gt;%            
+  ungroup() %&gt;% 
   mutate(n = c(2, 5, 3)) %&gt;% 
   mutate(samp = map2(data, n, sample_n)) %&gt;% 
-  select(Species, samp) %&gt;%
-  unnest()
-#&gt; # A tibble: 10 x 5
-#&gt;    Species    Sepal.Length Sepal.Width Petal.Length Petal.Width
-#&gt;    &lt;fct&gt;             &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
-#&gt;  1 setosa              5.4         3.4          1.7         0.2
-#&gt;  2 setosa              5.5         3.5          1.3         0.2
-#&gt;  3 versicolor          6.6         2.9          4.6         1.3
-#&gt;  4 versicolor          6.9         3.1          4.9         1.5
-#&gt;  5 versicolor          5.8         2.7          3.9         1.2
-#&gt;  6 versicolor          6           2.7          5.1         1.6
-#&gt;  7 versicolor          6.2         2.9          4.3         1.3
-#&gt;  8 virginica           6.4         3.2          5.3         2.3
-#&gt;  9 virginica           6.5         3            5.5         1.8
-#&gt; 10 virginica           6.1         3            4.9         1.8</code></pre>
+  select(-data) %&gt;%
+  unnest(samp)
+#&gt; # A tibble: 10 x 6
+#&gt;    Species        n Sepal.Length Sepal.Width Petal.Length Petal.Width
+#&gt;    &lt;fct&gt;      &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
+#&gt;  1 setosa         2          4.7         3.2          1.6         0.2
+#&gt;  2 setosa         2          4.8         3.1          1.6         0.2
+#&gt;  3 versicolor     5          6.7         3.1          4.7         1.5
+#&gt;  4 versicolor     5          5.1         2.5          3           1.1
+#&gt;  5 versicolor     5          5.2         2.7          3.9         1.4
+#&gt;  6 versicolor     5          5.7         3            4.2         1.2
+#&gt;  7 versicolor     5          5.6         2.7          4.2         1.3
+#&gt;  8 virginica      3          7.6         3            6.6         2.1
+#&gt;  9 virginica      3          5.6         2.8          4.9         2  
+#&gt; 10 virginica      3          6.4         3.1          5.5         1.8</code></pre>
 <p>A base R solution, with some marginal comments:</p>
 <pre class="r"><code>split_iris &lt;- split(iris, iris$Species) # why can&#39;t Species be found in iris?
                                         # where else would it be found?
@@ -429,13 +427,13 @@ str(split_iris)                         # split_iris ~= nested_iris[[&quot;data&
 #&gt;         50         50         50
 (sampled_obs &lt;- mapply(sample, group_sizes, n)) # I&#39;m floating free too!
 #&gt; $setosa
-#&gt; [1] 47 32
+#&gt; [1] 36 14
 #&gt; 
 #&gt; $versicolor
-#&gt; [1] 15 50 13 30 21
+#&gt; [1] 28 43 22 24 13
 #&gt; 
 #&gt; $virginica
-#&gt; [1] 15 23 33
+#&gt; [1] 48  3 25
 get_rows &lt;- function(df, rows) df[rows, , drop = FALSE] # custom function
                                         # drop = FALSE required to avoid
                                         # nasty surprise in case of n = 1
@@ -443,45 +441,34 @@ get_rows &lt;- function(df, rows) df[rows, , drop = FALSE] # custom function
     mapply(get_rows, split_iris, sampled_obs, SIMPLIFY = FALSE))
 #&gt; $setosa
 #&gt;    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
-#&gt; 47          5.1         3.8          1.6         0.2  setosa
-#&gt; 32          5.4         3.4          1.5         0.4  setosa
+#&gt; 36          5.0         3.2          1.2         0.2  setosa
+#&gt; 14          4.3         3.0          1.1         0.1  setosa
 #&gt; 
 #&gt; $versicolor
-#&gt;     Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
-#&gt; 65           5.6         2.9          3.6         1.3 versicolor
-#&gt; 100          5.7         2.8          4.1         1.3 versicolor
-#&gt; 63           6.0         2.2          4.0         1.0 versicolor
-#&gt; 80           5.7         2.6          3.5         1.0 versicolor
-#&gt; 71           5.9         3.2          4.8         1.8 versicolor
+#&gt;    Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
+#&gt; 78          6.7         3.0          5.0         1.7 versicolor
+#&gt; 93          5.8         2.6          4.0         1.2 versicolor
+#&gt; 72          6.1         2.8          4.0         1.3 versicolor
+#&gt; 74          6.1         2.8          4.7         1.2 versicolor
+#&gt; 63          6.0         2.2          4.0         1.0 versicolor
 #&gt; 
 #&gt; $virginica
 #&gt;     Sepal.Length Sepal.Width Petal.Length Petal.Width   Species
-#&gt; 115          5.8         2.8          5.1         2.4 virginica
-#&gt; 123          7.7         2.8          6.7         2.0 virginica
-#&gt; 133          6.4         2.8          5.6         2.2 virginica
+#&gt; 148          6.5         3.0          5.2         2.0 virginica
+#&gt; 103          7.1         3.0          5.9         2.1 virginica
+#&gt; 125          6.7         3.3          5.7         2.1 virginica
 do.call(rbind, sampled_iris)            # :( do.call()
-#&gt;                Sepal.Length Sepal.Width Petal.Length Petal.Width
-#&gt; setosa.47               5.1         3.8          1.6         0.2
-#&gt; setosa.32               5.4         3.4          1.5         0.4
-#&gt; versicolor.65           5.6         2.9          3.6         1.3
-#&gt; versicolor.100          5.7         2.8          4.1         1.3
-#&gt; versicolor.63           6.0         2.2          4.0         1.0
-#&gt; versicolor.80           5.7         2.6          3.5         1.0
-#&gt; versicolor.71           5.9         3.2          4.8         1.8
-#&gt; virginica.115           5.8         2.8          5.1         2.4
-#&gt; virginica.123           7.7         2.8          6.7         2.0
-#&gt; virginica.133           6.4         2.8          5.6         2.2
-#&gt;                   Species
-#&gt; setosa.47          setosa
-#&gt; setosa.32          setosa
-#&gt; versicolor.65  versicolor
-#&gt; versicolor.100 versicolor
-#&gt; versicolor.63  versicolor
-#&gt; versicolor.80  versicolor
-#&gt; versicolor.71  versicolor
-#&gt; virginica.115   virginica
-#&gt; virginica.123   virginica
-#&gt; virginica.133   virginica</code></pre>
+#&gt;               Sepal.Length Sepal.Width Petal.Length Petal.Width    Species
+#&gt; setosa.36              5.0         3.2          1.2         0.2     setosa
+#&gt; setosa.14              4.3         3.0          1.1         0.1     setosa
+#&gt; versicolor.78          6.7         3.0          5.0         1.7 versicolor
+#&gt; versicolor.93          5.8         2.6          4.0         1.2 versicolor
+#&gt; versicolor.72          6.1         2.8          4.0         1.3 versicolor
+#&gt; versicolor.74          6.1         2.8          4.7         1.2 versicolor
+#&gt; versicolor.63          6.0         2.2          4.0         1.0 versicolor
+#&gt; virginica.148          6.5         3.0          5.2         2.0  virginica
+#&gt; virginica.103          7.1         3.0          5.9         2.1  virginica
+#&gt; virginica.125          6.7         3.3          5.7         2.1  virginica</code></pre>
 <p>IMO the base R solution requires much greater facility with R programming and data structures to get it right. It feels more like programming than data analysis.</p>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
@@ -502,6 +489,23 @@ $(document).ready(function () {
 
 
 </script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

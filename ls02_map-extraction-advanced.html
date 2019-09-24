@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -25,10 +26,10 @@
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<script src="site_libs/htmlwidgets-1.2/htmlwidgets.js"></script>
-<link href="site_libs/jsoneditor-5.5.5/jsoneditor.min.css" rel="stylesheet" />
-<script src="site_libs/jsoneditor-5.5.5/jsoneditor.min.js"></script>
-<script src="site_libs/jsonedit-binding-2.0.0/jsonedit.js"></script>
+<script src="site_libs/htmlwidgets-1.3/htmlwidgets.js"></script>
+<link href="site_libs/jsoneditor-5.25.6/jsoneditor.min.css" rel="stylesheet" />
+<script src="site_libs/jsoneditor-5.25.6/jsoneditor.min.js"></script>
+<script src="site_libs/jsonedit-binding-2.1.0/jsonedit.js"></script>
 
 <style type="text/css">code{white-space: pre;}</style>
 <style type="text/css">
@@ -76,9 +77,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -92,7 +91,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -102,6 +100,9 @@ img {
 }
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
@@ -194,8 +195,6 @@ $(document).ready(function () {
 });
 </script>
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
 
 <style type="text/css">
@@ -252,48 +251,9 @@ $(document).ready(function () {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
 
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
 
 <style type="text/css">
 
@@ -342,8 +302,6 @@ div.tocify {
 
 .tocify-subheader .tocify-item {
   font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
 }
 
 .tocify .list-group-item {
@@ -352,6 +310,16 @@ div.tocify {
 
 
 </style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
 
 <!-- setup 3col/9col grid for toc_float and main content  -->
 <div class="row-fluid">
@@ -416,7 +384,7 @@ library(tibble)
 library(purrr)</code></pre>
 <div id="get-several-github-users" class="section level3">
 <h3>Get several GitHub users</h3>
-<p>The <a href="https://github.com/jennybc/repurrrsive#readme">repurrrsive package</a> provides information on 6 GitHub users in an R list named <code>gh_users</code>.</p>
+<p>The <a href="https://cran.r-project.org/package=repurrrsive">repurrrsive package</a> provides information on 6 GitHub users in an R list named <code>gh_users</code>.</p>
 <p><code>gh_users</code> is <em>a recursive list</em>:</p>
 <ul>
 <li>one component for each of the 6 GitHub users</li>
@@ -615,8 +583,8 @@ str(x[3:4])
 <h3>Data frame output</h3>
 <p>We just learned how to extract multiple elements per user by mapping <code>[</code>. But, since <code>[</code> is non-simplifying, each user’s elements are returned in a list. And, as it must, <code>map()</code> itself returns list. We’ve traded one recursive list for another recursive list, albeit a slightly less complicated one.</p>
 <p>How can we “stack up” these results row-wise, i.e. one row per user and variables for “login”, “name”, etc.? A data frame would be the perfect data structure for this information.</p>
-<p>This is what <code>map_df()</code> is for.</p>
-<pre class="r"><code>map_df(gh_users, `[`, c(&quot;login&quot;, &quot;name&quot;, &quot;id&quot;, &quot;location&quot;))
+<p>This is what <code>map_dfr()</code> is for.</p>
+<pre class="r"><code>map_dfr(gh_users, `[`, c(&quot;login&quot;, &quot;name&quot;, &quot;id&quot;, &quot;location&quot;))
 #&gt; # A tibble: 6 x 4
 #&gt;   login       name                         id location              
 #&gt;   &lt;chr&gt;       &lt;chr&gt;                     &lt;int&gt; &lt;chr&gt;                 
@@ -648,7 +616,7 @@ str(x[3:4])
 <div id="exercises-4" class="section level4">
 <h4>Exercises</h4>
 <ol style="list-style-type: decimal">
-<li>Use <code>map_df()</code> to create a data frame with one row per user and variables for “name”, “following”, and “created_at”. What type are the variables?</li>
+<li>Use <code>map_dfr()</code> to create a data frame with one row per user and variables for “name”, “following”, and “created_at”. What type are the variables?</li>
 </ol>
 </div>
 </div>
@@ -661,7 +629,7 @@ str(x[3:4])
 <li>each component is another list of that user’s repositories (or just the first 30, if user has more than 30)</li>
 <li>several of those list components are, again, a list</li>
 </ul>
-<p>The <a href="https://github.com/jennybc/repurrrsive#readme">repurrrsive package</a> provides this in an R list named <code>gh_repos</code>.</p>
+<p>The <a href="https://cran.r-project.org/package=repurrrsive">repurrrsive package</a> provides this in an R list named <code>gh_repos</code>.</p>
 <pre class="r"><code>str(gh_repos, max.level = 1)
 #&gt; List of 6
 #&gt;  $ :List of 30
@@ -778,7 +746,7 @@ map_df(one_user, `[`, c(&quot;name&quot;, &quot;fork&quot;, &quot;open_issues&qu
 #&gt;  8 cmark       TRUE            0
 #&gt;  9 conditions  TRUE            0
 #&gt; 10 crayon      FALSE           7
-#&gt; # ... with 20 more rows
+#&gt; # … with 20 more rows
 ## YYAAAASSSSSSS</code></pre>
 <p>Now we scale this up to all of our users. Yes, we use mutate to <code>map()</code> inside a <code>map()</code>.</p>
 <pre class="r"><code>udf %&gt;% 
@@ -800,7 +768,7 @@ map_df(one_user, `[`, c(&quot;name&quot;, &quot;fork&quot;, &quot;open_issues&qu
        map(. %&gt;% map_df(`[`, c(&quot;name&quot;, &quot;fork&quot;, &quot;open_issues&quot;)))
    ) %&gt;% 
    select(-gh_repos) %&gt;% 
-   tidyr::unnest())
+   tidyr::unnest(repo_info))
 #&gt; # A tibble: 176 x 4
 #&gt;    username    name        fork  open_issues
 #&gt;    &lt;chr&gt;       &lt;chr&gt;       &lt;lgl&gt;       &lt;int&gt;
@@ -814,7 +782,7 @@ map_df(one_user, `[`, c(&quot;name&quot;, &quot;fork&quot;, &quot;open_issues&qu
 #&gt;  8 gaborcsardi cmark       TRUE            0
 #&gt;  9 gaborcsardi conditions  TRUE            0
 #&gt; 10 gaborcsardi crayon      FALSE           7
-#&gt; # ... with 166 more rows</code></pre>
+#&gt; # … with 166 more rows</code></pre>
 <p>Let’s do a little manipulation with dplyr to find some of the more interesting repos and get repos from each user in front of our eyeballs. I get rid of forks and show the 3 repos for each user that have the most open issues. (Remember we are only working with the first 30 repos for each user – I had to remember my open issue situation is much more grim than this table suggests.)</p>
 <pre class="r"><code>rdf %&gt;% 
   filter(!fork) %&gt;% 
@@ -869,6 +837,49 @@ $(document).ready(function () {
 });
 
 
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
 </script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->

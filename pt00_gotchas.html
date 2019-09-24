@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -69,9 +70,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type = "text/css">
 .main-container {
@@ -85,7 +84,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -95,6 +93,9 @@ img {
 }
 button.code-folding-btn:focus {
   outline: none;
+}
+summary {
+  display: list-item;
 }
 </style>
 
@@ -187,8 +188,6 @@ $(document).ready(function () {
 });
 </script>
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
 
 <style type="text/css">
@@ -245,20 +244,17 @@ $(document).ready(function () {
 }
 </style>
 
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-
-$(document).ready(function () {
-  $('.tabset-dropdown > .nav-tabs > li').click(function () {
-    $(this).parent().toggleClass('nav-tabs-open')
-  });
-});
-</script>
-
 <!-- code folding -->
 
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
 
 
 
@@ -369,7 +365,9 @@ x %&gt;% {
   tibble(id = . %&gt;% map_int(&quot;int&quot;),
          chr = . %&gt;% map_chr(&quot;chr&quot;))
 }
-#&gt; Error: Columns `id`, `chr` must be 1d atomic vectors or lists</code></pre>
+#&gt; All columns in a tibble must be 1d or 2d objects:
+#&gt; * Column `id` is fseq
+#&gt; * Column `chr` is fseq</code></pre>
 <p>What went wrong?</p>
 <p><code>. %&gt;% map_int(&quot;int&quot;)</code> built a unary function, instead of passing <code>x</code> into <code>map_int()</code>. Do not start a pipeline with <code>.</code> unless you want a unary function.</p>
 <p>What does this have to do with <code>purrr</code>?</p>
@@ -380,11 +378,11 @@ x %&gt;% {
 <p><code>purrr</code>’s type checking is very strict, which is overhwhelmingly positive. But it will force you to be more aware of integer vs. double.</p>
 <pre class="r"><code>set.seed(4561)
 (x &lt;- sample(1:5))
-#&gt; [1] 1 4 2 5 3
+#&gt; [1] 4 5 1 2 3
 
 times_two &lt;- function(x) x * 2
 times_two(x)
-#&gt; [1]  2  8  4 10  6
+#&gt; [1]  8 10  2  4  6
 
 x_list &lt;- as.list(x)
 
@@ -399,13 +397,13 @@ x_list %&gt;%
 times_two &lt;- function(x) x * 2L
 x_list %&gt;% 
   map_int(times_two)
-#&gt; [1]  2  8  4 10  6
+#&gt; [1]  8 10  2  4  6
 
 ## GOOD, in the loosen up sense
 times_two &lt;- function(x) x * 2
 x_list %&gt;% 
   map_dbl(times_two)
-#&gt; [1]  2  8  4 10  6</code></pre>
+#&gt; [1]  8 10  2  4  6</code></pre>
 </div>
 
 <p><a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="by-nc.png" height="400" width="65"/></a></p>
@@ -426,6 +424,23 @@ $(document).ready(function () {
 
 
 </script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
