@@ -6,6 +6,7 @@ title: "Lessons and Examples"
 library(tidyverse)
 library(stringr)
 library(htmltools)
+tagList(rmarkdown::html_dependency_font_awesome())
 ```
 
 ```{r file-list, include = FALSE, warning = FALSE}
@@ -63,4 +64,6 @@ cat_bullet(x, "^ex")
 ```{r results = 'asis', echo = FALSE}
 cat_bullet(x, "^pt")
 ```
+
+This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/).
 
